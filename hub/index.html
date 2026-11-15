@@ -59,6 +59,11 @@ a{color:var(--green)} button,input,textarea{font:inherit;color:inherit}
 .task[open] .hint2{display:none}
 .reply input{flex:1;min-width:0;min-height:44px;border-radius:999px;border:1px solid var(--line);background:#06111a;padding:0 14px}
 .thread{display:grid;gap:6px;padding:0 14px 10px 52px}
+.card{border:1px solid var(--line);border-radius:14px;background:rgb(255 255 255/.02);min-width:0;overflow:hidden}
+.list>li{min-width:0}
+.reply input{width:0}
+.card .task{border:0;background:transparent}
+.card .reply{padding-top:2px}
 .tmsg{margin:0;font-size:13px;padding:8px 10px;border-radius:10px;overflow-wrap:anywhere}
 .tmsg.you{background:rgb(255 111 174/.10)}.tmsg.claude{background:rgb(52 226 155/.08)}
 @media (max-width:520px){.steps,.taskbar,.reply,.thread{padding-left:14px}}
@@ -160,7 +165,7 @@ function renderTasks() {
       s.append(el('span', 'num', String(i + 1)));
       const txt = el('div'); txt.append(el('div', 't', t.title)); if (t.why) txt.append(el('div', 'why', t.why));
       const n = msgs.filter(m => m.taskId === t.id).length;
-      txt.append(el('div', 'hint2', (t.owner === 'you' ? 'Tap to open · steps · reply to Claude' : 'Tap to open · reply to Claude') + (n ? ` · 💬 ${n}` : '')));
+      txt.append(el('div', 'hint2', (t.owner === 'you' ? 'Tap the title for step-by-step help' : 'Tap the title for details') + (n ? ` · 💬 ${n}` : '')));
       s.append(txt);
       s.append(el('span', 'pill p-' + (t.status || 'todo'), pillText[t.status] || 'To do'));
       d.append(s);
@@ -168,11 +173,13 @@ function renderTasks() {
       const bar = el('div', 'taskbar');
       if (t.owner === 'you') { const b = el('button', 'btn primary', 'I did this'); b.type = 'button'; b.addEventListener('click', () => markDone(t.id, b)); bar.append(b); }
       const thread = msgs.filter(m => m.taskId === t.id);
-      if (thread.length) { const th = el('div', 'thread'); thread.slice(-4).forEach(m => { const p = el('p', 'tmsg ' + (m.from === 'you' ? 'you' : 'claude')); p.append(el('b', null, m.from === 'you' ? 'You: ' : 'Claude: ')); p.append(document.createTextNode(m.text)); th.append(p); }); d.append(th); }
-      const f = el('form', 'reply'); const inp = el('input'); inp.placeholder = 'Reply to Claude about this…'; inp.setAttribute('aria-label', 'Reply to Claude about: ' + t.title);
+      const th = el('div', 'thread'); thread.slice(-4).forEach(m => { const p = el('p', 'tmsg ' + (m.from === 'you' ? 'you' : 'claude')); p.append(el('b', null, m.from === 'you' ? 'You: ' : 'Claude: ')); p.append(document.createTextNode(m.text)); th.append(p); });
+      const f = el('form', 'reply'); const inp = el('input'); inp.placeholder = t.owner === 'you' ? 'Type here: done, a question, or "help"…' : 'Type here to tell Claude anything about this…'; inp.setAttribute('aria-label', 'Reply to Claude about: ' + t.title);
       const sb = el('button', 'btn ghost', 'Send'); sb.type = 'submit'; f.append(inp, sb);
       f.addEventListener('submit', async (e) => { e.preventDefault(); const v = inp.value.trim(); if (!v) return; sb.disabled = true; const ok = await sendMessage(v, t); if (ok) inp.value = ''; sb.disabled = false; });
-      d.append(bar, f);
+      if (bar.childElementCount) d.append(bar);
+      const card = el('div', 'card'); card.append(d); if (thread.length) card.append(th); card.append(f);
+      li.append(card); ul.append(li); return;
       li.append(d); ul.append(li);
     });
   }
