@@ -28,7 +28,7 @@ export default function Home() {
         <div className="mx-auto grid max-w-6xl items-center gap-6 px-4 pb-24 pt-14 md:grid-cols-[1.1fr_1fr] md:pt-24">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full border border-lagoon/30 bg-lagoon/10 px-3 py-1 text-xs font-medium text-teal">
-              <span className="size-1.5 rounded-full bg-lagoon shadow-[0_0_10px_#2CE0D4]" /> Private by design · runs on your device
+              <span className="size-1.5 rounded-full bg-lagoon shadow-[0_0_10px_#4FA8FF]" /> Private by design · runs on your device
             </span>
             <h1 className="mt-6 text-[2.6rem] font-bold leading-[1.05] sm:text-6xl">
               Close your dating chapter.<br /><span className="text-glow">Completely.</span>
@@ -82,7 +82,7 @@ export default function Home() {
             <div className="mt-5 flex justify-center" aria-hidden="true">
               <svg viewBox="0 0 120 120" width="140" height="140">
                 <circle cx="60" cy="60" r="48" fill="none" stroke="#fff" strokeOpacity=".08" strokeWidth="10" />
-                <circle cx="60" cy="60" r="48" fill="none" stroke="#2CE0D4" strokeWidth="10" strokeLinecap="round" strokeDasharray="301.6" strokeDashoffset="54" transform="rotate(-90 60 60)" style={{ filter: 'drop-shadow(0 0 8px #2CE0D4)' }} />
+                <circle cx="60" cy="60" r="48" fill="none" stroke="#4FA8FF" strokeWidth="10" strokeLinecap="round" strokeDasharray="301.6" strokeDashoffset="54" transform="rotate(-90 60 60)" style={{ filter: 'drop-shadow(0 0 8px #4FA8FF)' }} />
                 <text x="60" y="68" textAnchor="middle" fill="#E4F4F3" fontSize="26" fontWeight="700" fontFamily="Space Grotesk Variable">82</text>
               </svg>
             </div>
