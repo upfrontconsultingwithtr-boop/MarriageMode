@@ -7,6 +7,7 @@ import Ring from '@/components/Ring';
 import PartnerTab from '@/components/PartnerTab';
 import SettingsTab from '@/components/SettingsTab';
 import WebSearch from '@/components/WebSearch';
+import DataScan from '@/components/DataScan';
 import { cloud, cloudEnabled, sendLink, pull, push, merge, signOut } from '@/lib/cloud';
 import { BASE, KIT_URL } from '@/lib/base';
 
@@ -357,6 +358,7 @@ export default function AuditApp() {
                 <button onClick={() => copy(gmailQuery(domains), 'q')} className="min-h-11 rounded-lg px-4 text-sm font-semibold ring-1 ring-white/15">{copied === 'q' ? 'Copied' : 'Copy'}</button>
               </div>
             </div>
+            <DataScan selected={state.platformIds} toggle={toggle} />
             <WebSearch state={state} setState={setState} addApps={() => window.scrollTo({ top: 0, behavior: 'smooth' })} />
             <div className="glass p-6">
               <h2 className="text-lg font-semibold">Other places to look</h2>

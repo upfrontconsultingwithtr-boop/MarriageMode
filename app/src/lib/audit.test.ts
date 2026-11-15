@@ -73,3 +73,12 @@ test('web self-search: merge keeps saved searches; queries stay short', () => {
   assert.ok(s.some((x) => x.label.includes('"tiff"')) && s.some((x) => x.label.includes('a@b.co')));
   assert.equal(s.filter((x) => x.kind === 'email').length, 2);
 });
+
+import { scanText, MATCHERS } from './scan.ts';
+test('data scan finds platforms by web address and safe names, ignores common words', () => {
+  const acc = new Map();
+  scanText('Logged in with Facebook to Tinder. Email from noreply@hinge.co. A good match for her, seeking boo.', 'apps.json', acc);
+  const ids = [...acc.keys()].sort();
+  assert.deepEqual(ids, ['hinge', 'tinder']);
+  assert.ok(MATCHERS.length > 20);
+});
