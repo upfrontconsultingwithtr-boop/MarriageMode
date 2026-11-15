@@ -3,6 +3,7 @@ import Halo, { HaloIcon } from '@/components/Halo';
 import HeroDemo from '@/components/HeroDemo';
 import Ring from '@/components/Ring';
 import { PLATFORMS } from '@/lib/catalog';
+import { KIT_URL } from '@/lib/base';
 
 const facts = [
   `${PLATFORMS.length} dating apps covered`,
@@ -46,17 +47,17 @@ export default function Home() {
         <div className="absolute inset-x-0 bottom-0 -z-10 h-40 overflow-hidden opacity-70" aria-hidden="true"><div className="grid-floor absolute -inset-x-1/2 top-0 h-[200%]" /></div>
         <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 pb-20 pt-14 md:grid-cols-[1.15fr_1fr] md:pt-24">
           <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-lagoon/30 bg-lagoon/10 px-3 py-1 text-xs font-medium text-teal">
+            <span className="rise inline-flex items-center gap-2 rounded-full border border-lagoon/30 bg-lagoon/10 px-3 py-1 text-xs font-medium text-teal">
               <span className="size-1.5 rounded-full bg-lagoon shadow-[0_0_10px_#34E29B]" /> For the newly exclusive, engaged and married
             </span>
-            <h1 className="mt-6 text-[2.6rem] font-bold leading-[1.04] sm:text-6xl">
+            <h1 className="rise rise-2 mt-6 text-[2.6rem] font-bold leading-[1.04] sm:text-6xl">
               Close your dating chapter.<br /><span className="text-glow">Completely.</span>
             </h1>
-            <p className="mt-6 max-w-xl text-lg text-ink/75">
+            <p className="rise rise-3 mt-6 max-w-xl text-lg text-ink/75">
               Marriage Mode finds every dating account you ever opened and walks you through closing it for good:
               profile, billing, app and emails. Private, free, done in about 20 minutes.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="rise rise-4 mt-8 flex flex-wrap gap-3">
               <Link href="/audit/" className="glow-mango min-h-12 rounded-full bg-mango px-7 py-3.5 font-semibold text-night hover:brightness-110">Start my free audit →</Link>
               <Link href="/engagement-checklist/" className="min-h-12 rounded-full border border-white/15 bg-white/5 px-7 py-3.5 font-semibold backdrop-blur hover:border-lagoon/60">Just engaged? Read the checklist</Link>
             </div>
@@ -84,7 +85,7 @@ export default function Home() {
       </section>
 
       {/* HOW IT WORKS: numbered rail */}
-      <section className="mx-auto max-w-6xl px-4 pt-24">
+      <section id="how" className="mx-auto max-w-6xl scroll-mt-24 px-4 pt-24">
         <Eyebrow>How it works</Eyebrow>
         <h2 className="mt-3 text-3xl font-bold sm:text-4xl">Three steps to a clean slate</h2>
         <ol className="relative mt-10 grid gap-4 md:grid-cols-3">
@@ -133,6 +134,47 @@ export default function Home() {
               <li key={t} className="flex gap-3"><span className="mt-1 text-lagoon">✓</span><div><p className="font-semibold">{t}</p><p className="text-sm text-ink/65">{d}</p></div></li>
             ))}
           </ul>
+        </div>
+      </section>
+
+      {/* PRICING */}
+      <section id="pricing" className="mx-auto max-w-6xl scroll-mt-24 px-4 pt-24">
+        <Eyebrow>Pricing</Eyebrow>
+        <h2 className="mt-3 text-3xl font-bold sm:text-4xl">The important part is free. Always.</h2>
+        <div className="mt-10 grid gap-4 md:grid-cols-3 [&>*]:min-w-0">
+          <div className="halo-border"><div className="h-full rounded-[1.75rem] bg-deep/95 p-6">
+            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-teal">Free</p>
+            <p className="mt-2 font-display text-4xl font-bold">$0</p>
+            <ul className="mt-4 space-y-2 text-sm text-ink/75">{['Full private audit for 29 apps', 'Inbox and web self-search', 'Dashboard, milestones, report', 'Couple Mode and partner space', 'Sync across your devices', 'Guides and couples worksheet'].map((t) => <li key={t} className="flex gap-2"><span className="text-lagoon">✓</span>{t}</li>)}</ul>
+            <Link href="/audit/" className="glow-mango mt-6 inline-block rounded-full bg-mango px-6 py-3 text-sm font-semibold text-night">Start free</Link>
+          </div></div>
+          <div className="glass p-6">
+            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-mango">Clean Slate Kit</p>
+            <p className="mt-2 font-display text-4xl font-bold">$19 <span className="text-base font-normal text-ink/55">one time</span></p>
+            <ul className="mt-4 space-y-2 text-sm text-ink/75">{['Printable cleanup report', '30-day boundaries plan', '12 conversation cards', 'Monthly re-check'].map((t) => <li key={t} className="flex gap-2"><span className="text-mango">✓</span>{t}</li>)}</ul>
+            {KIT_URL ? <a href={KIT_URL} target="_blank" rel="noopener noreferrer" className="mt-6 inline-block rounded-full px-6 py-3 text-sm font-semibold ring-1 ring-mango/50">Get the kit ↗</a> : <p className="mt-6 text-sm text-ink/50">Coming very soon</p>}
+          </div>
+          <div className="glass p-6">
+            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-violet">AI Relationship Coach</p>
+            <p className="mt-2 font-display text-2xl font-bold">Add-ons</p>
+            <ul className="mt-4 space-y-2 text-sm text-ink/75">{['Coach chat', 'Couple sessions by chat or email', 'Voice sessions', 'Live video coach'].map((t) => <li key={t} className="flex gap-2"><span className="text-violet">✓</span>{t}</li>)}</ul>
+            <p className="mt-6 text-sm text-ink/50">Coming later. Always clearly AI, never a replacement for a licensed counselor.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* WHO BUILT THIS */}
+      <section className="mx-auto max-w-6xl px-4 pt-24">
+        <div className="glass grid items-center gap-8 p-7 sm:p-10 md:grid-cols-[auto_1fr]">
+          <div className="relative mx-auto size-40 shrink-0" aria-hidden="true">
+            <div className="halo-sweep" />
+            <Halo className="h-full w-full" />
+          </div>
+          <div>
+            <Eyebrow>Who built this</Eyebrow>
+            <h2 className="mt-3 text-3xl font-bold">Made by a couple, for couples</h2>
+            <p className="mt-3 text-ink/75">Marriage Mode comes from Tiffany and Reco of Upfront Consulting with Tiff &amp; Reco LLC. Faith, trust and family are the foundation of their partnership, and of this product. Tiffany spent 10+ years building and leading teams and systems; Reco is a former yacht captain who was responsible for everyone on board. Together they built the tool they wished existed: private, kind, and on your side.</p>
+          </div>
         </div>
       </section>
 

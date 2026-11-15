@@ -111,3 +111,18 @@ html[data-theme="light"] .glass { background: #fff; border-color: rgb(11 26 31 /
 html[data-theme="light"] .text-glow { background: linear-gradient(100deg, #0B1A1F 10%, var(--color-lagoon) 45%, var(--color-mango) 85%); -webkit-background-clip: text; background-clip: text; }
 html[data-theme="light"][data-contrast="high"] { --color-ink: #000000; }
 html[data-theme="light"][data-contrast="high"] .glass { border-color: rgb(0 0 0 / .4); }
+
+/* ── Round 2 polish: tactile buttons, entrance motion, focus ── */
+.btn-press { transition: transform .12s ease, filter .2s ease, box-shadow .2s ease; }
+.btn-press:active { transform: scale(.97); }
+a.rounded-full, button.rounded-full { transition: transform .12s ease, filter .2s ease, box-shadow .2s ease, background-color .2s ease; }
+a.rounded-full:active, button.rounded-full:active { transform: scale(.97); }
+@keyframes rise { from { opacity: .001; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.rise { animation: rise .6s cubic-bezier(.2,.8,.2,1) both; }
+.rise-2 { animation-delay: .08s; } .rise-3 { animation-delay: .16s; } .rise-4 { animation-delay: .24s; }
+@keyframes sweep { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.halo-sweep { position: absolute; inset: 0; border-radius: 9999px; background: conic-gradient(from 0deg, transparent 0 80%, rgb(52 226 155 / .35) 92%, transparent); animation: sweep 6s linear infinite; mask: radial-gradient(circle, transparent 46%, #000 47%, #000 50%, transparent 51%); }
+.check-pop { animation: pop .35s cubic-bezier(.2,1.6,.4,1); }
+@keyframes pop { 0% { transform: scale(.6); } 100% { transform: scale(1); } }
+input[type=checkbox]:checked { animation: pop .3s cubic-bezier(.2,1.6,.4,1); }
+@media (prefers-reduced-motion: reduce) { .rise, .halo-sweep, input[type=checkbox]:checked { animation: none; } }

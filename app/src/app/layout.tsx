@@ -20,14 +20,29 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <head><script dangerouslySetInnerHTML={{ __html: PREFS_BOOT }} /></head>
       <body className="min-h-screen overflow-x-hidden antialiased print:bg-white">
-        <header className="print:hidden sticky top-0 z-50 border-b border-white/[0.06] bg-night/70 backdrop-blur-xl">
-          <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+        <header className="print:hidden sticky top-0 z-50 border-b border-white/[0.06] bg-night/75 backdrop-blur-xl">
+          <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3" aria-label="Main">
             <Link href="/" className="flex items-center gap-2.5 font-display text-lg font-bold tracking-tight">
               <img src={`${BASE}/icon.svg`} alt="" width={30} height={30} /> Marriage Mode
             </Link>
-            <Link href="/audit/" className="glow-mango rounded-full bg-mango px-4 py-1.5 text-sm font-semibold text-night hover:brightness-110">
-              Start free audit
-            </Link>
+            <div className="hidden items-center gap-6 text-sm text-ink/70 md:flex">
+              <Link href="/#how" className="hover:text-ink">How it works</Link>
+              <Link href="/couple/" className="hover:text-ink">Couple Mode</Link>
+              <Link href="/guides/" className="hover:text-ink">Guides</Link>
+              <Link href="/#pricing" className="hover:text-ink">Pricing</Link>
+              <Link href="/audit/" className="hover:text-ink">My dashboard</Link>
+            </div>
+            <div className="flex items-center gap-2">
+              <Link href="/audit/" className="btn-press glow-mango rounded-full bg-mango px-4 py-1.5 text-sm font-semibold text-night hover:brightness-110">Start free audit</Link>
+              <details className="relative md:hidden">
+                <summary className="grid size-10 cursor-pointer list-none place-items-center rounded-full ring-1 ring-white/15 [&::-webkit-details-marker]:hidden" aria-label="Menu">☰</summary>
+                <div className="glass absolute right-0 top-12 flex w-56 flex-col p-2 text-sm shadow-2xl">
+                  {[['/#how', 'How it works'], ['/couple/', 'Couple Mode'], ['/guides/', 'Delete-account guides'], ['/#pricing', 'Pricing'], ['/audit/', 'My dashboard'], ['/worksheet/', 'Couples worksheet']].map(([h, l]) => (
+                    <Link key={h} href={h} className="rounded-xl px-3 py-3 hover:bg-white/5">{l}</Link>
+                  ))}
+                </div>
+              </details>
+            </div>
           </nav>
         </header>
         <main>{children}</main>

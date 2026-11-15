@@ -113,6 +113,8 @@ export default function AuditApp() {
   const addCustom = () => { const n = custom.trim(); if (n && !state.custom.includes(n)) setState((st) => ({ ...st, custom: [...st.custom, n] })); setCustom(''); };
   const copy = async (text: string, what: string) => { try { await navigator.clipboard.writeText(text); setCopied(what); setTimeout(() => setCopied(''), 2000); } catch { /* ignore */ } };
   const reset = () => { if (confirm('Clear your audit from this device?')) { setState(EMPTY_STATE); setTab('apps'); } };
+  const hour = new Date().getHours();
+  const hello = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
   const summary = shareSummary(s);
   const fmt = (iso: string) => new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   const cats = Object.keys(CATEGORY_LABEL) as Category[];
@@ -161,24 +163,38 @@ export default function AuditApp() {
         </div>
       )}
 
-      <div className="mx-auto max-w-6xl px-4 py-8 print:hidden">
+      <div className="mx-auto max-w-6xl px-4 py-8 print:hidden md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-8">
+        {/* Desktop sidebar */}
+        <aside className="hidden md:block">
+          <div className="glass sticky top-24 p-3">
+            <p className="px-3 pt-2 font-mono text-[10px] uppercase tracking-[0.25em] text-teal">Dashboard</p>
+            <nav className="mt-2 flex flex-col gap-1" role="tablist" aria-label="Dashboard menu">
+              {TABS.map((t) => (
+                <button key={t.id} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}
+                  className={`flex min-h-11 items-center gap-3 rounded-xl px-3 text-left text-sm font-semibold transition ${tab === t.id ? 'bg-lagoon/15 text-ink ring-1 ring-lagoon/50 shadow-[0_0_20px_-8px_#34E29B]' : 'text-ink/65 hover:bg-white/[0.04] hover:text-ink'}`}>
+                  <span aria-hidden="true" className={tab === t.id ? 'text-lagoon' : ''}>{t.icon}</span>{t.label}
+                </button>
+              ))}
+            </nav>
+            <div className="mt-3 border-t border-white/[0.07] px-3 pb-2 pt-3">
+              <p className="text-xs text-ink/50">Clean-slate score</p>
+              <div className="mt-1.5 h-1.5 rounded-full bg-white/[0.06]"><div className="h-full rounded-full bg-gradient-to-r from-lagoon to-mango transition-all" style={{ width: `${s.organization}%` }} /></div>
+              <p className="mt-1 text-xs text-ink/60">{s.organization} / 100</p>
+            </div>
+          </div>
+        </aside>
+        <div className="min-w-0">
         {/* Header */}
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-teal">Private · saved on this device only</p>
-            <h1 className="mt-1 text-3xl font-bold">Your dashboard</h1>
+            <h1 suppressHydrationWarning className="mt-1 text-3xl font-bold">{hello}{hasApps ? '. Here\'s where you stand.' : '. Let\'s begin.'}</h1>
             {cloudEnabled && (
               <button onClick={() => setSyncOpen((o) => !o)} className="mt-2 inline-flex min-h-9 items-center gap-2 rounded-full bg-white/[0.04] px-3 text-xs ring-1 ring-white/10 hover:ring-lagoon/50">
                 <span className={`size-1.5 rounded-full ${syncEmail ? 'bg-lagoon shadow-[0_0_8px_#34E29B]' : 'bg-ink/40'}`} />{syncEmail ? 'Synced across devices' : 'Use on more than one device?'}
               </button>
             )}
           </div>
-          <nav className="hidden gap-1 rounded-full bg-white/[0.04] p-1 ring-1 ring-white/10 md:flex" role="tablist">
-            {TABS.map((t) => (
-              <button key={t.id} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${tab === t.id ? 'bg-lagoon text-night glow-lagoon' : 'text-ink/70 hover:text-ink'}`}>{t.label}</button>
-            ))}
-          </nav>
         </div>
 
         {syncOpen && cloudEnabled && (
@@ -365,6 +381,7 @@ export default function AuditApp() {
         {tab === 'settings' && <SettingsTab signedInEmail={syncEmail} openSignIn={() => { setSyncOpen(true); window.scrollTo({ top: 0 }); }} clearDevice={reset} />}
 
         <div className="mt-10 flex justify-end"><button onClick={reset} className="text-sm text-ink/50 underline">Clear my audit from this device</button></div>
+        </div>
       </div>
 
       {/* Mobile bottom tab bar */}
