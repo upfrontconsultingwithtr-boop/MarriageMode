@@ -24,7 +24,7 @@ export default function SocialScan() {
   useEffect(() => { setDone(loadDone()); }, []);
     const start = useMemo(() => [since, since2].filter(Boolean).sort()[0] ?? '', [since, since2]); // the earlier of the two dates
   const flagged = useMemo(() => flag(list, names.split(','), start || undefined, dates), [list, names, start, dates]);
-  const people = useMemo(() => (start && raw.length ? scanInteractions(raw, Date.parse(start), new Set(flagged.filter((a) => a.reasons.length).map((a) => a.handle.toLowerCase()))) : []), [raw, start, flagged]);
+  const people = useMemo(() => (raw.length ? scanInteractions(raw, start ? Date.parse(start) : 0, new Set(flagged.filter((a) => a.reasons.length).map((a) => a.handle.toLowerCase()))) : []), [raw, start, flagged]);
   const riskyPeople = people.filter((x) => x.reasons.length);
   const risky = flagged.filter((a) => a.reasons.length);
   const FILTERS: Record<typeof filter, (a: Account) => boolean> = {
@@ -106,9 +106,9 @@ export default function SocialScan() {
             </div>
           )}
 
-          {start && people.length > 0 && !queue && (
+          {people.length > 0 && !queue && (
             <div className="mt-5 rounded-xl bg-night/60 p-4 ring-1 ring-coral/25">
-              <p className="font-semibold">{t(`Your interactions since ${new Date(start).toLocaleDateString()}: ${riskyPeople.length} to review`, `Tus interacciones desde ${new Date(start).toLocaleDateString()}: ${riskyPeople.length} para revisar`)}</p>
+              <p className="font-semibold">{start ? t(`Your interactions since ${new Date(start).toLocaleDateString()}: ${riskyPeople.length} to review`, `Tus interacciones desde ${new Date(start).toLocaleDateString()}: ${riskyPeople.length} para revisar`) : t(`Your interactions (all time): ${riskyPeople.length} to review`, `Tus interacciones (todo el tiempo): ${riskyPeople.length} para revisar`)}</p>
               <p className="mt-1 text-xs text-ink/55">{t('Your own likes, reactions, comments, story likes and messages. Flagged when the words are flirty or risqué, the attention is frequent, or the account is already flagged. You decide what to undo.', 'Tus propios “me gusta”, reacciones, comentarios, reacciones a historias y mensajes. Se marcan si las palabras son coquetas o subidas de tono, si la atención es frecuente o si la cuenta ya está marcada. Tú decides qué deshacer.')}</p>
               <ul className="mt-3 max-h-96 space-y-2 overflow-y-auto pr-1">{(riskyPeople.length ? riskyPeople : people.slice(0, 20)).map((x) => (
                 <li key={x.key} className="rounded-lg p-3 ring-1 ring-white/10">
@@ -118,6 +118,20 @@ export default function SocialScan() {
                   <p className="mt-1 text-[11px] text-ink/55">{x.links[0] ? <a href={x.links[0]} target="_blank" rel="noopener noreferrer" className="text-teal underline">{t('Open a post to unlike or delete the comment ↗', 'Abrir una publicación para quitar el me gusta o borrar el comentario ↗')}</a> : t('Open the app to unlike, delete comments or archive the chat.', 'Abre la app para quitar “me gusta”, borrar comentarios o archivar el chat.')}</p>
                 </li>))}</ul>
               {riskyPeople.length === 0 && <p className="mt-2 text-sm text-palm">{t('Nothing risqué found since that date. 🎉', 'No se encontró nada subido de tono desde esa fecha. 🎉')}</p>}
+            </div>
+          )}
+
+          {list.length > 0 && !queue && (!start || !since2 || !dates1 || !dates2 || !names.trim() || !raw.length) && (
+            <div className="mt-5 rounded-xl bg-lagoon/10 p-4 ring-1 ring-lagoon/30">
+              <p className="font-semibold">{t('Make your results sharper', 'Haz tus resultados más precisos')}</p>
+              <p className="mt-1 text-xs text-ink/60">{t('Your results above are ready now. Add any of these and they update instantly:', 'Tus resultados ya están listos. Agrega cualquiera de estos y se actualizan al instante:')}</p>
+              <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-ink/80">
+                {!since && <li>{t('Your relationship start date: flags follows and interactions after it.', 'La fecha en que empezó su relación: marca seguidos e interacciones posteriores.')}</li>}
+                {!since2 && <li>{t('Your partner’s date, if they remember it differently.', 'La fecha de tu pareja, si la recuerda distinta.')}</li>}
+                {(!dates1 || !dates2) && <li>{t('Who you date, from you and from your partner: flags likely matches.', 'Con quién sales, según tú y según tu pareja: marca posibles coincidencias.')}</li>}
+                {!names.trim() && <li>{t('Names of exes or old flings to look for.', 'Nombres de exparejas o antiguos ligues a buscar.')}</li>}
+                {!raw.length && <li>{t('Likes, comments, story interactions and messages in your download: adds the interaction review.', '“Me gusta”, comentarios, historias y mensajes en tu descarga: agrega la revisión de interacciones.')}</li>}
+              </ul>
             </div>
           )}
 
