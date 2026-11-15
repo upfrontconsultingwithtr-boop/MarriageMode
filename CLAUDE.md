@@ -37,17 +37,15 @@ tool for Marriage Mode to work. Everything runs in a normal phone or computer
 browser, free, with no sign-up for the core audit. Any future AI feature runs
 on our side (capped, approved spend) and the product still works if it's off.
 
-## Standing rule: the live Hub page (Tiffany, 2026-11-15)
-Tiffany's main hub is the private page https://claude.ai/artifact/9A4nMECrwQFZYxBRjAbH9i
-(source `hub/index.html`; data in its `tasks` and `messages` collections).
-At the start of every session: read `messages` (newest first) for requests from
-Tiffany, and `tasks` for the priority list; do the work in that order. As work
-moves, update each task's `status` (todo, doing, blocked, done with `doneAt`),
-add new tasks, and put anything Tiffany must do in as `owner: "you"` with
-`steps` written as dummy instructions. Reply to Tiffany in the hub by adding a `messages` doc with `from: "builder"`
-and mark her message `handled: true`. Her hub messages also arrive as comments
-sent to Claude (two-way sync); answer those the same way. Finished items leave the to-do lists automatically and appear in the hub History with their date; also append each to the HUB.md Done log (the history file). Keep HUB.md in step as the backup.
-Tiffany and her partner always get every product free (docs/14-MONETIZATION.md).
+## Standing rule: the live Hub page (Tiffany, 2026-11-15, moved off Claude)
+Tiffany's hub is LIVE on the site: https://upfrontconsultingwithtr-boop.github.io/MarriageMode/founders/
+(founders-only sign-in; data in Supabase `app.hub_tasks` / `app.hub_messages`, migration 0008).
+Upfront HQ links to it. The old Claude artifact hub is retired (read-only backup).
+At the start of every session run `python3 scripts/hub.py inbox` and `python3 scripts/hub.py tasks`
+and do the work in that order. Reply with `scripts/hub.py reply`, mark hers with `handled`, and
+update tasks with `scripts/hub.py task <id> '<json>'` (status todo|doing|blocked|done + doneAt;
+owner "you" tasks get `steps` as dummy instructions; post reviews get `preview`). Also append
+finished items to the HUB.md Done log. Tiffany and her partner always get every product free.
 
 ## Standing rule: never wait (Tiffany, 2026-11-15)
 If Tiffany hasn't answered or a step is blocked on her, don't stop: put her
