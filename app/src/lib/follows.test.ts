@@ -18,3 +18,26 @@ test('reads Instagram, Facebook and TikTok follow/friend exports', () => {
   assert.ok(r.find((a) => a.handle === 'grandma_rose')!.reasons.length === 0);
   assert.equal(all.find((a) => a.handle === 'spicy.content')!.url, 'https://www.tiktok.com/@spicy.content');
 });
+
+test('marks mutual vs one-way follows and recent follows', () => {
+  const m = new Map<string, Account>();
+  extract('connections/followers_and_following/following.json', JSON.stringify({ relationships_following: [
+    { title: 'bestie', string_list_data: [{ href: 'https://www.instagram.com/bestie', timestamp: 1500000000 }] },
+    { title: 'new_stranger', string_list_data: [{ href: 'https://www.instagram.com/new_stranger', timestamp: 1790000000 }] }] }), m);
+  extract('connections/followers_and_following/followers_1.json', JSON.stringify([{ title: '', string_list_data: [{ href: 'https://www.instagram.com/bestie', value: 'bestie', timestamp: 1 }] }]), m);
+  const all = [...m.values()];
+  assert.equal(all.find((a) => a.handle === 'bestie')!.kind, 'mutual follow');
+  assert.equal(all.find((a) => a.handle === 'new_stranger')!.kind, 'you follow');
+  const r = flag(all, [], '2026-01-01');
+  assert.ok(r.find((a) => a.handle === 'new_stranger')!.reasons.some((x) => x.includes('after your relationship')));
+  assert.equal(r.find((a) => a.handle === 'bestie')!.reasons.length, 0);
+});
+
+test('flags dating/sex influencers and groups', () => {
+  const m = new Map<string, Account>();
+  extract('connections/followers_and_following/following.json', JSON.stringify({ relationships_following: [{ title: 'the_dating_coach_mike', string_list_data: [{ href: 'https://www.instagram.com/the_dating_coach_mike', timestamp: 1 }] }, { title: 'sussex_gardens', string_list_data: [{ href: 'https://www.instagram.com/sussex_gardens', timestamp: 1 }] }] }), m);
+  extract('your_facebook_activity/groups/your_group_membership_activity.json', JSON.stringify({ groups_joined_v2: [{ title: 'Atlanta Singles Hookups', timestamp: 1700000000 }, { title: 'Bible Study Moms', timestamp: 1700000000 }] }), m);
+  const r = flag([...m.values()], []);
+  const f = r.filter((a) => a.reasons.length).map((a) => a.handle).sort();
+  assert.deepEqual(f, ['Atlanta Singles Hookups', 'the_dating_coach_mike']);
+});

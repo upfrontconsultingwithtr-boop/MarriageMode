@@ -8,6 +8,7 @@ import { track } from '@/lib/track';
 import { useT, useLang, LOCALE } from '@/lib/i18n';
 import * as P from '@/lib/partner';
 import DailyQuestion from './DailyQuestion';
+import Survey from './Survey';
 
 type Props = {
   signedIn: boolean;
@@ -94,6 +95,7 @@ export default function PartnerTab({ signedIn, openSignIn, stats, summary }: Pro
         {cloudEnabled && <button onClick={openSignIn} className="glow-mango mt-4 min-h-11 rounded-full bg-mango px-5 font-semibold text-night">{t('Sign in to start', 'Entrar para empezar')}</button>}
         <p className="mt-4 text-sm text-ink/55">{t('Prefer no account?', '¿Prefieres sin cuenta?')} <a href="../couple/" className="text-teal underline">{t('Use Couple Mode with a private link', 'Usa el Modo Pareja con un enlace privado')}</a>.</p>
       </div></div>
+      <div className="md:col-span-2"><Survey /></div>
       <div className="glass p-6">
         <h2 className="text-lg font-semibold">{t('Or just send a quick update', 'O envía una actualización rápida')}</h2>
         <pre className="mt-3 whitespace-pre-wrap rounded-xl bg-night/70 p-4 font-sans text-sm">{summary}</pre>
@@ -156,6 +158,8 @@ export default function PartnerTab({ signedIn, openSignIn, stats, summary }: Pro
           </div>
 
           <div className="glass flex flex-wrap items-center justify-between gap-3 p-5"><div><p className="font-semibold">{t('Talk it through with Mia, your AI coach', 'Habla con Mia, tu coach de IA')}</p><p className="text-sm text-ink/60">{t('Free live voice sessions, private on your device. Or try a 5-minute guided lesson together.', 'Sesiones de voz gratis y privadas en tu dispositivo. O prueben una lección guiada de 5 minutos.')}</p></div><span className="flex gap-2"><a href="../coach/" className="glow-mango min-h-11 rounded-full bg-mango px-5 py-2.5 text-sm font-semibold text-night">{t('Start a session', 'Empezar sesión')}</a><a href="../lessons/" className="min-h-11 rounded-full px-5 py-2.5 text-sm ring-1 ring-white/15">{t('Lessons', 'Lecciones')}</a></span></div>
+
+          <Survey partnerName={partner?.display_name || undefined} />
 
           <DailyQuestion coupleId={couple.id} me={couple.me} partnerName={partner?.display_name || t('Your partner', 'Tu pareja')} />
 

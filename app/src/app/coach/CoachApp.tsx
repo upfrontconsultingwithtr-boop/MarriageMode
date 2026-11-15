@@ -11,6 +11,7 @@ import { saveSession } from '@/lib/sessions';
 import { startRecording, type Rec as Recording, type Part } from '@/lib/recorder';
 import { coachReply, guidanceFor, findTopics } from '@/lib/coachKnowledge';
 import { addAssignment, extractAssignment } from '@/lib/assignments';
+import { loadMine, surveyContext } from '@/lib/survey';
 
 type Msg = { role: 'user' | 'assistant'; content: string };
 type Engine = { chat: { completions: { create: (o: unknown) => Promise<AsyncIterable<{ choices: { delta: { content?: string } }[] }>> } } };
@@ -162,7 +163,7 @@ export default function CoachApp() {
     else if (mode === 'lite' || !engine.current) reply = coachReply(v, es) ?? guideAnswer(v, es, { base: BASE }).text;
     else {
       try {
-        const chunks = await engine.current.chat.completions.create({ stream: true, temperature: 0.7, max_tokens: 320, messages: [{ role: 'system', content: systemPrompt(es) + guidanceFor(history.filter((m) => m.role === 'user').slice(-3).map((m) => m.content).join(' ')) }, ...history.slice(-12)] });
+        const chunks = await engine.current.chat.completions.create({ stream: true, temperature: 0.7, max_tokens: 320, messages: [{ role: 'system', content: systemPrompt(es) + surveyContext(loadMine().answers) + guidanceFor(history.filter((m) => m.role === 'user').slice(-3).map((m) => m.content).join(' ')) }, ...history.slice(-12)] });
         for await (const c of chunks) { reply += c.choices[0]?.delta?.content ?? ''; setLive(reply); }
       } catch {
         // The device ran out of graphics memory: keep the session going in Lite mode.

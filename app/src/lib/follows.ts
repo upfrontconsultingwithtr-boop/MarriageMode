@@ -3,10 +3,11 @@
 // and flags accounts that may put the relationship at risk: people they name (like exes)
 // and dating, hookup or adult accounts. The customer decides; we only suggest.
 export type Platform = 'instagram' | 'facebook' | 'tiktok' | 'other';
-export type Account = { key: string; platform: Platform; handle: string; url: string; kind: string; reasons: string[] };
+export type Account = { key: string; platform: Platform; handle: string; url: string; kind: string; reasons: string[]; youFollow?: boolean; followsYou?: boolean; closeFriend?: boolean; friend?: boolean; since?: number };
 
-const FILES = /(follow|friend|close_friend|connections|following)/i;
-const RISKY = ['dating', 'singles', 'hookup', 'hook_up', 'onlyfans', 'fansly', 'sugarbaby', 'sugar_baby', 'sugardaddy', 'sugar_daddy', 'sugarmomma', 'nsfw', 'xxx', 'escort', 'camgirl', 'fling', 'tinder', 'bumble', 'hinge', 'feeld', 'grindr', 'swinger', 'swingers', 'flirt', 'affair', 'ashleymadison', 'seeking', '18plus', 'spicy'];
+const FILES = /(follow|friend|close_friend|connections|following|fans|group)/i;
+// Accounts, influencers and groups that promote dating, hookups or sexual content.
+const RISKY = ['datingcoach', 'datingadvice', 'pickupartist', 'seduction', 'rizz', 'thirsttrap', 'thirst', 'lingerie', 'bikinimodel', 'hotgirls', 'hotguys', 'hookups', 'meetsingles', 'singlesgroup', 'swipe', 'onenight', 'adult', 'erotic', 'sexy', 'playboy', 'playmate', 'stripper', 'strip_club', 'cougar', 'milf', 'dilf', 'fwb', 'dating', 'singles', 'hookup', 'hook_up', 'onlyfans', 'fansly', 'sugarbaby', 'sugar_baby', 'sugardaddy', 'sugar_daddy', 'sugarmomma', 'nsfw', 'xxx', 'escort', 'camgirl', 'fling', 'tinder', 'bumble', 'hinge', 'feeld', 'grindr', 'swinger', 'swingers', 'flirt', 'affair', 'ashleymadison', 'seeking', '18plus', 'spicy'];
 
 const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9_. ]/g, ' ').replace(/\s+/g, ' ').trim();
 
@@ -18,9 +19,10 @@ function platformOf(path: string, href = ''): Platform {
   return 'other';
 }
 function kindOf(path: string): string {
-  const p = path.toLowerCase();
+  const p = (path.split('/').pop() || path).toLowerCase();
+  if (p.includes('group')) return 'group';
   if (p.includes('close_friend')) return 'close friend';
-  if (p.includes('follower') && !p.includes('following')) return 'follows you';
+  if ((p.includes('follower') || p.includes('fans')) && !p.includes('following')) return 'follows you';
   if (p.includes('friend')) return 'friend';
   return 'you follow';
 }
@@ -34,11 +36,17 @@ export function profileUrl(platform: Platform, handle: string, href?: string): s
 // Walk any JSON export and pull out usernames / names from follow & friend lists.
 export function extract(path: string, text: string, out: Map<string, Account>) {
   if (!FILES.test(path)) return;
-  const add = (handle: string, href?: string) => {
+  const kind = kindOf(path);
+  const add = (handle: string, href?: string, ts?: number) => {
     const h = handle.trim(); if (!h || h.length > 80) return;
     const platform = platformOf(path, href);
     const key = `${platform}:${h.toLowerCase()}`;
-    if (!out.has(key)) out.set(key, { key, platform, handle: h, url: profileUrl(platform, h, href), kind: kindOf(path), reasons: [] });
+    const a = out.get(key) ?? { key, platform, handle: h, url: profileUrl(platform, h, href), kind, reasons: [] };
+    if (kind === 'you follow') a.youFollow = true; else if (kind === 'follows you') a.followsYou = true; else if (kind === 'close friend') a.closeFriend = true; else if (kind === 'friend') a.friend = true;
+    if (kind === 'group') a.kind = 'group';
+    if (ts && (kind === 'you follow' || kind === 'friend' || kind === 'group')) a.since = ts > 1e12 ? ts : ts * 1000;
+    if (kind !== 'group') a.kind = a.closeFriend ? 'close friend' : a.friend ? 'friend' : a.youFollow && a.followsYou ? 'mutual follow' : a.youFollow ? 'you follow' : 'follows you';
+    out.set(key, a);
   };
   if (/\.json$/i.test(path)) {
     let data: unknown; try { data = JSON.parse(text); } catch { return; }
@@ -47,9 +55,11 @@ export function extract(path: string, text: string, out: Map<string, Account>) {
       if (!v || typeof v !== 'object') return;
       const o = v as Record<string, unknown>;
       const sld = Array.isArray(o.string_list_data) ? (o.string_list_data as Record<string, unknown>[]) : null;
-      if (sld?.length) { const s = sld[0]; const h = (s.value as string) || (o.title as string) || ((s.href as string) || '').split('/').filter(Boolean).pop() || ''; add(h, s.href as string); return; }
-      if (typeof o.UserName === 'string') { add(o.UserName); return; }
-      if (typeof o.name === 'string' && (typeof o.timestamp === 'number' || 'contact_info' in o)) { add(o.name); return; }
+      if (sld?.length) { const s = sld[0]; const h = (s.value as string) || (o.title as string) || ((s.href as string) || '').split('/').filter(Boolean).pop() || ''; add(h, s.href as string, s.timestamp as number); return; }
+      if (/group/i.test(path) && typeof o.name === 'string' && typeof o.timestamp === 'number') { add(o.name, undefined, o.timestamp as number); return; }
+      if (/group/i.test(path) && typeof o.title === 'string' && typeof o.timestamp === 'number') { add(o.title, undefined, o.timestamp as number); return; }
+      if (typeof o.UserName === 'string') { add(o.UserName, undefined, typeof o.Date === 'string' ? Date.parse(o.Date) : undefined); return; }
+      if (typeof o.name === 'string' && (typeof o.timestamp === 'number' || 'contact_info' in o)) { add(o.name, undefined, o.timestamp as number); return; }
       Object.values(o).forEach(walk);
     };
     walk(data);
@@ -58,13 +68,16 @@ export function extract(path: string, text: string, out: Map<string, Account>) {
   }
 }
 
-export function flag(list: Account[], names: string[]): Account[] {
+export function flag(list: Account[], names: string[], sinceDate?: string): Account[] {
+  const cut = sinceDate ? Date.parse(sinceDate) : NaN;
   const people = names.map(norm).filter((n) => n.length >= 2);
   return list.map((a) => {
     const h = norm(a.handle); const compact = h.replace(/[ ._]/g, ''); const reasons: string[] = [];
     for (const p of people) { const pc = p.replace(/[ ._]/g, ''); if (compact.includes(pc) || p.split(' ').filter((w) => w.length >= 3).every((w) => h.includes(w))) { reasons.push(`matches “${p}”`); break; } }
-    const word = RISKY.find((w) => compact.includes(w.replace(/_/g, '')));
-    if (word) reasons.push(`dating / adult account (“${word}”)`);
+    const tokens = h.split(/[ ._]+/);
+    const word = RISKY.find((w) => compact.includes(w.replace(/_/g, ''))) ?? (tokens.includes('sex') || tokens.includes('sexo') || tokens.includes('dating') || tokens.includes('citas') ? 'sex/dating' : undefined);
+    if (word) reasons.push(a.kind === 'group' ? `group about dating or sex (“${word}”)` : `promotes dating, hookups or sex (“${word}”)`);
+    if (!Number.isNaN(cut) && a.since && a.since >= cut) reasons.push(`followed ${new Date(a.since).toLocaleDateString()}, after your relationship began`);
     return { ...a, reasons };
   }).sort((x, y) => y.reasons.length - x.reasons.length || x.handle.localeCompare(y.handle));
 }

@@ -174,3 +174,15 @@ export async function answerToday(coupleId: string, day: string, question: numbe
   const { error } = await c.from('couple_answers').insert({ couple_id: coupleId, day, question, answer: text.slice(0, 500) });
   return !error;
 }
+
+// Relationship survey (app.couple_survey; only the two partners can read).
+export async function saveSurvey(coupleId: string, answers: Record<string, unknown>): Promise<boolean> {
+  const c = cloud(); if (!c) return false; const uid = await me(); if (!uid) return false;
+  const { error } = await c.from('couple_survey').upsert({ couple_id: coupleId, author_id: uid, answers, updated_at: new Date().toISOString() });
+  return !error;
+}
+export async function surveys(coupleId: string): Promise<{ author_id: string; answers: Record<string, unknown>; updated_at: string }[]> {
+  const c = cloud(); if (!c) return [];
+  const { data } = await c.from('couple_survey').select('author_id, answers, updated_at').eq('couple_id', coupleId);
+  return (data ?? []) as { author_id: string; answers: Record<string, unknown>; updated_at: string }[];
+}

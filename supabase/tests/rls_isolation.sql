@@ -99,12 +99,19 @@ create temp table cid as select app.accept_couple_invite((select t from tok2)) a
 grant select on cid to authenticated;
 insert into app.couple_messages (couple_id, body) select id, 'Hi from B' from cid;
 insert into app.couple_answers (couple_id, question, answer) select id, 1, 'B daily answer' from cid;
+insert into app.couple_survey (couple_id, answers) select id, '{"q1":4}'::jsonb from cid;
 reset role;
 select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
 select pg_temp.check((select count(*) from app.couple_answers) = 1, 'A reads partner B''s daily answer');
+select pg_temp.check((select count(*) from app.couple_survey) = 1, 'A reads partner B''s survey');
+update app.couple_survey set answers = '{"q1":1}'::jsonb;
+reset role;
+select pg_temp.check((select answers->>'q1' from app.couple_survey) = '4', 'A cannot change B''s survey');
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
 reset role;
 select pg_temp.as_user('00000000-0000-0000-0000-00000000000c');
 select pg_temp.check((select count(*) from app.couple_answers) = 0, 'outsider reads no daily answers');
+select pg_temp.check((select count(*) from app.couple_survey) = 0, 'outsider reads no surveys');
 do $$ begin
   insert into app.couple_answers (couple_id, question, answer) select id, 1, 'intrude' from cid;
   raise exception 'RLS FAIL: outsider answered for a couple';
