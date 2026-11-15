@@ -79,3 +79,4 @@ Why: counselors and pastors who work with engaged couples are the fastest free w
 - 2026-11-15: Value and benefits shown on the home page, Spanish page and dashboard (Your toolkit panel).
 - 2026-11-15: Home page speed: phone score 68 → 72–81 (no background dashboard loading, lazy sections). Hub: post previews + tappable links.
 - 2026-11-15: Partner program live (/partners/) with lead capture to app.leads (migration 0004, RLS tested). Lead-gen plan: docs/marketing/LEAD-GEN-PLAN.md.
+- 2026-11-15: Gmail drafts point to /partners/ (links cleaned); posts #2 and #3 drafted in Metricool with hub previews; safety copy wording.
