@@ -41,3 +41,16 @@ test('flags dating/sex influencers and groups', () => {
   const f = r.filter((a) => a.reasons.length).map((a) => a.handle).sort();
   assert.deepEqual(f, ['Atlanta Singles Hookups', 'the_dating_coach_mike']);
 });
+
+test('flags likely the sex they date only with another warning sign', () => {
+  const m = new Map<string, Account>();
+  extract('connections/followers_and_following/following.json', JSON.stringify({ relationships_following: [
+    { title: 'jessica.fit', string_list_data: [{ href: 'https://www.instagram.com/jessica.fit', timestamp: 1790000000 }] },
+    { title: 'maria_lopez', string_list_data: [{ href: 'https://www.instagram.com/maria_lopez', timestamp: 1500000000 }] },
+    { title: 'jake_m', string_list_data: [{ href: 'https://www.instagram.com/jake_m', timestamp: 1790000000 }] }] }), m);
+  extract('connections/followers_and_following/followers_1.json', JSON.stringify([{ string_list_data: [{ href: 'https://www.instagram.com/maria_lopez', value: 'maria_lopez', timestamp: 1 }] }]), m);
+  const r = flag([...m.values()], [], '2026-01-01', 'women');
+  assert.ok(r.find((a) => a.handle === 'jessica.fit')!.reasons.some((x) => x.includes('likely a woman')));
+  assert.ok(!r.find((a) => a.handle === 'maria_lopez')!.reasons.some((x) => x.includes('likely')));
+  assert.ok(!r.find((a) => a.handle === 'jake_m')!.reasons.some((x) => x.includes('likely')));
+});

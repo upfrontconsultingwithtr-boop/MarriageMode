@@ -12,6 +12,7 @@ import { startRecording, type Rec as Recording, type Part } from '@/lib/recorder
 import { coachReply, guidanceFor, findTopics } from '@/lib/coachKnowledge';
 import { addAssignment, extractAssignment } from '@/lib/assignments';
 import { loadMine, surveyContext } from '@/lib/survey';
+import { loadReview, reviewContext } from '@/lib/review';
 
 type Msg = { role: 'user' | 'assistant'; content: string };
 type Engine = { chat: { completions: { create: (o: unknown) => Promise<AsyncIterable<{ choices: { delta: { content?: string } }[] }>> } } };
@@ -78,6 +79,8 @@ export default function CoachApp() {
   const [input, setInput] = useState(''); const [busy, setBusy] = useState(false);
   const [speaking, setSpeaking] = useState(false); const [listening, setListening] = useState(false);
   const [assigned, setAssigned] = useState<string | null>(null);
+  const [reviewMode, setReviewMode] = useState(false);
+  useEffect(() => { setReviewMode(new URLSearchParams(window.location.search).has('review') && !!loadReview()); }, []);
   const [voiceOn, setVoiceOn] = useState(true); const [cam, setCam] = useState(false); const [err, setErr] = useState('');
   const engine = useRef<Engine | null>(null); const rec = useRef<Rec | null>(null);
   const session = useRef<{ id: string; startedAt: string } | null>(null);
@@ -126,7 +129,7 @@ export default function CoachApp() {
     speechSynthesis.speak(u);
   };
 
-  const opening = () => t('Hi, I’m Mia, your Marriage Mode AI relationship coach. I’m an AI, not a counselor, and our conversation stays on your device. What would you like to work on today?', 'Hola, soy Mia, tu coach de relaciones con IA de Marriage Mode. Soy una IA, no una consejera, y nuestra conversación se queda en tu dispositivo. ¿En qué te gustaría trabajar hoy?');
+  const opening = () => reviewMode ? t('Hi, I’m Mia, your AI relationship coach. Thank you for doing your social media review: that took honesty. If your partner is with you, welcome to you both. This is a calm, no-blame conversation. To start, how are each of you feeling about what came up?', 'Hola, soy Mia, tu coach de relaciones con IA. Gracias por hacer tu revisión de redes sociales: eso requirió honestidad. Si tu pareja está contigo, bienvenidos los dos. Esta es una conversación tranquila y sin culpas. Para empezar, ¿cómo se siente cada uno con lo que salió?') : t('Hi, I’m Mia, your Marriage Mode AI relationship coach. I’m an AI, not a counselor, and our conversation stays on your device. What would you like to work on today?', 'Hola, soy Mia, tu coach de relaciones con IA de Marriage Mode. Soy una IA, no una consejera, y nuestra conversación se queda en tu dispositivo. ¿En qué te gustaría trabajar hoy?');
 
   // Load Mia's lifelike 3D face + natural voice (free, open source). Falls back to the drawn face.
   const startFace = async () => {
@@ -160,10 +163,10 @@ export default function CoachApp() {
     const history: Msg[] = [...msgs, { role: 'user', content: v }]; setMsgs(history); setBusy(true);
     let reply = '';
     if (crisis(v)) reply = es ? CRISIS_ES : CRISIS_EN;
-    else if (mode === 'lite' || !engine.current) reply = coachReply(v, es) ?? guideAnswer(v, es, { base: BASE }).text;
+    else if (mode === 'lite' || !engine.current) reply = coachReply(v, es) ?? (reviewMode ? coachReply('social media phones boundaries trust', es) : null) ?? guideAnswer(v, es, { base: BASE }).text;
     else {
       try {
-        const chunks = await engine.current.chat.completions.create({ stream: true, temperature: 0.7, max_tokens: 320, messages: [{ role: 'system', content: systemPrompt(es) + surveyContext(loadMine().answers) + guidanceFor(history.filter((m) => m.role === 'user').slice(-3).map((m) => m.content).join(' ')) }, ...history.slice(-12)] });
+        const chunks = await engine.current.chat.completions.create({ stream: true, temperature: 0.7, max_tokens: 320, messages: [{ role: 'system', content: systemPrompt(es) + surveyContext(loadMine().answers) + (reviewMode ? reviewContext(loadReview()) : '') + guidanceFor(history.filter((m) => m.role === 'user').slice(-3).map((m) => m.content).join(' ')) }, ...history.slice(-12)] });
         for await (const c of chunks) { reply += c.choices[0]?.delta?.content ?? ''; setLive(reply); }
       } catch {
         // The device ran out of graphics memory: keep the session going in Lite mode.

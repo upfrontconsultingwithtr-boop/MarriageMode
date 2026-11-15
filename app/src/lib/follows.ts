@@ -3,7 +3,7 @@
 // and flags accounts that may put the relationship at risk: people they name (like exes)
 // and dating, hookup or adult accounts. The customer decides; we only suggest.
 export type Platform = 'instagram' | 'facebook' | 'tiktok' | 'other';
-export type Account = { key: string; platform: Platform; handle: string; url: string; kind: string; reasons: string[]; youFollow?: boolean; followsYou?: boolean; closeFriend?: boolean; friend?: boolean; since?: number };
+export type Account = { key: string; platform: Platform; handle: string; url: string; kind: string; reasons: string[]; likely?: boolean; youFollow?: boolean; followsYou?: boolean; closeFriend?: boolean; friend?: boolean; since?: number };
 
 const FILES = /(follow|friend|close_friend|connections|following|fans|group)/i;
 // Accounts, influencers and groups that promote dating, hookups or sexual content.
@@ -68,7 +68,9 @@ export function extract(path: string, text: string, out: Map<string, Account>) {
   }
 }
 
-export function flag(list: Account[], names: string[], sinceDate?: string): Account[] {
+import { guessSex } from './names.ts';
+export type Dates = 'women' | 'men' | 'both' | '';
+export function flag(list: Account[], names: string[], sinceDate?: string, dates: Dates = ''): Account[] {
   const cut = sinceDate ? Date.parse(sinceDate) : NaN;
   const people = names.map(norm).filter((n) => n.length >= 2);
   return list.map((a) => {
@@ -77,18 +79,24 @@ export function flag(list: Account[], names: string[], sinceDate?: string): Acco
     const tokens = h.split(/[ ._]+/);
     const word = RISKY.find((w) => compact.includes(w.replace(/_/g, ''))) ?? (tokens.includes('sex') || tokens.includes('sexo') || tokens.includes('dating') || tokens.includes('citas') ? 'sex/dating' : undefined);
     if (word) reasons.push(a.kind === 'group' ? `group about dating or sex (“${word}”)` : `promotes dating, hookups or sex (“${word}”)`);
-    if (!Number.isNaN(cut) && a.since && a.since >= cut) reasons.push(`followed ${new Date(a.since).toLocaleDateString()}, after your relationship began`);
-    return { ...a, reasons };
+    const recent = !Number.isNaN(cut) && !!a.since && a.since >= cut;
+    if (recent) reasons.push(`followed ${new Date(a.since!).toLocaleDateString()}, after your relationship began`);
+    const sx = guessSex(a.handle); const likely = !!sx && (dates === 'both' || (dates === 'women' && sx === 'f') || (dates === 'men' && sx === 'm'));
+    const oneway = !!a.youFollow && !a.followsYou && !a.closeFriend && !a.friend;
+    if (likely && (recent || oneway) && a.kind !== 'group') reasons.push(`likely ${sx === 'f' ? 'a woman' : 'a man'} (guessed from the name)${oneway && !recent ? ', one-way follow' : ''}`);
+    return { ...a, reasons, likely };
   }).sort((x, y) => y.reasons.length - x.reasons.length || x.handle.localeCompare(y.handle));
 }
 
-export async function readExport(f: File, onProgress: (m: string) => void): Promise<Account[]> {
+const INTER = /(like|comment|reaction|story|stories|messages\/inbox|message_\d)/i;
+export type RawFile = { path: string; text: string };
+export async function readExport(f: File, onProgress: (m: string) => void, raw?: RawFile[]): Promise<Account[]> {
   const out = new Map<string, Account>();
   if (/\.zip$/i.test(f.name)) {
     const { unzip } = await import('fflate');
     const buf = new Uint8Array(await f.arrayBuffer()); onProgress('Opening the download…');
-    const files: Record<string, Uint8Array> = await new Promise((res, rej) => unzip(buf, { filter: (e) => FILES.test(e.name) && /\.(json|html?)$/i.test(e.name) && e.originalSize <= 30e6 }, (err, o) => (err ? rej(err) : res(o))));
-    const dec = new TextDecoder(); for (const [n, b] of Object.entries(files)) extract(n, dec.decode(b), out);
+    const files: Record<string, Uint8Array> = await new Promise((res, rej) => unzip(buf, { filter: (e) => (FILES.test(e.name) || (!!raw && INTER.test(e.name))) && /\.(json|html?)$/i.test(e.name) && e.originalSize <= 30e6 }, (err, o) => (err ? rej(err) : res(o))));
+    const dec = new TextDecoder(); for (const [n, b] of Object.entries(files)) { const txt = dec.decode(b); extract(n, txt, out); if (raw && INTER.test(n)) raw.push({ path: n, text: txt }); }
   } else if (/\.(json|html?)$/i.test(f.name)) { extract(`following/${f.name}`, await f.text(), out); }
   else throw new Error('unsupported');
   return [...out.values()];
