@@ -18,6 +18,9 @@ jobs:
         env:
           PAGES_BASE_PATH: /MarriageMode
           SITE_URL: https://upfrontconsultingwithtr-boop.github.io/MarriageMode
+          # Public by design (publishable key); row-level security protects every row.
+          NEXT_PUBLIC_SUPABASE_URL: https://wdokqitjoeellkwbtdso.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_6TLLpaZKPtfYJmA1IQDpEA_VJB4ehaz
       - run: touch out/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with: { path: app/out }
