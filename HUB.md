@@ -47,6 +47,7 @@ Why: counselors and pastors who work with engaged couples are the fastest free w
 | Design look (green & pink) | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/DESIGN-SYSTEM.md |
 
 ## 📝 Done log (newest first)
+- **Nov 15:** Customer dashboard: Partner tab (link with your own partner, messages, shared goals, shared progress, leave anytime, quick exit) and Settings tab (profile + photo, light/dark theme, text size, reduce motion, high contrast, underline links, analytics opt-out, download my data, delete my account). Tested end to end with two test users.
 - **Nov 15:** Synced accounts are ON. Claude created the free Marriage Mode database itself (you connected Supabase once) and tested that each person sees only their own data.
 - **Nov 15:** Accounts list: how Claude connects to each account, no passwords (docs/ACCOUNTS.md).
 - **Nov 15:** Your live hub page with a visual to-do list and chat with Claude. You and your partner get every product free, forever.

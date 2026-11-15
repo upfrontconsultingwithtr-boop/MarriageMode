@@ -4,6 +4,7 @@ type GC = { count?: (o: { path: string; title?: string; event: boolean }) => voi
 const sent = new Set<string>();
 export function track(event: string) {
   if (typeof window === 'undefined' || sent.has(event)) return;
+  try { if (JSON.parse(localStorage.getItem('marriage-mode:prefs') || '{}').analytics === false) return; } catch { /* ignore */ }
   const gc = (window as unknown as { goatcounter?: GC }).goatcounter;
   if (!gc?.count) return;
   sent.add(event);

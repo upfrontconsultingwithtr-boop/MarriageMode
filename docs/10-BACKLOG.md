@@ -25,7 +25,7 @@ Status: ✅ done · ▶ next · ○ later.
 | B2 | Upload local audit to account on first sign-in (with consent) | 3 | ✅ |
 | B3 | Stripe Checkout for Cleanup Pass; webhook writes `app.subscriptions` | 5 | ▶ |
 | B4 | Customer Portal: cancel, invoices | 2 | ○ |
-| B5 | Export my data (JSON) and delete my account | 3 | ▶ |
+| B5 | Export my data (JSON) and delete my account | 3 | ✅ |
 
 ## Epic C · Discovery
 | C1 | Takeout / Facebook data-file scanner in a Web Worker; never uploads | 8 | ○ |

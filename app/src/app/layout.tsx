@@ -4,6 +4,7 @@ import '@fontsource-variable/inter';
 import '@fontsource-variable/space-grotesk';
 import './globals.css';
 import { BASE } from '@/lib/base';
+import { PREFS_BOOT } from '@/lib/prefs';
 
 export const metadata: Metadata = {
   title: 'Marriage Mode: close your dating chapter, privately',
@@ -16,7 +17,8 @@ export const viewport: Viewport = { themeColor: '#03080C', width: 'device-width'
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head><script dangerouslySetInnerHTML={{ __html: PREFS_BOOT }} /></head>
       <body className="min-h-screen overflow-x-hidden antialiased print:bg-white">
         <header className="print:hidden sticky top-0 z-50 border-b border-white/[0.06] bg-night/70 backdrop-blur-xl">
           <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
@@ -29,7 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </nav>
         </header>
         <main>{children}</main>
-        <script data-goatcounter="https://upfront-with-tr.goatcounter.com/count" async src="https://gc.zgo.at/count.js" />
+        <script data-goatcounter-settings={JSON.stringify({ allow_local: false })} data-goatcounter="https://upfront-with-tr.goatcounter.com/count" async src="https://gc.zgo.at/count.js" />
         <footer className="print:hidden relative mt-24 border-t border-white/[0.06] py-10 text-center text-sm text-ink/60">
           <p>Marriage Mode by <strong className="text-ink/85">Upfront Consulting with Tiff &amp; Reco LLC</strong></p>
           <p className="mx-auto mt-3 flex max-w-xl flex-wrap justify-center gap-x-5 gap-y-2 px-4">

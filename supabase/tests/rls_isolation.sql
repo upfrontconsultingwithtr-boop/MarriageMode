@@ -89,5 +89,41 @@ do $$ begin
   raise exception 'RLS FAIL: A wrote B''s synced audit';
 exception when insufficient_privilege then raise notice 'pass: A cannot write B''s synced audit'; end $$;
 reset role;
+-- partner space messages (relink A and B, C is an outsider)
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
+create temp table tok2 as select app.create_couple_invite() as t;
+grant select on tok2 to authenticated;
+reset role;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000b');
+create temp table cid as select app.accept_couple_invite((select t from tok2)) as id;
+grant select on cid to authenticated;
+insert into app.couple_messages (couple_id, body) select id, 'Hi from B' from cid;
+reset role;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
+select pg_temp.check((select count(*) from app.couple_messages) = 1, 'A reads partner B''s message');
+select pg_temp.check(private.is_partner('00000000-0000-0000-0000-00000000000b'), 'A and B are partners');
+insert into app.profiles (user_id, display_name) values ('00000000-0000-0000-0000-00000000000a', 'Tester A') on conflict (user_id) do update set display_name = 'Tester A';
+reset role;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000b');
+select pg_temp.check((select display_name from app.profiles where user_id = '00000000-0000-0000-0000-00000000000a') = 'Tester A', 'B sees partner A''s name');
+reset role;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000c');
+select pg_temp.check((select count(*) from app.profiles where user_id = '00000000-0000-0000-0000-00000000000a') = 0, 'outsider cannot see A''s profile');
+reset role;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
+reset role;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000c');
+select pg_temp.check((select count(*) from app.couple_messages) = 0, 'outsider reads no partner messages');
+do $$ begin
+  insert into app.couple_messages (couple_id, body) select id, 'intrude' from cid;
+  raise exception 'RLS FAIL: outsider posted into a couple';
+exception when insufficient_privilege then raise notice 'pass: outsider cannot post into a couple'; end $$;
+reset role;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000b');
+select app.leave_couple();
+reset role;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
+select pg_temp.check((select count(*) from app.couple_messages) = 0, 'after leaving, messages are no longer visible');
+reset role;
 rollback;
 \echo RLS_ISOLATION_ALL_PASSED

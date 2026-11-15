@@ -4,16 +4,18 @@ import { PLATFORMS, CATEGORY_LABEL, BILLING_LINKS, helpSearchUrl, CATALOG_VERIFI
 import { buildSteps, score, emailDomainsFor, gmailQuery, gmailSearchUrl, shareSummary, EMPTY_STATE, type AuditState, type Step } from '@/lib/audit';
 import { track } from '@/lib/track';
 import Ring from '@/components/Ring';
+import PartnerTab from '@/components/PartnerTab';
+import SettingsTab from '@/components/SettingsTab';
 import { cloud, cloudEnabled, sendLink, pull, push, merge, signOut } from '@/lib/cloud';
-import { SITE, KIT_URL } from '@/lib/base';
+import { BASE, KIT_URL } from '@/lib/base';
 
 const KEY = 'marriage-mode:audit:v1';
 const TABS = [
   { id: 'overview', label: 'Overview', icon: '◎' },
   { id: 'apps', label: 'My apps', icon: '＋' },
   { id: 'clean', label: 'Clean up', icon: '✓' },
-  { id: 'find', label: 'Find', icon: '⌕' },
-  { id: 'share', label: 'Share', icon: '♡' },
+  { id: 'partner', label: 'Partner', icon: '♡' },
+  { id: 'settings', label: 'Settings', icon: '⚙' },
 ] as const;
 type Tab = (typeof TABS)[number]['id'];
 const KIND_ORDER: Step['kind'][] = ['delete_profile', 'cancel_billing', 'delete_app', 'stop_emails', 'contacts', 'social'];
@@ -138,7 +140,7 @@ export default function AuditApp() {
   };
 
   return (
-    <div className="relative isolate pb-28 md:pb-10">
+    <div className="relative isolate z-10 pb-28 md:pb-10">
       <div className="grid-bg absolute inset-x-0 top-0 -z-10 h-[520px] print:hidden" aria-hidden="true" />
 
       {/* Celebration */}
@@ -150,7 +152,7 @@ export default function AuditApp() {
               <h2 className="mt-4 text-2xl font-bold"><span className="text-glow">Clean slate.</span></h2>
               <p className="mt-2 text-ink/70">Every step is done. That took real care. Want to share it?</p>
               <div className="mt-6 flex justify-center gap-2">
-                <button onClick={() => { setCelebrate(false); setTab('share'); }} className="glow-mango rounded-full bg-mango px-5 py-3 font-semibold text-night">Share my progress</button>
+                <button onClick={() => { setCelebrate(false); setTab('partner'); }} className="glow-mango rounded-full bg-mango px-5 py-3 font-semibold text-night">Share my progress</button>
                 <button onClick={() => setCelebrate(false)} className="rounded-full px-5 py-3 ring-1 ring-white/15">Close</button>
               </div>
             </div>
@@ -187,7 +189,7 @@ export default function AuditApp() {
                 <button onClick={() => { void signOut(); setSyncOpen(false); }} className="mt-3 min-h-11 rounded-full px-4 text-sm ring-1 ring-white/15">Sign out</button>
               </>
             ) : (
-              <form onSubmit={async (e) => { e.preventDefault(); setSyncMsg('Sending…'); const err = await sendLink(emailInput.trim(), `${SITE}/audit/`); setSyncMsg(err ? `That didn't work: ${err}` : 'Check your email and tap the link to finish. You can close this.'); }}>
+              <form onSubmit={async (e) => { e.preventDefault(); setSyncMsg('Sending…'); const err = await sendLink(emailInput.trim(), `${window.location.origin}${BASE}/audit/`); setSyncMsg(err ? `That didn't work: ${err}` : 'Check your email and tap the link to finish. You can close this.'); }}>
                 <p className="font-semibold">Sync across your devices (optional)</p>
                 <p className="mt-1 text-sm text-ink/60">Without signing in, your audit stays only on this device. Sign in with an email link (no password) to keep it on every device. Only you can see it, and you can sign out anytime.</p>
                 <div className="mt-3 flex gap-2">
@@ -279,7 +281,7 @@ export default function AuditApp() {
           <section className="mt-6">
             <div className="glass p-6">
               <h2 className="text-lg font-semibold">Which apps have you ever used?</h2>
-              <p className="mt-1 text-ink/65">Tick every one, even if you only opened it once. Not sure? Use <button onClick={() => setTab('find')} className="text-teal underline">Find</button>.</p>
+              <p className="mt-1 text-ink/65">Tick every one, even if you only opened it once. Not sure? Use the inbox search below.</p>
               <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search apps…" aria-label="Search apps" className="mt-4 min-h-11 w-full rounded-full border border-white/15 bg-night/60 px-5 sm:w-80" />
               {cats.map((c) => {
                 const items = filtered.filter((p) => p.category === c);
@@ -324,8 +326,8 @@ export default function AuditApp() {
           </section>
         )}
 
-        {/* FIND */}
-        {tab === 'find' && (
+        {/* FIND (shown inside My apps) */}
+        {tab === 'apps' && (
           <section className="mt-6 grid gap-4 md:grid-cols-2">
             <div className="glass p-6">
               <h2 className="text-lg font-semibold">Search your own inbox</h2>
@@ -346,38 +348,19 @@ export default function AuditApp() {
                 <li>Card statements from the last 3 months.</li>
                 <li>Old or second email addresses.</li>
               </ul>
-              <button onClick={() => setTab('apps')} className="mt-4 min-h-11 rounded-full px-5 font-semibold ring-1 ring-white/15">Found one? Add it →</button>
+              <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="mt-4 min-h-11 rounded-full px-5 font-semibold ring-1 ring-white/15">Found one? Add it above ↑</button>
             </div>
           </section>
         )}
 
-        {/* SHARE */}
-        {tab === 'share' && (
-          <section className="mt-6 grid gap-4 md:grid-cols-2">
-            <div className="halo-border">
-              <div className="h-full rounded-[1.75rem] bg-deep/95 p-6">
-                <h2 className="text-lg font-semibold">Share your progress, if you want to</h2>
-                <p className="mt-1 text-sm text-ink/60">It never names any app. Edit it any way you like.</p>
-                <pre className="mt-4 whitespace-pre-wrap rounded-xl bg-night/70 p-4 font-sans text-sm">{summary}</pre>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <button onClick={() => { copy(summary, 's'); track('share-copied'); }} className="glow-lagoon min-h-11 rounded-full bg-lagoon px-5 font-semibold text-night">{copied === 's' ? 'Copied' : 'Copy message'}</button>
-                  <button onClick={() => { if (navigator.share) navigator.share({ text: summary }).catch(() => {}); else copy(summary, 's'); }} className="min-h-11 rounded-full px-5 font-semibold ring-1 ring-white/15">Share…</button>
-                </div>
-              </div>
-            </div>
-            <div className="glass p-6">
-              <h2 className="text-lg font-semibold">Talking about it</h2>
-              <ul className="mt-3 list-disc space-y-2 pl-5 text-ink/75">
-                <li>Lead with why: &ldquo;I wanted nothing from before to get in our way.&rdquo;</li>
-                <li>Offer, don&apos;t demand. Your partner can do their own audit if and when they choose.</li>
-                <li>Agree on boundaries together with the <a href="../worksheet/" className="text-teal underline">free worksheet</a>.</li>
-                <li>Plan a check-in in a month, each on your own.</li>
-                <li>Want a shared space? Try <a href="../couple/" className="text-teal underline">Couple Mode</a>: goals and only what you each choose to share.</li>
-              </ul>
-              <p className="mt-4 text-sm text-ink/60">If anyone pressures you to prove things, hand over passwords or be tracked, that isn&apos;t trust. Free, confidential help: National Domestic Violence Hotline, 1-800-799-7233, or text START to 88788.</p>
-            </div>
-          </section>
+        {/* PARTNER */}
+        {tab === 'partner' && (
+          <PartnerTab signedIn={!!syncEmail} openSignIn={() => setSyncOpen(true)} summary={summary}
+            stats={{ progress: s.progress, closed: s.accountsClosed, total: s.accountsTotal, milestones: milestones.filter((m) => m.ok).map((m) => m.t) }} />
         )}
+
+        {/* SETTINGS */}
+        {tab === 'settings' && <SettingsTab signedInEmail={syncEmail} openSignIn={() => { setSyncOpen(true); window.scrollTo({ top: 0 }); }} clearDevice={reset} />}
 
         <div className="mt-10 flex justify-end"><button onClick={reset} className="text-sm text-ink/50 underline">Clear my audit from this device</button></div>
       </div>
