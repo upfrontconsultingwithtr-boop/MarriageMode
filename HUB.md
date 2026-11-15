@@ -16,9 +16,9 @@ Why: right now, when someone joins the waitlist, their email is not saved.
 
 1. Open this link: https://app.netlify.com/projects/marriagemode
 2. If it asks you to log in, log in with your **personal** Netlify account (the tiffnyh9218 Gmail one).
-3. In the menu, tap **Project configuration**.
-4. In the list on the left (or the menu at the top on iPad), tap **Forms**.
-5. Tap the button **Enable form detection**.
+3. In the project's menu (left side, or tap the ☰ menu button on iPad), tap **Forms**.
+4. Tap the button **Enable form detection**.
+5. If you don't see Forms in the menu, tap **Project configuration**, then look for **Forms** there.
 6. Tell Claude: **"form is on"**. Claude republishes the site and tests it.
 
 _No other steps are waiting on you right now._
