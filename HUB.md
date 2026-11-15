@@ -47,6 +47,8 @@ Why: counselors and pastors who work with engaged couples are the fastest free w
 | Design look (green & pink) | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/DESIGN-SYSTEM.md |
 
 ## 📝 Done log (newest first)
+- **Nov 15:** Synced accounts are ON. Claude created the free Marriage Mode database itself (you connected Supabase once) and tested that each person sees only their own data.
+- **Nov 15:** Accounts list: how Claude connects to each account, no passwords (docs/ACCOUNTS.md).
 - **Nov 15:** Your live hub page with a visual to-do list and chat with Claude. You and your partner get every product free, forever.
 - **Nov 15:** Couple Mode is live (no accounts, no sign-up): each partner shares only what they choose plus shared goals, inside a private link. Replaced the waitlist. Also fixed a bug where glowing panels blocked taps.
 - **Nov 15:** Full redesign from competitor research: live demo on the home page, new customer dashboard (app statuses, next best step, milestones, timeline, printable report, celebration). Research: docs/research/DESIGN-RESEARCH-2026-11.md

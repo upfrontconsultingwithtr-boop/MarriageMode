@@ -21,8 +21,8 @@ Status: ✅ done · ▶ next · ○ later.
 | A12 | Spanish translation | 5 | ○ |
 
 ## Epic B · Accounts and payments
-| B1 | Supabase Auth: magic link, Google, Apple, passkeys | 5 | ▶ |
-| B2 | Upload local audit to account on first sign-in (with consent) | 3 | ▶ |
+| B1 | Supabase Auth: magic link (live); Google, Apple, passkeys later | 5 | ✅ |
+| B2 | Upload local audit to account on first sign-in (with consent) | 3 | ✅ |
 | B3 | Stripe Checkout for Cleanup Pass; webhook writes `app.subscriptions` | 5 | ▶ |
 | B4 | Customer Portal: cancel, invoices | 2 | ○ |
 | B5 | Export my data (JSON) and delete my account | 3 | ▶ |
@@ -56,7 +56,7 @@ Status: ✅ done · ▶ next · ○ later.
 ## Epic G · Platform
 | G1 | GitHub Actions CI: typecheck, unit tests, build, RLS test | 3 | ✅ |
 | G2 | Security headers (CSP, HSTS…) | 1 | ✅ |
-| G3 | Supabase keep-alive workflow | 1 | ○ |
+| G3 | Supabase keep-alive workflow | 1 | ✅ |
 | G4 | Error monitoring (free tier) | 2 | ○ |
 
 ## Enterprise (H)
