@@ -37,11 +37,13 @@ Why: counselors and pastors who work with engaged couples are the fastest free w
 | Pricing plan | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/14-MONETIZATION.md |
 | Marketing & launch | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/09-MARKETING-LAUNCH.md |
 | Investor pitch | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/08-PITCH-DECK.md |
+| Your AI team | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/AI-TEAM.md |
 | Safety rules | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/TRUST-AND-SAFETY.md |
 | Couples worksheet (printable) | https://upfrontconsultingwithtr-boop.github.io/MarriageMode/worksheet/ |
 | Design look (green & pink) | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/DESIGN-SYSTEM.md |
 
 ## 📝 Done log (newest first)
+- **Nov 15:** Built your AI team: 7 expert agents (chief of staff, engineer, growth, trust & safety, finance & ops, customer success, analyst). See docs/AI-TEAM.md.
 - **Nov 15:** Free printable "Digital Boundaries" worksheet for couples and counselors (/worksheet/), plus a ready-to-send counselor email.
 - **Nov 15:** Site live again on free GitHub Pages; all pages checked.
 - **Nov 15:** Netlify paused the site (free limit). Moved hosting to free GitHub Pages; waitlist now opens an email to the business inbox so no signup is lost.

@@ -51,6 +51,7 @@ Status: ✅ done · ▶ next · ○ later.
 | F2 | Marriage Mode view in Command Center HQ (doc 04) | 5 | ○ |
 | F3 | Docs ingestion → `knowledge_chunks` | 5 | ○ |
 | F4 | Chief of Staff chat with memories | 8 | ○ |
+| F5 | AI team: 7 custom agents in .claude/agents (done); weekly scheduled chief-of-staff run (later) | 3 | ✅ / ○ |
 
 ## Epic G · Platform
 | G1 | GitHub Actions CI: typecheck, unit tests, build, RLS test | 3 | ✅ |
