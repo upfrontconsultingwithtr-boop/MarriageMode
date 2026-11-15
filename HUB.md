@@ -37,14 +37,14 @@ Why: counselors and pastors who work with engaged couples are the fastest free w
 | Pricing plan | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/14-MONETIZATION.md |
 | Marketing & launch | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/09-MARKETING-LAUNCH.md |
 | Investor pitch | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/08-PITCH-DECK.md |
-| Visitor numbers | https://marriagemode.goatcounter.com (log in with the business email) |
+| Visitor numbers | https://upfront-with-tr.goatcounter.com (log in with the business email) |
 | Your AI team | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/AI-TEAM.md |
 | Safety rules | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/TRUST-AND-SAFETY.md |
 | Couples worksheet (printable) | https://upfrontconsultingwithtr-boop.github.io/MarriageMode/worksheet/ |
 | Design look (green & pink) | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/DESIGN-SYSTEM.md |
 
 ## 📝 Done log (newest first)
-- **Nov 15:** Visitor counter connected (GoatCounter, free, no cookies). See your numbers: https://marriagemode.goatcounter.com
+- **Nov 15:** Visitor counter connected (GoatCounter, free, no cookies). See your numbers: https://upfront-with-tr.goatcounter.com
 - **Nov 15:** "Digital checklist for newly engaged couples" page for Google search, linked from the home page.
 - **Nov 15:** Built your AI team: 7 expert agents (chief of staff, engineer, growth, trust & safety, finance & ops, customer success, analyst). See docs/AI-TEAM.md.
 - **Nov 15:** Free printable "Digital Boundaries" worksheet for couples and counselors (/worksheet/), plus a ready-to-send counselor email.
