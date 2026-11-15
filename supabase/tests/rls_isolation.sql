@@ -178,5 +178,19 @@ reset role;
 select pg_temp.as_user('00000000-0000-0000-0000-00000000000c');
 select pg_temp.check(not app.am_i_comped(), 'other user is not comped');
 reset role;
+-- founder hub: founders only
+insert into app.hub_tasks (id, data) values ('t1', '{"title":"x"}');
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
+select pg_temp.check((select count(*) from app.hub_tasks) = 1, 'founder reads hub tasks');
+insert into app.hub_messages (data) values ('{"from":"you","text":"hi"}');
+reset role;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000c');
+select pg_temp.check((select count(*) from app.hub_tasks) = 0, 'non-founder cannot read hub tasks');
+select pg_temp.check((select count(*) from app.hub_messages) = 0, 'non-founder cannot read hub messages');
+do $$ begin
+  insert into app.hub_messages (data) values ('{"from":"you","text":"intrude"}');
+  raise exception 'RLS FAIL: non-founder wrote hub message';
+exception when insufficient_privilege then raise notice 'pass: non-founder cannot write hub'; end $$;
+reset role;
 rollback;
 \echo RLS_ISOLATION_ALL_PASSED
