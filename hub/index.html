@@ -45,6 +45,12 @@ a{color:var(--green)} button,input,textarea{font:inherit;color:inherit}
 .p-done{background:rgb(217 183 126/.15);color:var(--green)} .p-blocked{background:rgb(255 184 107/.15);color:var(--warn)}
 .steps{margin:0;padding:0 14px 14px 52px;display:grid;gap:6px}
 .steps li{padding-left:2px}
+.steps a,.why a,.tmsg a,.msg a{color:var(--accent,#D9B77E);text-decoration:underline;word-break:break-all}
+.post{margin:0 14px 14px 52px;border:1px solid var(--line,#ffffff22);border-radius:14px;overflow:hidden;background:#0000001a}
+.post img{display:block;width:100%;height:auto}
+.post .pb{padding:12px 14px}.post .pm{font-size:12px;color:var(--muted);margin-bottom:6px}
+.post .ptxt{white-space:pre-wrap;font-size:14px;line-height:1.45}
+@media (max-width:520px){.post{margin-left:14px}}
 .taskbar{display:flex;gap:8px;flex-wrap:wrap;padding:0 14px 14px 52px}
 .btn{min-height:44px;border:0;border-radius:999px;padding:0 16px;font-weight:600;cursor:pointer}
 .btn.primary{background:var(--pink);color:#1a0610;box-shadow:0 8px 30px -10px rgb(232 164 169/.8)}
@@ -154,6 +160,7 @@ const $ = (id) => document.getElementById(id);
 let db = null, sample = null, comments = null, tasks = [], msgs = [];
 const statusEl = $('status');
 
+function linked(tag, cls, text) { const e = el(tag, cls); String(text).split(/(https?:\/\/[^\s)]+)/g).forEach((part, i) => { if (i % 2) { const a = el('a', null, part); a.href = part; a.target = '_blank'; a.rel = 'noopener'; e.append(a); } else if (part) e.append(document.createTextNode(part)); }); return e; }
 function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
 const pillText = { todo: 'To do', doing: 'Working', done: 'Done', blocked: 'Needs your yes' };
 
@@ -170,17 +177,18 @@ function renderTasks() {
     list.forEach((t, i) => {
       const li = el('li'); const d = el('details', 'task'); const s = el('summary');
       s.append(el('span', 'num', String(i + 1)));
-      const txt = el('div'); txt.append(el('div', 't', t.title)); if (t.why) txt.append(el('div', 'why', t.why));
+      const txt = el('div'); txt.append(el('div', 't', t.title)); if (t.why) txt.append(linked('div', 'why', t.why));
       const n = msgs.filter(m => m.taskId === t.id).length;
       txt.append(el('div', 'hint2', (t.owner === 'you' ? 'Tap the title for step-by-step help' : 'Tap the title for details') + (n ? ` · 💬 ${n}` : '')));
       s.append(txt);
       s.append(el('span', 'pill p-' + (t.status || 'todo'), pillText[t.status] || 'To do'));
       d.append(s);
-      if (Array.isArray(t.steps) && t.steps.length) { const ol = el('ol', 'steps'); t.steps.forEach(st => ol.append(el('li', null, st))); d.append(ol); }
+      if (Array.isArray(t.steps) && t.steps.length) { const ol = el('ol', 'steps'); t.steps.forEach(st => ol.append(linked('li', null, st))); d.append(ol); }
+      if (t.preview) { const pv = el('div', 'post'); if (t.preview.image) { const im = el('img'); im.src = t.preview.image; im.alt = t.preview.alt || 'Post picture'; pv.append(im); } const pb = el('div', 'pb'); pb.append(el('div', 'pm', t.preview.meta || 'Post preview')); pb.append(linked('div', 'ptxt', t.preview.text || '')); pv.append(pb); d.append(pv); }
       const bar = el('div', 'taskbar');
       if (t.owner === 'you') { const b = el('button', 'btn primary', 'I did this'); b.type = 'button'; b.addEventListener('click', () => markDone(t.id, b)); bar.append(b); }
       const thread = msgs.filter(m => m.taskId === t.id);
-      const th = el('div', 'thread'); thread.slice(-4).forEach(m => { const p = el('p', 'tmsg ' + (m.from === 'you' ? 'you' : 'claude')); p.append(el('b', null, m.from === 'you' ? 'You: ' : 'Claude: ')); p.append(document.createTextNode(m.text)); th.append(p); });
+      const th = el('div', 'thread'); thread.slice(-4).forEach(m => { const p = el('p', 'tmsg ' + (m.from === 'you' ? 'you' : 'claude')); p.append(el('b', null, m.from === 'you' ? 'You: ' : 'Claude: ')); p.append(linked('span', null, m.text)); th.append(p); });
       const f = el('form', 'reply'); const inp = el('input'); inp.placeholder = t.owner === 'you' ? 'Type here: done, a question, or "help"…' : 'Type here to tell Claude anything about this…'; inp.setAttribute('aria-label', 'Reply to Claude about: ' + t.title);
       const sb = el('button', 'btn ghost', 'Send'); sb.type = 'submit'; f.append(inp, sb);
       f.addEventListener('submit', async (e) => { e.preventDefault(); const v = inp.value.trim(); if (!v) return; sb.disabled = true; const ok = await sendMessage(v, t); if (ok) { inp.value = ''; if (t.owner === 'you' && /^(done|did it|finished|complete[d]?)[.!]*$/i.test(v)) await markDone(t.id, sb); } sb.disabled = false; });
@@ -198,7 +206,7 @@ function renderMsgs() {
   const box = $('msgs'); box.replaceChildren();
   if (!msgs.length) box.append(el('p', 'empty', 'Say hi, ask how something works, or ask for a change. Example: "Add a Spanish version to the list."'));
   const who = { you: 'You', claude: 'Claude · quick answer', builder: 'Claude Code · your builder' };
-  msgs.forEach(m => { const d = el('div', 'msg ' + (m.from === 'you' ? 'you' : 'claude') + (m.from === 'builder' ? ' builder' : '')); d.append(el('small', null, (who[m.from] || 'Claude') + (m.from === 'you' && m.sentToBuilder ? ' · sent to builder ✓' : ''))); d.append(document.createTextNode(m.text)); box.append(d); });
+  msgs.forEach(m => { const d = el('div', 'msg ' + (m.from === 'you' ? 'you' : 'claude') + (m.from === 'builder' ? ' builder' : '')); d.append(el('small', null, (who[m.from] || 'Claude') + (m.from === 'you' && m.sentToBuilder ? ' · sent to builder ✓' : ''))); d.append(linked('span', null, m.text)); box.append(d); });
   box.scrollTop = box.scrollHeight;
 }
 
