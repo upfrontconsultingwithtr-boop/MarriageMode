@@ -9,6 +9,7 @@ import PartnerTab from '@/components/PartnerTab';
 import SettingsTab from '@/components/SettingsTab';
 import WebSearch from '@/components/WebSearch';
 import DataScan from '@/components/DataScan';
+import SocialScan from '@/components/SocialScan';
 import DeletionRequests from '@/components/DeletionRequests';
 import Recheck from '@/components/Recheck';
 import ProofBox from '@/components/ProofBox';
@@ -420,6 +421,7 @@ export default function AuditApp() {
               </div>
             </div>
             <DataScan selected={state.platformIds} toggle={toggle} />
+            <SocialScan />
             <WebSearch state={state} setState={setState} addApps={() => window.scrollTo({ top: 0, behavior: 'smooth' })} />
             <div className="glass p-6">
               <h2 className="text-lg font-semibold">{t('Other places to look', 'Otros lugares para revisar')}</h2>
