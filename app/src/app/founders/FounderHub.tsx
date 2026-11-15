@@ -27,7 +27,10 @@ export default function FounderHub() {
 
   useEffect(() => {
     const c = cloud(); if (!c) { setState('signin'); return; }
-    const check = async () => { const { data } = await c.auth.getSession(); if (!data.session) { setState('signin'); return; } if (!(await amIComped())) { setState('denied'); return; } setState('ok'); await load(); };
+    const check = async () => {
+      const h = new URLSearchParams(window.location.hash.slice(1));
+      if (h.get('access_token') && h.get('refresh_token')) { await c.auth.setSession({ access_token: h.get('access_token')!, refresh_token: h.get('refresh_token')! }); history.replaceState(null, '', window.location.pathname); }
+      const { data } = await c.auth.getSession(); if (!data.session) { setState('signin'); return; } if (!(await amIComped())) { setState('denied'); return; } setState('ok'); await load(); };
     void check();
     const { data: sub } = c.auth.onAuthStateChange(() => void check());
     return () => sub.subscription.unsubscribe();
