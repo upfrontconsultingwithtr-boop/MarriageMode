@@ -54,6 +54,12 @@ a{color:var(--green)} button,input,textarea{font:inherit;color:inherit}
 .msg.you{align-self:flex-end;background:rgb(255 111 174/.14);border:1px solid rgb(255 111 174/.3)}
 .msg.claude{align-self:flex-start;background:rgb(52 226 155/.08);border:1px solid rgb(52 226 155/.25)}
 .msg.builder{background:rgb(139 124 255/.12);border-color:rgb(139 124 255/.4)}
+.reply{display:flex;gap:8px;padding:0 14px 14px 52px}
+.reply input{flex:1;min-width:0;min-height:44px;border-radius:999px;border:1px solid var(--line);background:#06111a;padding:0 14px}
+.thread{display:grid;gap:6px;padding:0 14px 10px 52px}
+.tmsg{margin:0;font-size:13px;padding:8px 10px;border-radius:10px;overflow-wrap:anywhere}
+.tmsg.you{background:rgb(255 111 174/.10)}.tmsg.claude{background:rgb(52 226 155/.08)}
+@media (max-width:520px){.steps,.taskbar,.reply,.thread{padding-left:14px}}
 .msg small{display:block;color:var(--muted);font-size:11px;margin-bottom:2px}
 .compose{display:flex;gap:8px;margin-top:12px}
 .compose textarea{flex:1;min-width:0;min-height:48px;max-height:160px;resize:vertical;border-radius:14px;border:1px solid var(--line);background:#06111a;padding:12px}
@@ -154,10 +160,14 @@ function renderTasks() {
       s.append(el('span', 'pill p-' + (t.status || 'todo'), pillText[t.status] || 'To do'));
       d.append(s);
       if (Array.isArray(t.steps) && t.steps.length) { const ol = el('ol', 'steps'); t.steps.forEach(st => ol.append(el('li', null, st))); d.append(ol); }
-      if (t.owner === 'you') {
-        const bar = el('div', 'taskbar'); const b = el('button', 'btn primary', 'I did this');
-        b.type = 'button'; b.addEventListener('click', () => markDone(t.id, b)); bar.append(b); d.append(bar);
-      }
+      const bar = el('div', 'taskbar');
+      if (t.owner === 'you') { const b = el('button', 'btn primary', 'I did this'); b.type = 'button'; b.addEventListener('click', () => markDone(t.id, b)); bar.append(b); }
+      const thread = msgs.filter(m => m.taskId === t.id);
+      if (thread.length) { const th = el('div', 'thread'); thread.slice(-4).forEach(m => { const p = el('p', 'tmsg ' + (m.from === 'you' ? 'you' : 'claude')); p.append(el('b', null, m.from === 'you' ? 'You: ' : 'Claude: ')); p.append(document.createTextNode(m.text)); th.append(p); }); d.append(th); }
+      const f = el('form', 'reply'); const inp = el('input'); inp.placeholder = 'Reply to Claude about this…'; inp.setAttribute('aria-label', 'Reply to Claude about: ' + t.title);
+      const sb = el('button', 'btn ghost', 'Send'); sb.type = 'submit'; f.append(inp, sb);
+      f.addEventListener('submit', async (e) => { e.preventDefault(); const v = inp.value.trim(); if (!v) return; sb.disabled = true; const ok = await sendMessage(v, t); if (ok) inp.value = ''; sb.disabled = false; });
+      d.append(bar, f);
       li.append(d); ul.append(li);
     });
   }
@@ -170,6 +180,24 @@ function renderMsgs() {
   const who = { you: 'You', claude: 'Claude · quick answer', builder: 'Claude Code · your builder' };
   msgs.forEach(m => { const d = el('div', 'msg ' + (m.from === 'you' ? 'you' : 'claude') + (m.from === 'builder' ? ' builder' : '')); d.append(el('small', null, (who[m.from] || 'Claude') + (m.from === 'you' && m.sentToBuilder ? ' · sent to builder ✓' : ''))); d.append(document.createTextNode(m.text)); box.append(d); });
   box.scrollTop = box.scrollHeight;
+}
+
+// Save a message (optionally about one task) and send it straight to the builder session.
+async function sendMessage(text, task) {
+  if (!db) return false;
+  let ref;
+  const doc = { from: 'you', text: task ? `About “${task.title}”: ${text}` : text, at: new Date().toISOString(), handled: false };
+  if (task) doc.taskId = task.id;
+  try { ref = await db.collection('messages').add(doc); } catch (e) { statusEl.textContent = 'Message not saved. Check your connection and try again.'; return false; }
+  if (comments) {
+    try {
+      if ((await comments.canSendToClaude()) === 'available') {
+        await comments.sendToClaude({ anchor: await comments.anchorFor($('msgs')), text: 'From Tiffany\'s hub: ' + doc.text.slice(0, 3800) });
+        await ref.update({ sentToBuilder: true });
+      }
+    } catch (e) { /* the builder still reads saved messages next session */ }
+  }
+  return true;
 }
 
 async function markDone(id, btn) {
@@ -235,6 +263,6 @@ renderTasks(); renderMsgs();
   if (!db) { clearTimeout(timer); statusEl.textContent = 'Sign in to claude.ai to see your list.'; return; }
   db.collection('tasks').onSnapshot(snap => { clearTimeout(timer); tasks = snap.docs.map(d => ({ id: d.id, ...d.data() })); statusEl.textContent = 'Updates live as Claude works.'; renderTasks(); },
     () => { clearTimeout(timer); statusEl.textContent = 'Couldn’t load the list. Reopen the page to try again.'; });
-  db.collection('messages').orderBy('at', 'asc').limit(200).onSnapshot(snap => { msgs = snap.docs.map(d => ({ id: d.id, ...d.data() })); renderMsgs(); }, () => {});
+  db.collection('messages').orderBy('at', 'asc').limit(300).onSnapshot(snap => { msgs = snap.docs.map(d => ({ id: d.id, ...d.data() })); renderMsgs(); renderTasks(); }, () => {});
 })();
 </script>
