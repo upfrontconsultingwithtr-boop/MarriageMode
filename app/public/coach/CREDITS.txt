@@ -2,3 +2,8 @@ Mia's 3D avatar (mia.glb) is the "mpfb.glb" example avatar from the TalkingHead 
 (https://github.com/met4citizen/TalkingHead), created with Blender and MPFB (MakeHuman),
 licensed CC0 (public domain). Compressed with glTF-Transform.
 TalkingHead (MIT) and HeadTTS (MIT) by Mika Suominen. Kokoro-82M voice model (Apache 2.0).
+
+Mia's video face (mia-idle.mp4, mia-talk.mp4, mia-poster.jpg) is cut from the free stock video
+"Woman Talking In Front of Camera" (Pexels video 8048249, https://www.pexels.com/video/woman-talking-in-front-of-camera-8048249/),
+used under the Pexels License (free for commercial use, modification allowed). The person shown is an actor
+in stock footage; Mia is an AI and the actor does not endorse Marriage Mode.

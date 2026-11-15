@@ -13,6 +13,8 @@ import DeletionRequests from '@/components/DeletionRequests';
 import Recheck from '@/components/Recheck';
 import ProofBox from '@/components/ProofBox';
 import InstallApp from '@/components/InstallApp';
+import CoachSessions from '@/components/CoachSessions';
+import Assignments from '@/components/Assignments';
 import { cloud, cloudEnabled, sendLink, pull, push, merge, signOut, amIComped, kitDownloadUrl } from '@/lib/cloud';
 import { BASE, KIT_URL } from '@/lib/base';
 import { LangCtx, LOCALE, type Lang } from '@/lib/i18n';
@@ -290,6 +292,9 @@ export default function AuditApp() {
                 ))}
               </ul>
             </div>
+
+            <Assignments />
+            <CoachSessions />
 
             {hasApps && <Recheck state={state} setState={setState} goApps={() => { setTab('apps'); window.scrollTo({ top: 0 }); }} />}
 

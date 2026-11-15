@@ -6,10 +6,33 @@ import { loadPrefs } from '@/lib/prefs';
 import { BASE } from '@/lib/base';
 import { track } from '@/lib/track';
 import { startMia, type Mia } from '@/lib/mia';
+import { createVoice, type Voice } from '@/lib/voice';
+import { saveSession } from '@/lib/sessions';
+import { startRecording, type Rec as Recording, type Part } from '@/lib/recorder';
+import { coachReply, guidanceFor, findTopics } from '@/lib/coachKnowledge';
+import { addAssignment, extractAssignment } from '@/lib/assignments';
 
 type Msg = { role: 'user' | 'assistant'; content: string };
 type Engine = { chat: { completions: { create: (o: unknown) => Promise<AsyncIterable<{ choices: { delta: { content?: string } }[] }>> } } };
 type Rec = { lang: string; interimResults: boolean; continuous: boolean; onresult: (e: { results: { 0: { transcript: string }; isFinal: boolean }[] & { length: number } }) => void; onend: () => void; onerror: () => void; start: () => void; stop: () => void };
+
+// Mia's real-human video face: an idle (listening) loop and a talking loop, cross-faded live.
+function VideoAvatar({ speaking, listening }: { speaking: boolean; listening: boolean }) {
+  const idle = useRef<HTMLVideoElement>(null); const talk = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const t = talk.current; if (!t) return;
+    if (speaking) { try { t.currentTime = Math.random() * Math.max(0, (t.duration || 7) - 2); } catch { /* not ready */ } void t.play().catch(() => {}); }
+    else { const h = setTimeout(() => t.pause(), 300); return () => clearTimeout(h); }
+  }, [speaking]);
+  useEffect(() => { void idle.current?.play().catch(() => {}); }, []);
+  return (
+    <div className="absolute inset-0">
+      <video ref={idle} src={`${BASE}/coach/mia-idle.mp4`} poster={`${BASE}/coach/mia-poster.jpg`} muted loop playsInline autoPlay preload="auto" className="absolute inset-0 h-full w-full object-cover" aria-hidden="true" />
+      <video ref={talk} src={`${BASE}/coach/mia-talk.mp4`} muted loop playsInline preload="auto" className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${speaking ? 'opacity-100' : 'opacity-0'}`} aria-hidden="true" />
+      {listening && <span className="absolute left-3 top-3 rounded-full bg-night/70 px-3 py-1 text-xs text-mango">● listening</span>}
+    </div>
+  );
+}
 
 function Avatar({ speaking, listening, thinking }: { speaking: boolean; listening: boolean; thinking: boolean }) {
   return (
@@ -53,18 +76,46 @@ export default function CoachApp() {
   const [msgs, setMsgs] = useState<Msg[]>([]); const [live, setLive] = useState('');
   const [input, setInput] = useState(''); const [busy, setBusy] = useState(false);
   const [speaking, setSpeaking] = useState(false); const [listening, setListening] = useState(false);
+  const [assigned, setAssigned] = useState<string | null>(null);
   const [voiceOn, setVoiceOn] = useState(true); const [cam, setCam] = useState(false); const [err, setErr] = useState('');
   const engine = useRef<Engine | null>(null); const rec = useRef<Rec | null>(null);
-  const mia = useRef<Mia | null>(null); const stage = useRef<HTMLDivElement>(null);
+  const session = useRef<{ id: string; startedAt: string } | null>(null);
+  const recording = useRef<Recording | null>(null); const parts = useRef<Part[]>([]); const [format, setFormat] = useState<'text' | 'voice' | 'video'>('text');
+  const faceBox = useRef<HTMLDivElement>(null); const caption = useRef(''); const speakingRef = useRef(false);
+  const mia = useRef<Mia | null>(null); const stage = useRef<HTMLDivElement>(null); const voice = useRef<Voice | null>(null);
   const [face3d, setFace3d] = useState<'off' | 'loading' | 'on' | 'failed'>('off'); const [faceP, setFaceP] = useState(0);
   const video = useRef<HTMLVideoElement>(null); const stream = useRef<MediaStream | null>(null);
   const [size, setSize] = useState(MODELS.full.sizeMB);
 
   useEffect(() => { setLang(loadPrefs().lang); setSize(MODELS[pickModel()].sizeMB); void canRunAI().then(setGpu); return () => { try { speechSynthesis.cancel(); } catch { /* none */ } stream.current?.getTracks().forEach((x) => x.stop()); }; }, []);
 
+  // Save the transcript on this device after every message (shown later in the dashboard).
+  useEffect(() => {
+    if (phase !== 'call' || !msgs.length) return;
+    if (!session.current) session.current = { id: `s-${Date.now()}`, startedAt: new Date().toISOString() };
+    saveSession({ ...session.current, updatedAt: '', mode, lang, msgs, format, parts: parts.current });
+  }, [msgs, phase, mode, lang, format]);
+  useEffect(() => { speakingRef.current = speaking; }, [speaking]);
+
+  // Record in the format the session happens in: voice when the mic is used, video when the camera is on.
+  const record = async (kind: 'voice' | 'video') => {
+    if (recording.current?.kind === kind || (recording.current?.kind === 'video')) return;
+    if (!session.current) session.current = { id: `s-${Date.now()}`, startedAt: new Date().toISOString() };
+    if (recording.current) { const p = await recording.current.stop(); if (p) parts.current = [...parts.current, p]; recording.current = null; }
+    recording.current = await startRecording({ kind, key: `${session.current.id}-${parts.current.length + 1}`, coachAudio: voice.current?.stream() ?? null,
+      frame: () => { const vids = faceBox.current?.querySelectorAll('video'); return { coach: (vids && (speakingRef.current ? vids[1] : vids[0])) ?? null, cam: video.current, caption: caption.current }; } });
+    setFormat(kind);
+  };
+  const finishRecording = async () => {
+    const r = recording.current; recording.current = null; if (!r || !session.current) return;
+    const p = await r.stop(); if (p) parts.current = [...parts.current, p];
+    saveSession({ ...session.current, updatedAt: '', mode, lang, msgs, format, parts: parts.current });
+  };
+
   const say = (text: string) => {
     if (!voiceOn) return;
     if (mia.current) { mia.current.speak(text, es, () => setSpeaking(true), () => setSpeaking(false)); return; }
+    if (voice.current) { voice.current.speak(text, es, () => setSpeaking(true), () => setSpeaking(false)); return; }
     if (!('speechSynthesis' in window)) return;
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text); u.lang = es ? 'es-US' : 'en-US'; u.rate = 1; u.pitch = 1.05;
@@ -89,6 +140,7 @@ export default function CoachApp() {
 
   const start = async (useAI: boolean) => {
     setErr(''); track(useAI ? 'coach-start-ai' : 'coach-start-lite');
+    if (!voice.current) voice.current = createVoice();
     if (!useAI) { setMode('lite'); setPhase('call'); await startFace(); const o = opening(); setMsgs([{ role: 'assistant', content: o }]); say(o); return; }
     setMode('ai'); setPhase('loading');
     try {
@@ -107,18 +159,20 @@ export default function CoachApp() {
     const history: Msg[] = [...msgs, { role: 'user', content: v }]; setMsgs(history); setBusy(true);
     let reply = '';
     if (crisis(v)) reply = es ? CRISIS_ES : CRISIS_EN;
-    else if (mode === 'lite' || !engine.current) reply = guideAnswer(v, es, { base: BASE }).text;
+    else if (mode === 'lite' || !engine.current) reply = coachReply(v, es) ?? guideAnswer(v, es, { base: BASE }).text;
     else {
       try {
-        const chunks = await engine.current.chat.completions.create({ stream: true, temperature: 0.7, max_tokens: 220, messages: [{ role: 'system', content: systemPrompt(es) }, ...history.slice(-12)] });
+        const chunks = await engine.current.chat.completions.create({ stream: true, temperature: 0.7, max_tokens: 320, messages: [{ role: 'system', content: systemPrompt(es) + guidanceFor(history.filter((m) => m.role === 'user').slice(-3).map((m) => m.content).join(' ')) }, ...history.slice(-12)] });
         for await (const c of chunks) { reply += c.choices[0]?.delta?.content ?? ''; setLive(reply); }
       } catch {
         // The device ran out of graphics memory: keep the session going in Lite mode.
         engine.current = null; setMode('lite');
         setErr(t('This device ran out of memory for the full AI, so Mia switched to Lite mode. You can keep talking.', 'Este dispositivo se quedó sin memoria para la IA completa, así que Mia cambió al modo Lite. Puedes seguir hablando.'));
-        reply = guideAnswer(v, es, { base: BASE }).text;
+        reply = coachReply(v, es) ?? guideAnswer(v, es, { base: BASE }).text;
       }
     }
+    const hw = extractAssignment(reply);
+    if (hw) { if (!session.current) session.current = { id: `s-${Date.now()}`, startedAt: new Date().toISOString() }; const a = addAssignment(hw, findTopics(v, 1)[0]?.id ?? 'general', session.current.id); if (a) { setAssigned(a.text); track('coach-assignment'); } }
     setLive(''); setMsgs((m) => [...m, { role: 'assistant', content: reply.trim() }]); setBusy(false); say(reply.trim());
   };
 
@@ -127,7 +181,8 @@ export default function CoachApp() {
     const R = W.SpeechRecognition ?? W.webkitSpeechRecognition;
     if (!R) { setErr(t('Voice input isn’t available in this browser. You can type instead.', 'La voz no está disponible en este navegador. Puedes escribir.')); return; }
     if (listening) { rec.current?.stop(); return; }
-    mia.current?.stop(); speechSynthesis.cancel(); setSpeaking(false); mia.current?.listen(true);
+    mia.current?.stop(); voice.current?.stop(); speechSynthesis.cancel(); setSpeaking(false); mia.current?.listen(true);
+    void record(cam ? 'video' : 'voice');
     const r = new R(); r.lang = es ? 'es-US' : 'en-US'; r.interimResults = true; r.continuous = false;
     let finalText = '';
     r.onresult = (e) => { let s = ''; for (let i = 0; i < e.results.length; i++) { s += e.results[i][0].transcript; if (e.results[i].isFinal) finalText = s; } setInput(s); };
@@ -138,12 +193,13 @@ export default function CoachApp() {
 
   const toggleCam = async () => {
     if (cam) { stream.current?.getTracks().forEach((x) => x.stop()); stream.current = null; setCam(false); return; }
-    try { stream.current = await navigator.mediaDevices.getUserMedia({ video: true, audio: false }); setCam(true); setTimeout(() => { if (video.current && stream.current) video.current.srcObject = stream.current; }, 0); }
+    try { stream.current = await navigator.mediaDevices.getUserMedia({ video: true, audio: false }); setCam(true); setTimeout(() => { if (video.current && stream.current) video.current.srcObject = stream.current; }, 0); void record('video'); }
     catch { setErr(t('Camera not available. That’s fine: the coach works without it.', 'Cámara no disponible. No pasa nada: la coach funciona sin ella.')); }
   };
 
-  const end = () => { mia.current?.stop(); speechSynthesis.cancel(); rec.current?.stop(); stream.current?.getTracks().forEach((x) => x.stop()); setCam(false); setPhase('intro'); setMsgs([]); };
+  const end = () => { void finishRecording().then(() => { session.current = null; parts.current = []; setFormat('text'); }); mia.current?.stop(); voice.current?.stop(); speechSynthesis.cancel(); rec.current?.stop(); stream.current?.getTracks().forEach((x) => x.stop()); setCam(false); setPhase('intro'); setMsgs([]); };
   const lastCoach = live || [...msgs].reverse().find((m) => m.role === 'assistant')?.content || '';
+  caption.current = lastCoach;
 
   return (
     <div lang={lang} className="mx-auto max-w-5xl px-4 py-10">
@@ -156,14 +212,14 @@ export default function CoachApp() {
 
       {phase === 'intro' && (
         <div className="mt-6 grid items-center gap-8 md:grid-cols-[1fr_1.1fr]">
-          <Avatar speaking={false} listening={false} thinking={false} />
+          <div className="relative mx-auto aspect-square w-full max-w-[380px] overflow-hidden rounded-[1.75rem] ring-1 ring-white/10"><VideoAvatar speaking={false} listening={false} /></div>
           <div>
             <h1 className="text-4xl font-bold leading-tight">{t('Talk it through with Mia, your AI coach', 'Habla con Mia, tu coach de IA')}</h1>
             <p className="mt-4 text-ink/75">{t('A live, face-to-face style session: speak or type, and Mia answers out loud. Use it alone or together as a couple.', 'Una sesión en vivo, cara a cara: habla o escribe y Mia responde en voz alta. Úsala a solas o juntos como pareja.')}</p>
             <ul className="mt-4 space-y-2 text-sm text-ink/75">
               <li>🔒 {t('Private: the AI runs on your own device. Nothing you say is sent to us or anyone.', 'Privado: la IA funciona en tu propio dispositivo. Nada de lo que dices se nos envía a nosotros ni a nadie.')}</li>
               <li>💸 {t('Free: no account, no subscription.', 'Gratis: sin cuenta ni suscripción.')}</li>
-              <li>🤖 {t('Mia is an AI coach, not a person or a licensed counselor.', 'Mia es una coach de IA, no una persona ni una consejera con licencia.')}</li>
+              <li>🤖 {t('Mia is an AI coach, not a person or a licensed counselor. Her face is video of an actor.', 'Mia es una coach de IA, no una persona ni una consejera con licencia. Su rostro es video de una actriz.')}</li>
               <li>📶 {t(`First time only: a one-time download of about ${size >= 1000 ? (size / 1000).toFixed(1) + ' GB' : size + ' MB'}. Wi-Fi recommended.`, `Solo la primera vez: una descarga única de unos ${size >= 1000 ? (size / 1000).toFixed(1) + ' GB' : size + ' MB'}. Se recomienda Wi-Fi.`)}</li>
             </ul>
             <div className="mt-6 flex flex-wrap gap-3">
@@ -191,7 +247,8 @@ export default function CoachApp() {
             <div className="flex items-center justify-between text-xs text-ink/60"><span className="flex items-center gap-2"><span className="size-2 rounded-full bg-palm shadow-[0_0_8px_#7BC59A]" />{t('Live session with Mia', 'Sesión en vivo con Mia')} · {mode === 'ai' ? t('AI on your device', 'IA en tu dispositivo') : t('Lite mode', 'Modo Lite')}</span><span>{t('AI coach · not a counselor', 'Coach de IA · no es consejera')}</span></div>
             <div className="relative mx-auto mt-4 aspect-square w-full max-w-[420px] overflow-hidden rounded-[1.5rem] bg-gradient-to-b from-[#2A1520] to-night" style={{ boxShadow: listening ? '0 0 0 4px #D9B77E66, 0 0 50px #D9B77E55' : speaking ? '0 0 40px #E7A3AE44' : undefined }}>
               <div ref={stage} className={`absolute inset-0 ${face3d === 'on' ? '' : 'invisible'}`} aria-label={t('Mia, the AI coach (3D)', 'Mia, la coach de IA (3D)')} role="img" />
-              {face3d !== 'on' && <div className="absolute inset-0 grid place-items-center p-6"><Avatar speaking={speaking} listening={listening} thinking={busy && !live} /></div>}
+              {face3d !== 'on' && face3d !== 'loading' && <div ref={faceBox} className="absolute inset-0"><VideoAvatar speaking={speaking} listening={listening} /></div>}
+              {format !== 'text' && <span className="absolute right-3 top-3 rounded-full bg-night/70 px-3 py-1 text-xs text-coral">● {format === 'video' ? t('Recording video to this device', 'Grabando video en este dispositivo') : t('Recording audio to this device', 'Grabando audio en este dispositivo')}</span>}
               {face3d === 'loading' && <p className="absolute inset-x-0 bottom-2 text-center text-[11px] text-ink/60">{t('Loading Mia’s 3D face…', 'Cargando el rostro 3D de Mia…')} {Math.round(faceP * 100)}%</p>}
             </div>
             {cam && <video ref={video} autoPlay muted playsInline className="absolute bottom-24 right-4 h-28 w-20 rounded-xl object-cover ring-2 ring-white/20 sm:h-36 sm:w-28" aria-label={t('Your camera (stays on your device)', 'Tu cámara (se queda en tu dispositivo)')} />}
@@ -214,8 +271,9 @@ export default function CoachApp() {
               <input id="coach-in" value={input} onChange={(e) => setInput(e.target.value)} placeholder={listening ? t('Listening…', 'Escuchando…') : t('Type or tap the mic…', 'Escribe o toca el micrófono…')} className="min-h-11 min-w-0 flex-1 rounded-full border border-white/15 bg-night/60 px-4" />
               <button disabled={busy} className="glow-lagoon min-h-11 rounded-full bg-lagoon px-5 font-semibold text-night disabled:opacity-50">{t('Send', 'Enviar')}</button>
             </form>
+            {assigned && <p role="status" className="mt-2 rounded-xl bg-mango/10 p-2 text-xs ring-1 ring-mango/30">📌 {t('Added to your assignments in My dashboard:', 'Agregada a tus tareas en Mi panel:')} {assigned}</p>}
             {err && <p role="status" className="mt-2 text-xs text-coral">{err}</p>}
-            <p className="mt-3 text-[11px] text-ink/50">{t('Mia is an AI and can make mistakes. Not therapy or medical advice. In danger? Call 911. Hotline: 1-800-799-7233 · Crisis: 988.', 'Mia es una IA y puede equivocarse. No es terapia ni consejo médico. ¿En peligro? Llama al 911. Línea: 1-800-799-7233 · Crisis: 988.')}</p>
+            <p className="mt-3 text-[11px] text-ink/50">{t('Your transcript is saved on this device: find it in My dashboard → Overview. ', 'Tu transcripción se guarda en este dispositivo: está en Mi panel → Resumen. ')}{t('Mia is an AI and can make mistakes. Not therapy or medical advice. In danger? Call 911. Hotline: 1-800-799-7233 · Crisis: 988.', 'Mia es una IA y puede equivocarse. No es terapia ni consejo médico. ¿En peligro? Llama al 911. Línea: 1-800-799-7233 · Crisis: 988.')}</p>
           </div>
         </div>
       )}

@@ -161,7 +161,7 @@ export default function PartnerTab({ signedIn, openSignIn, stats, summary }: Pro
 
           <div className="grid gap-4 lg:grid-cols-[1fr_1.3fr] [&>*]:min-w-0">
             <div className="glass p-5">
-              <h3 className="font-semibold">{t('Shared goals', 'Metas en común')}</h3>
+              <h3 className="font-semibold">{t('Shared goals & assignments', 'Metas y tareas en común')}</h3>
               <ul className="mt-2 space-y-1">{goals.map((g) => (
                 <li key={g.id}><label className="flex min-h-11 items-center gap-3"><input type="checkbox" checked={g.done} onChange={async () => { await P.setGoal(g.id, !g.done); setGoals(await P.goals(couple.id)); }} className="size-5 accent-[#D9B77E]" /><span className={g.done ? 'text-ink/60 line-through' : ''}>{g.title}</span></label></li>))}</ul>
               {!goals.length && <p className="text-sm text-ink/55">{t('Add something you both want, like “Agree on follows and DMs”.', 'Agrega algo que ambos quieran, como “Acordar a quién seguimos y los mensajes privados”.')}</p>}

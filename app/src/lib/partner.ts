@@ -115,8 +115,10 @@ export async function goals(coupleId: string): Promise<Goal[]> {
   const { data } = await c.from('couple_goals').select('id, title, done, created_by').eq('couple_id', coupleId).order('created_at');
   return (data ?? []) as Goal[];
 }
-export async function addGoal(coupleId: string, uid: string, title: string) {
-  await cloud()?.from('couple_goals').insert({ couple_id: coupleId, title: title.slice(0, 120), created_by: uid });
+export async function addGoal(coupleId: string, uid: string, title: string): Promise<boolean> {
+  const c = cloud(); if (!c) return false;
+  const { error } = await c.from('couple_goals').insert({ couple_id: coupleId, title: title.slice(0, 300), created_by: uid });
+  return !error;
 }
 export async function setGoal(id: string, done: boolean) { await cloud()?.from('couple_goals').update({ done }).eq('id', id); }
 
