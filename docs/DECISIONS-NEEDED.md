@@ -14,4 +14,4 @@ involve money, legal status, accounts or the brand rule. None blocks the MVP.
 | 7 | **Google Play developer account** | Needed for the Play Store. | $25 one time | Not yet. |
 | 8 | **Stripe account** | Needed to take payments. Stripe charges per transaction, no monthly fee. Signing up needs your identity check. | Per-transaction fees only | Open it when the waitlist passes 50. |
 | 9 | **Privacy policy and terms review** by a lawyer | We drafted them; a relationship-data product should have a legal read. | Lawyer's fee | Before taking the first payment. |
-| 10 | **Netlify publish** of the MVP under the LLC's existing Netlify team | Free plan, commercial use allowed. | $0 | Done by Claude under the standing permission; tell us to take it down if you disagree. |
+| 10 | **Netlify publish** of the MVP (project `marriage-mode` created, forms on) | Free plan, commercial use allowed. The deploy command was blocked in the cloud session by the safety check. | $0 | Approve the deploy in a session, or connect this repo in Netlify (Build: base `app`, command `npm run build`, publish `out`). |
