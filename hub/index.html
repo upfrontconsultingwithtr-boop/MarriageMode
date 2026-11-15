@@ -55,6 +55,8 @@ a{color:var(--green)} button,input,textarea{font:inherit;color:inherit}
 .msg.claude{align-self:flex-start;background:rgb(52 226 155/.08);border:1px solid rgb(52 226 155/.25)}
 .msg.builder{background:rgb(139 124 255/.12);border-color:rgb(139 124 255/.4)}
 .reply{display:flex;gap:8px;padding:0 14px 14px 52px}
+.hint2{color:var(--pink);font-size:12px;margin-top:4px}
+.task[open] .hint2{display:none}
 .reply input{flex:1;min-width:0;min-height:44px;border-radius:999px;border:1px solid var(--line);background:#06111a;padding:0 14px}
 .thread{display:grid;gap:6px;padding:0 14px 10px 52px}
 .tmsg{margin:0;font-size:13px;padding:8px 10px;border-radius:10px;overflow-wrap:anywhere}
@@ -156,7 +158,10 @@ function renderTasks() {
     list.forEach((t, i) => {
       const li = el('li'); const d = el('details', 'task'); const s = el('summary');
       s.append(el('span', 'num', String(i + 1)));
-      const txt = el('div'); txt.append(el('div', 't', t.title)); if (t.why) txt.append(el('div', 'why', t.why)); s.append(txt);
+      const txt = el('div'); txt.append(el('div', 't', t.title)); if (t.why) txt.append(el('div', 'why', t.why));
+      const n = msgs.filter(m => m.taskId === t.id).length;
+      txt.append(el('div', 'hint2', (t.owner === 'you' ? 'Tap to open · steps · reply to Claude' : 'Tap to open · reply to Claude') + (n ? ` · 💬 ${n}` : '')));
+      s.append(txt);
       s.append(el('span', 'pill p-' + (t.status || 'todo'), pillText[t.status] || 'To do'));
       d.append(s);
       if (Array.isArray(t.steps) && t.steps.length) { const ol = el('ol', 'steps'); t.steps.forEach(st => ol.append(el('li', null, st))); d.append(ol); }
