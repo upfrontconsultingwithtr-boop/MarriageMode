@@ -11,7 +11,16 @@ https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-ei
 
 Each step says exactly where to tap. When you finish one, just tell Claude "done".
 
-_No other steps are waiting on you right now._
+### 1. (Optional, when you have time) Email counselors about the free worksheet
+Why: counselors and pastors who work with engaged couples are the fastest free way to reach new users.
+
+1. On your iPad, open Safari and search Google for: **premarital counseling** plus your city (or any city).
+2. Open a counselor's or church's website that mentions premarital or couples counseling.
+3. Find their email address or contact form.
+4. Open the ready-to-send email: https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/outreach/COUNSELOR-EMAIL.md
+5. Copy the text from **Hi [first name]** down to the last line.
+6. Paste it into a new email (or their contact form), change **[first name]** to their name, and tap **Send**.
+7. Do up to 2 a day. Tell Claude who replied and Claude drafts your answer.
 
 ---
 
@@ -29,9 +38,11 @@ _No other steps are waiting on you right now._
 | Marketing & launch | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/09-MARKETING-LAUNCH.md |
 | Investor pitch | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/08-PITCH-DECK.md |
 | Safety rules | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/TRUST-AND-SAFETY.md |
+| Couples worksheet (printable) | https://upfrontconsultingwithtr-boop.github.io/MarriageMode/worksheet/ |
 | Design look (green & pink) | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/DESIGN-SYSTEM.md |
 
 ## 📝 Done log (newest first)
+- **Nov 15:** Free printable "Digital Boundaries" worksheet for couples and counselors (/worksheet/), plus a ready-to-send counselor email.
 - **Nov 15:** Site live again on free GitHub Pages; all pages checked.
 - **Nov 15:** Netlify paused the site (free limit). Moved hosting to free GitHub Pages; waitlist now opens an email to the business inbox so no signup is lost.
 - **Nov 15:** 29 "how to delete [app]" guide pages + sitemap, so people find Marriage Mode on Google.

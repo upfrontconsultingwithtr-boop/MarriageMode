@@ -84,3 +84,10 @@ h1, h2, h3, .font-display { font-family: var(--font-display); letter-spacing: -0
 @media (prefers-reduced-motion: reduce) {
   .spin-slow, .spin-rev, .pulse-soft, .halo-border::before { animation: none; }
 }
+
+@media print {
+  @page { margin: 16mm; }
+  html, body { background: #fff !important; color: #000 !important; }
+  .text-glow { background: none; color: #000; -webkit-text-fill-color: #000; }
+  .grid-bg, .grid-floor { display: none; }
+}

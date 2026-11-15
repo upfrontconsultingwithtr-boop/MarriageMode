@@ -17,8 +17,8 @@ export const viewport: Viewport = { themeColor: '#03080C', width: 'device-width'
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="min-h-screen overflow-x-hidden antialiased">
-        <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-night/70 backdrop-blur-xl">
+      <body className="min-h-screen overflow-x-hidden antialiased print:bg-white">
+        <header className="print:hidden sticky top-0 z-50 border-b border-white/[0.06] bg-night/70 backdrop-blur-xl">
           <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
             <Link href="/" className="flex items-center gap-2.5 font-display text-lg font-bold tracking-tight">
               <img src={`${BASE}/icon.svg`} alt="" width={30} height={30} /> Marriage Mode
@@ -29,10 +29,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </nav>
         </header>
         <main>{children}</main>
-        <footer className="relative mt-24 border-t border-white/[0.06] py-10 text-center text-sm text-ink/60">
+        <footer className="print:hidden relative mt-24 border-t border-white/[0.06] py-10 text-center text-sm text-ink/60">
           <p>Marriage Mode by <strong className="text-ink/85">Upfront Consulting with Tiff &amp; Reco LLC</strong></p>
           <p className="mt-3 space-x-5">
             <Link href="/guides/" className="hover:text-teal">Delete-account guides</Link>
+            <Link href="/worksheet/" className="hover:text-teal">Couples worksheet</Link>
             <Link href="/privacy/" className="hover:text-teal">Privacy</Link>
             <Link href="/safety/" className="hover:text-teal">Safety &amp; consent</Link>
           </p>

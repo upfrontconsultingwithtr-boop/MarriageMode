@@ -15,7 +15,8 @@ Status: ✅ done · ▶ next · ○ later.
 | A7 | I copy or share a summary that names no apps | 2 | ✅ |
 | A8 | Unit tests for steps and scores | 2 | ✅ |
 | A9 | Landing page, waitlist (Netlify Forms), privacy and safety pages | 3 | ✅ |
-| A10 | Per-platform SEO guide pages generated from the catalog | 5 | ▶ |
+| A10 | Per-platform SEO guide pages generated from the catalog | 5 | ✅ |
+| A13 | Printable Digital Boundaries worksheet + counselor email | 3 | ✅ |
 | A11 | PostHog events (counts only), opt-in banner | 2 | ▶ |
 | A12 | Spanish translation | 5 | ○ |
 
