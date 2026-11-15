@@ -5,7 +5,16 @@ import { track } from '@/lib/track';
 import { useT, useLang, LOCALE } from '@/lib/i18n';
 
 // Official request pages confirmed from the company's own help center.
+// Privacy emails confirmed on each company's own privacy policy (checked 2026-11-15).
+// Only add an address after reading it on the company's own site.
+const EMAIL: Record<string, string> = {
+  Bumble: 'DPO@bumble.com',        // bumble.com/en/privacy: "exercise your rights ... email our Data Protection Officer"
+  eharmony: 'privacy@eharmony.com', // eharmony.com/about/privacy: "submit a privacy rights request ... privacy@eharmony.com"
+};
+
 const OFFICIAL: Record<string, string> = {
+  Bumble: 'https://bumble.com/en/privacy',
+  eharmony: 'https://www.eharmony.com/about/privacy/',
   Tinder: 'https://www.help.tinder.com/hc/en-us/articles/5349453268877',
 };
 
@@ -58,6 +67,7 @@ export default function DeletionRequests({ apps, state, setState }: Props) {
             <span className="flex flex-wrap gap-1.5">
               <button onClick={() => setOpen(open === a ? null : a)} className="min-h-9 rounded-full px-3 text-xs ring-1 ring-white/15">{open === a ? t('Hide letter', 'Ocultar carta') : t('See letter', 'Ver carta')}</button>
               <button onClick={() => copy(a)} className="min-h-9 rounded-full bg-lagoon/15 px-3 text-xs ring-1 ring-lagoon/50">{copied === a ? t('Copied ✓', 'Copiada ✓') : t('Copy letter', 'Copiar carta')}</button>
+              {EMAIL[a] && <a href={`mailto:${EMAIL[a]}?subject=${encodeURIComponent('Request to delete my account and personal data')}&body=${encodeURIComponent(letter(a, name, email, user).replace(/^Subject:.*\n\n/, ''))}`} onClick={() => track('deletion-request-email')} className="inline-flex min-h-9 items-center rounded-full bg-mango px-3 text-xs font-semibold text-night">{t('Send from my email ✉', 'Enviar desde mi correo ✉')}</a>}
               <a href={OFFICIAL[a] ?? 'https://www.google.com/search?q=' + encodeURIComponent(`${a} official privacy request delete my personal data`)} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-9 items-center rounded-full px-3 text-xs ring-1 ring-white/15">{t(`Open ${a}'s privacy page ↗`, `Abrir la página de privacidad de ${a} ↗`)}</a>
               <button onClick={() => markSent(a)} aria-pressed={!!sent[a]} className={`min-h-9 rounded-full px-3 text-xs ring-1 ${sent[a] ? 'bg-palm/15 text-palm ring-palm/40' : 'ring-white/15'}`}>{sent[a] ? t('Sent ✓', 'Enviada ✓') : t('I sent it', 'La envié')}</button>
             </span>
