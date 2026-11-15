@@ -1,6 +1,7 @@
 # Marriage Mode Hub
 
 **Your live hub (visual list + chat with Claude):** https://claude.ai/artifact/9A4nMECrwQFZYxBRjAbH9i
+**Live Updates (every change, with pictures):** https://claude.ai/artifact/EdeL4o5f6JzbkBuLabLQWA
 This page is the backup copy.
 
 Your home base. Open this page anytime:

@@ -52,3 +52,10 @@ Tiffany and her partner always get every product free (docs/14-MONETIZATION.md).
 ## Standing rule: never wait (Tiffany, 2026-11-15)
 If Tiffany hasn't answered or a step is blocked on her, don't stop: put her
 step in the hub and move straight on to the next item Claude can do alone.
+
+## Standing rule: Live Updates page (Tiffany, 2026-11-15; she loves visuals)
+https://claude.ai/artifact/EdeL4o5f6JzbkBuLabLQWA (source `hub/updates.html`, data in
+its `updates` collection: title, area Site|Dashboard|Couple|Hub|Kit, summary, at,
+images, link). After every change that goes live, add an entry with at least one
+fresh screenshot (upload with the Artifact tool's asset upload, keep copies in
+`hub/screens/`). Prefer pictures over text when reporting to Tiffany.

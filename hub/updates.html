@@ -1,0 +1,138 @@
+<title>Marriage Mode Live Updates</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&display=swap">
+<style>
+/* Layout: a gallery-led changelog — live status band, area filter, then a timeline of update cards with screenshot strips; single column on phones. Champagne look to match the site. */
+:root{
+  --bg:#0C0709; --surface:#1B1016; --raise:#241820; --line:rgb(245 233 218/.10); --fg:#F5E9DA; --muted:#B9A7A0;
+  --gold:#D9B77E; --gold2:#E8C99A; --rose:#E8A4A9; --mauve:#B58BB0; --sage:#A9C9A0;
+  --display:"Fraunces",Georgia,serif; --body:"Inter",ui-sans-serif,system-ui,sans-serif;
+  color-scheme:dark;
+}
+body{background:var(--bg);color:var(--fg);font:15px/1.55 var(--body)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+body::after{content:"";position:fixed;inset:-20%;z-index:-1;pointer-events:none;filter:blur(60px);opacity:.5;background:radial-gradient(35% 30% at 20% 20%,rgb(217 183 126/.30),transparent 70%),radial-gradient(30% 28% at 80% 20%,rgb(232 164 169/.28),transparent 70%),radial-gradient(30% 30% at 55% 85%,rgb(181 139 176/.24),transparent 70%);animation:drift 26s ease-in-out infinite alternate}
+@keyframes drift{50%{transform:translate(3%,-3%) rotate(5deg)}100%{transform:translate(-3%,3%) rotate(-4deg)}}
+.wrap{position:relative;max-width:1120px;margin:0 auto;padding-block:24px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-.015em;text-wrap:balance;margin:0}
+a{color:var(--gold2)}
+.eyebrow{font:600 11px/1 var(--body);letter-spacing:.24em;text-transform:uppercase;color:var(--gold)}
+.hero{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:20px;align-items:end;margin-top:8px}
+.hero h1{font-size:clamp(34px,6vw,56px);line-height:1.02;margin-top:10px}
+.hero h1 em{color:var(--gold2)}
+.lede{color:var(--muted);max-width:52ch;margin:12px 0 0}
+.live{background:linear-gradient(180deg,rgb(255 255 255/.06),rgb(255 255 255/.02));border:1px solid var(--line);border-radius:22px;padding:18px}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--sage);box-shadow:0 0 12px var(--sage);margin-right:8px;animation:beat 2.4s ease-in-out infinite}
+@keyframes beat{50%{opacity:.35}}
+.live b{font-family:var(--display);font-weight:500;font-size:20px}
+.live .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.btn{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border-radius:999px;font-weight:600;text-decoration:none;border:1px solid var(--line);color:var(--fg)}
+.btn.primary{background:var(--rose);color:#1a0b10;border:0;box-shadow:0 10px 30px -10px rgb(232 164 169/.7)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:22px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px}
+.stat b{display:block;font:500 28px/1.1 var(--display);font-variant-numeric:tabular-nums;color:var(--gold2)}
+.stat span{color:var(--muted);font-size:13px}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin:28px 0 8px}
+.chip{min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);font:500 14px var(--body);cursor:pointer}
+.chip[aria-pressed="true"]{background:rgb(217 183 126/.16);border-color:rgb(217 183 126/.6);color:var(--fg)}
+.timeline{position:relative;margin-top:14px;padding-left:22px;display:grid;gap:18px}
+.timeline::before{content:"";position:absolute;left:6px;top:6px;bottom:6px;width:2px;background:linear-gradient(var(--gold),var(--rose),transparent)}
+.card{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:18px;min-width:0}
+.card::before{content:"";position:absolute;left:-22px;top:22px;width:12px;height:12px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 4px var(--bg),0 0 14px var(--gold)}
+.meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;color:var(--muted);font-size:13px}
+.area{border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600}
+.a-Site{background:rgb(217 183 126/.16);color:var(--gold2)} .a-Dashboard{background:rgb(232 164 169/.16);color:var(--rose)}
+.a-Hub{background:rgb(181 139 176/.18);color:#d9b6d4} .a-Kit,.a-Couple{background:rgb(169 201 160/.16);color:var(--sage)}
+.card h3{font-size:22px;margin-top:8px}
+.card p{color:#e2d4c6;margin:6px 0 0;max-width:75ch}
+.shots{display:flex;gap:12px;overflow-x:auto;margin-top:14px;padding-bottom:6px;scroll-snap-type:x mandatory}
+.shots button{flex:none;scroll-snap-align:start;border:1px solid var(--line);border-radius:14px;padding:0;background:var(--raise);cursor:zoom-in;overflow:hidden}
+.shots img{display:block;height:220px;width:auto;max-width:none}
+.open{display:inline-block;margin-top:10px;font-size:14px}
+.empty{color:var(--muted);text-align:center;padding:40px 10px;border:1px dashed var(--line);border-radius:22px}
+.lightbox{position:fixed;inset:0;z-index:50;background:rgb(12 7 9/.92);display:grid;place-items:center;padding:max(16px,env(safe-area-inset-top,0px)) 16px}
+.lightbox img{max-width:min(1100px,100%);max-height:86vh;border-radius:14px;border:1px solid var(--line)}
+.lightbox button{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:max(14px,env(safe-area-inset-right,0px));min-height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font:600 14px var(--body)}
+:focus-visible{outline:2px solid var(--rose);outline-offset:2px}
+@media (max-width:760px){.hero{grid-template-columns:minmax(0,1fr)}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.shots img{height:180px}}
+@media (prefers-reduced-motion:reduce){body::after,.dot{animation:none}}
+</style>
+
+<div class="wrap">
+  <header class="hero">
+    <div>
+      <p class="eyebrow">Marriage Mode · live updates</p>
+      <h1>Everything new on your site <em>and product</em></h1>
+      <p class="lede">Each change Claude ships appears here with pictures, newest first. It updates by itself.</p>
+    </div>
+    <div class="live" aria-live="polite">
+      <div><span class="dot" aria-hidden="true"></span><b>Site is live</b></div>
+      <p class="lede" style="margin-top:6px" id="last">Loading the latest update…</p>
+      <div class="row">
+        <a class="btn primary" href="https://upfrontconsultingwithtr-boop.github.io/MarriageMode/" target="_blank" rel="noopener">Open the site ↗</a>
+        <a class="btn" href="https://upfrontconsultingwithtr-boop.github.io/MarriageMode/audit/" target="_blank" rel="noopener">Customer dashboard ↗</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="stats" aria-label="Summary">
+    <div class="stat"><b id="n-all">–</b><span>updates shipped</span></div>
+    <div class="stat"><b id="n-site">–</b><span>to the website</span></div>
+    <div class="stat"><b id="n-product">–</b><span>to the customer product</span></div>
+    <div class="stat"><b id="n-week">–</b><span>in the last 7 days</span></div>
+  </section>
+
+  <div class="filters" role="group" aria-label="Filter by area" id="filters"></div>
+  <div class="timeline" id="list"></div>
+  <p class="empty" id="empty" hidden>No updates yet. The first ones appear here as soon as they're shipped.</p>
+</div>
+<div class="lightbox" id="lb" hidden><button type="button" id="lb-close">Close</button><img id="lb-img" alt=""></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const AREAS = ['All', 'Site', 'Dashboard', 'Couple', 'Hub', 'Kit'];
+let updates = [], area = 'All';
+const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+const ago = (iso) => { const m = Math.round((Date.now() - new Date(iso)) / 60000); if (m < 60) return m <= 1 ? 'just now' : `${m} minutes ago`; const h = Math.round(m / 60); if (h < 24) return `${h} hour${h > 1 ? 's' : ''} ago`; const d = Math.round(h / 24); return `${d} day${d > 1 ? 's' : ''} ago`; };
+
+function renderFilters() {
+  const f = $('filters'); f.replaceChildren();
+  AREAS.forEach(a => { const b = el('button', 'chip', a); b.type = 'button'; b.setAttribute('aria-pressed', String(a === area)); b.onclick = () => { area = a; renderFilters(); render(); }; f.append(b); });
+}
+function render() {
+  const sorted = [...updates].sort((a, b) => String(b.at).localeCompare(String(a.at)));
+  $('n-all').textContent = sorted.length;
+  $('n-site').textContent = sorted.filter(u => u.area === 'Site').length;
+  $('n-product').textContent = sorted.filter(u => ['Dashboard', 'Couple', 'Kit'].includes(u.area)).length;
+  $('n-week').textContent = sorted.filter(u => Date.now() - new Date(u.at) < 7 * 864e5).length;
+  $('last').textContent = sorted.length ? `Last update ${ago(sorted[0].at)}: ${sorted[0].title}` : 'No updates yet.';
+  const list = $('list'); list.replaceChildren();
+  const shown = sorted.filter(u => area === 'All' || u.area === area);
+  $('empty').hidden = shown.length > 0;
+  shown.forEach(u => {
+    const c = el('article', 'card');
+    const meta = el('div', 'meta'); meta.append(el('span', 'area a-' + u.area, u.area), el('span', null, new Date(u.at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })));
+    c.append(meta, el('h3', null, u.title), el('p', null, u.summary || ''));
+    if (Array.isArray(u.images) && u.images.length) {
+      const s = el('div', 'shots');
+      u.images.forEach((src, i) => { const b = el('button'); b.type = 'button'; b.setAttribute('aria-label', `Enlarge picture ${i + 1} of ${u.title}`); const img = el('img'); img.src = src; img.alt = `${u.title}, picture ${i + 1}`; img.loading = 'lazy'; b.append(img); b.onclick = () => { $('lb-img').src = src; $('lb-img').alt = img.alt; $('lb').hidden = false; $('lb-close').focus(); }; s.append(b); });
+      c.append(s);
+    }
+    if (u.link) { const a = el('a', 'open', 'See it live ↗'); a.href = u.link; a.target = '_blank'; a.rel = 'noopener'; c.append(a); }
+    list.append(c);
+  });
+}
+$('lb-close').onclick = () => { $('lb').hidden = true; };
+$('lb').onclick = (e) => { if (e.target.id === 'lb') $('lb').hidden = true; };
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') $('lb').hidden = true; });
+renderFilters(); render();
+
+(async () => {
+  const use = window.claude && window.claude.use ? (n) => window.claude.use(n) : null;
+  const db = use ? await use('db') : null;
+  if (!db) { $('last').textContent = 'Sign in to claude.ai to see updates.'; return; }
+  const t = setTimeout(() => { $('last').textContent = 'Still connecting… reopen the page if this stays.'; }, 10000);
+  db.collection('updates').onSnapshot(snap => { clearTimeout(t); updates = snap.docs.map(d => ({ id: d.id, ...d.data() })); render(); },
+    () => { clearTimeout(t); $('last').textContent = 'Couldn’t load updates. Reopen the page to try again.'; });
+})();
+</script>
