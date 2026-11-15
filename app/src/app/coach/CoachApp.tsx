@@ -5,6 +5,7 @@ import { answer as guideAnswer } from '@/lib/guide';
 import { loadPrefs } from '@/lib/prefs';
 import { BASE } from '@/lib/base';
 import { track } from '@/lib/track';
+import { startMia, type Mia } from '@/lib/mia';
 
 type Msg = { role: 'user' | 'assistant'; content: string };
 type Engine = { chat: { completions: { create: (o: unknown) => Promise<AsyncIterable<{ choices: { delta: { content?: string } }[] }>> } } };
@@ -54,13 +55,17 @@ export default function CoachApp() {
   const [speaking, setSpeaking] = useState(false); const [listening, setListening] = useState(false);
   const [voiceOn, setVoiceOn] = useState(true); const [cam, setCam] = useState(false); const [err, setErr] = useState('');
   const engine = useRef<Engine | null>(null); const rec = useRef<Rec | null>(null);
+  const mia = useRef<Mia | null>(null); const stage = useRef<HTMLDivElement>(null);
+  const [face3d, setFace3d] = useState<'off' | 'loading' | 'on' | 'failed'>('off'); const [faceP, setFaceP] = useState(0);
   const video = useRef<HTMLVideoElement>(null); const stream = useRef<MediaStream | null>(null);
   const [size, setSize] = useState(MODELS.full.sizeMB);
 
   useEffect(() => { setLang(loadPrefs().lang); setSize(MODELS[pickModel()].sizeMB); void canRunAI().then(setGpu); return () => { try { speechSynthesis.cancel(); } catch { /* none */ } stream.current?.getTracks().forEach((x) => x.stop()); }; }, []);
 
   const say = (text: string) => {
-    if (!voiceOn || !('speechSynthesis' in window)) return;
+    if (!voiceOn) return;
+    if (mia.current) { mia.current.speak(text, es, () => setSpeaking(true), () => setSpeaking(false)); return; }
+    if (!('speechSynthesis' in window)) return;
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text); u.lang = es ? 'es-US' : 'en-US'; u.rate = 1; u.pitch = 1.05;
     const vs = speechSynthesis.getVoices().filter((v) => v.lang.startsWith(es ? 'es' : 'en'));
@@ -71,18 +76,29 @@ export default function CoachApp() {
 
   const opening = () => t('Hi, I’m Mia, your Marriage Mode AI relationship coach. I’m an AI, not a counselor, and our conversation stays on your device. What would you like to work on today?', 'Hola, soy Mia, tu coach de relaciones con IA de Marriage Mode. Soy una IA, no una consejera, y nuestra conversación se queda en tu dispositivo. ¿En qué te gustaría trabajar hoy?');
 
+  // Load Mia's lifelike 3D face + natural voice (free, open source). Falls back to the drawn face.
+  const startFace = async () => {
+    if (mia.current || face3d === 'loading') return mia.current;
+    if (!new URLSearchParams(window.location.search).has('face3d')) return null; // free 3D preview: only with ?face3d
+    setFace3d('loading');
+    for (let i = 0; i < 40 && !stage.current; i++) await new Promise((r) => setTimeout(r, 50));
+    try { mia.current = await startMia(stage.current!, `${BASE}/coach/mia.glb`, setFaceP); setFace3d('on'); track('coach-face3d'); }
+    catch { setFace3d('failed'); }
+    return mia.current;
+  };
+
   const start = async (useAI: boolean) => {
     setErr(''); track(useAI ? 'coach-start-ai' : 'coach-start-lite');
-    if (!useAI) { setMode('lite'); setPhase('call'); const o = opening(); setMsgs([{ role: 'assistant', content: o }]); say(o); return; }
+    if (!useAI) { setMode('lite'); setPhase('call'); await startFace(); const o = opening(); setMsgs([{ role: 'assistant', content: o }]); say(o); return; }
     setMode('ai'); setPhase('loading');
     try {
       const webllm = await import('@mlc-ai/web-llm');
       const id = ((await hasF16()) ? MODELS : MODELS_F32)[pickModel()].id;
       engine.current = (await webllm.CreateMLCEngine(id, { initProgressCallback: (r: { progress: number; text: string }) => { setProgress(r.progress); setProgressText(r.text); } })) as unknown as Engine;
-      setPhase('call'); const o = opening(); setMsgs([{ role: 'assistant', content: o }]); say(o);
+      setPhase('call'); await startFace(); const o = opening(); setMsgs([{ role: 'assistant', content: o }]); say(o);
     } catch {
       setErr(t('This device couldn’t start the AI coach, so you’re in Lite mode (a simpler chat helper). On a newer phone or computer with Chrome, Edge or Safari, the full AI coach can run.', 'Este dispositivo no pudo iniciar la coach de IA, así que estás en modo Lite (un asistente más simple). En un teléfono o computadora más nuevo con Chrome, Edge o Safari, la coach completa puede funcionar.'));
-      setMode('lite'); setPhase('call'); const o = opening(); setMsgs([{ role: 'assistant', content: o }]); say(o);
+      setMode('lite'); setPhase('call'); await startFace(); const o = opening(); setMsgs([{ role: 'assistant', content: o }]); say(o);
     }
   };
 
@@ -111,11 +127,11 @@ export default function CoachApp() {
     const R = W.SpeechRecognition ?? W.webkitSpeechRecognition;
     if (!R) { setErr(t('Voice input isn’t available in this browser. You can type instead.', 'La voz no está disponible en este navegador. Puedes escribir.')); return; }
     if (listening) { rec.current?.stop(); return; }
-    speechSynthesis.cancel(); setSpeaking(false);
+    mia.current?.stop(); speechSynthesis.cancel(); setSpeaking(false); mia.current?.listen(true);
     const r = new R(); r.lang = es ? 'es-US' : 'en-US'; r.interimResults = true; r.continuous = false;
     let finalText = '';
     r.onresult = (e) => { let s = ''; for (let i = 0; i < e.results.length; i++) { s += e.results[i][0].transcript; if (e.results[i].isFinal) finalText = s; } setInput(s); };
-    r.onend = () => { setListening(false); if (finalText) void send(finalText); };
+    r.onend = () => { setListening(false); mia.current?.listen(false); if (finalText) void send(finalText); };
     r.onerror = () => setListening(false);
     rec.current = r; setListening(true); r.start();
   };
@@ -126,7 +142,7 @@ export default function CoachApp() {
     catch { setErr(t('Camera not available. That’s fine: the coach works without it.', 'Cámara no disponible. No pasa nada: la coach funciona sin ella.')); }
   };
 
-  const end = () => { speechSynthesis.cancel(); rec.current?.stop(); stream.current?.getTracks().forEach((x) => x.stop()); setCam(false); setPhase('intro'); setMsgs([]); };
+  const end = () => { mia.current?.stop(); speechSynthesis.cancel(); rec.current?.stop(); stream.current?.getTracks().forEach((x) => x.stop()); setCam(false); setPhase('intro'); setMsgs([]); };
   const lastCoach = live || [...msgs].reverse().find((m) => m.role === 'assistant')?.content || '';
 
   return (
@@ -173,7 +189,11 @@ export default function CoachApp() {
         <div className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_1fr] [&>*]:min-w-0">
           <div className="relative overflow-hidden rounded-[2rem] bg-deep/95 p-6 ring-1 ring-white/10">
             <div className="flex items-center justify-between text-xs text-ink/60"><span className="flex items-center gap-2"><span className="size-2 rounded-full bg-palm shadow-[0_0_8px_#7BC59A]" />{t('Live session with Mia', 'Sesión en vivo con Mia')} · {mode === 'ai' ? t('AI on your device', 'IA en tu dispositivo') : t('Lite mode', 'Modo Lite')}</span><span>{t('AI coach · not a counselor', 'Coach de IA · no es consejera')}</span></div>
-            <div className="mt-4"><Avatar speaking={speaking} listening={listening} thinking={busy && !live} /></div>
+            <div className="relative mx-auto mt-4 aspect-square w-full max-w-[420px] overflow-hidden rounded-[1.5rem] bg-gradient-to-b from-[#2A1520] to-night" style={{ boxShadow: listening ? '0 0 0 4px #D9B77E66, 0 0 50px #D9B77E55' : speaking ? '0 0 40px #E7A3AE44' : undefined }}>
+              <div ref={stage} className={`absolute inset-0 ${face3d === 'on' ? '' : 'invisible'}`} aria-label={t('Mia, the AI coach (3D)', 'Mia, la coach de IA (3D)')} role="img" />
+              {face3d !== 'on' && <div className="absolute inset-0 grid place-items-center p-6"><Avatar speaking={speaking} listening={listening} thinking={busy && !live} /></div>}
+              {face3d === 'loading' && <p className="absolute inset-x-0 bottom-2 text-center text-[11px] text-ink/60">{t('Loading Mia’s 3D face…', 'Cargando el rostro 3D de Mia…')} {Math.round(faceP * 100)}%</p>}
+            </div>
             {cam && <video ref={video} autoPlay muted playsInline className="absolute bottom-24 right-4 h-28 w-20 rounded-xl object-cover ring-2 ring-white/20 sm:h-36 sm:w-28" aria-label={t('Your camera (stays on your device)', 'Tu cámara (se queda en tu dispositivo)')} />}
             <p aria-live="polite" className="mt-4 min-h-[4.5rem] text-center text-lg leading-snug">{busy && !live ? <span className="text-ink/50">{t('Mia is thinking…', 'Mia está pensando…')}</span> : lastCoach}</p>
             <div className="mt-4 flex flex-wrap items-center justify-center gap-2">

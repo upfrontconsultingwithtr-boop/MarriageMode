@@ -17,3 +17,13 @@ involve money, legal status, accounts or the brand rule. None blocks the MVP.
 | 10 | **Hosting** | **2026-11-15: moved to GitHub Pages** (free, no monthly limit for public repos) at https://upfrontconsultingwithtr-boop.github.io/MarriageMode/ via `.github/workflows/pages.yml`, because the Netlify free plan paused the project after its monthly limit. Earlier: Live at https://marriagemode.netlify.app from Tiffany's personal Netlify account (free plan), linked to this repo with a read-only deploy key; builds from branch `claude/nice-einstein-h76zzg` using the root `netlify.toml`. The empty `marriage-mode` project in the business Netlify team is unused. | $0 | Turn on form detection in that project (Project configuration → Forms) so waitlist signups are saved. |
 | 11 | **AI Coach add-ons** (chat, couple sessions, voice, live video) | Founder wants them (2026-11-15). Each costs money per use or per minute from the AI provider. See docs/AI-COACH-PLAN.md. | Exact prices gathered before launch | Start with Coach chat under a small monthly cap you choose. |
 | 12 | **"Done for you" deletion service** (authorized agent sends privacy deletion requests and follows up) | Founder wants the app to take the work off customers (2026-11-15). Acting as an authorized agent is allowed under several state privacy laws, but it's a legal service model. | A lawyer's review (fee); later, possibly a paid email-sending service at volume | Build the free one-tap requests first; get a legal read before offering the agent service. |
+
+## 13. Real-looking video coach for Mia (2026-11-15)
+Free version live: Mia, on-device AI coach with a drawn animated face (and a free 3D preview at /coach/?face3d, which looks like a video-game character).
+A face that looks and moves like a real human needs a paid real-time avatar service. Published rates (third-party comparisons, verify on each vendor's pricing page before signing up):
+- Simli: about $0.009–$0.05 per minute (Scale plan $249/month for 27,500 minutes); bring your own AI + voice.
+- HeyGen LiveAvatar: about $0.08–$0.19 per minute.
+- Tavus: about $0.24–$0.37 per minute (30-second minimum per call).
+- D-ID: about $0.35 per minute (enterprise pricing not published).
+Plan if approved: customer pays (e.g. a paid "Video session" add-on priced above cost); the API key sits on our free Supabase server function, never in the site; monthly spending cap set by Tiffany.
+Needs Tiffany: a yes, a monthly cap, and her own sign-up with the chosen vendor.
