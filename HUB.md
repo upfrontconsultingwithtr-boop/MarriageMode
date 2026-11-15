@@ -75,3 +75,4 @@ Why: counselors and pastors who work with engaged couples are the fastest free w
 - 2026-11-15: Upfront HQ now has Marriage Mode: a 'Marriage Mode hub' option on the HQ sign-in page and hub, site and live-updates links in the side menu (same hub, two-way sync).
 - 2026-11-15: Spanish home page live at /es/ (Español link in the menu and footer).
 - 2026-11-15: Customer dashboard in Spanish (English/Español switch in header and Settings).
+- 2026-11-15: Investor pitch deck as 12 real slides: https://claude.ai/artifact/BwbsC8cNoTZWzJZiwit7PP (source in docs/deck/).
