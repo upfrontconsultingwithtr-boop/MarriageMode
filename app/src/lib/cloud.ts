@@ -56,3 +56,11 @@ export function merge(a: AuditState, b: AuditState): AuditState {
     } } : {}),
   };
 }
+
+// Public lead capture (partner sign-ups). Insert-only: nobody can read leads back.
+export type Lead = { kind: 'partner' | 'waitlist'; email: string; name?: string; org?: string; role?: string; city?: string; note?: string; source?: string };
+export async function addLead(lead: Lead): Promise<boolean> {
+  const c = cloud(); if (!c) return false;
+  const { error } = await c.from('leads').insert(lead);
+  return !error;
+}

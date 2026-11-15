@@ -124,6 +124,27 @@ select app.leave_couple();
 reset role;
 select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
 select pg_temp.check((select count(*) from app.couple_messages) = 0, 'after leaving, messages are no longer visible');
+-- leads: anyone can add one, nobody can read them back
+set local role anon;
+insert into app.leads (kind, email, name, org) values ('partner', 'pastor@example.org', 'Test', 'Test Church');
+do $$ begin
+  perform count(*) from app.leads;
+  raise exception 'RLS FAIL: anon read leads';
+exception when insufficient_privilege then raise notice 'pass: anon cannot read leads'; end $$;
+do $$ begin
+  update app.leads set email = 'x@x.co';
+  raise exception 'RLS FAIL: anon updated leads';
+exception when insufficient_privilege then raise notice 'pass: anon cannot change leads'; end $$;
+do $$ begin
+  insert into app.leads (kind, email) values ('partner', 'not-an-email');
+  raise exception 'RLS FAIL: bad email accepted';
+exception when check_violation then raise notice 'pass: bad email rejected'; end $$;
+reset role;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
+do $$ begin
+  perform count(*) from app.leads;
+  raise exception 'RLS FAIL: signed-in user read leads';
+exception when insufficient_privilege then raise notice 'pass: signed-in user cannot read leads'; end $$;
 reset role;
 rollback;
 \echo RLS_ISOLATION_ALL_PASSED

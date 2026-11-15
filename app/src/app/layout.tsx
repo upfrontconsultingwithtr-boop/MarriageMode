@@ -40,7 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <details className="relative md:hidden">
                 <summary className="grid size-10 cursor-pointer list-none place-items-center rounded-full ring-1 ring-white/15 [&::-webkit-details-marker]:hidden" aria-label="Menu">☰</summary>
                 <div className="glass absolute right-0 top-12 flex w-56 flex-col p-2 text-sm shadow-2xl">
-                  {[['/#value', 'Why Marriage Mode'], ['/#how', 'How it works'], ['/couple/', 'Couple Mode'], ['/guides/', 'Delete-account guides'], ['/#pricing', 'Pricing'], ['/audit/', 'My dashboard'], ['/worksheet/', 'Couples worksheet'], ['/es/', 'Español']].map(([h, l]) => (
+                  {[['/#value', 'Why Marriage Mode'], ['/#how', 'How it works'], ['/couple/', 'Couple Mode'], ['/guides/', 'Delete-account guides'], ['/#pricing', 'Pricing'], ['/audit/', 'My dashboard'], ['/worksheet/', 'Couples worksheet'], ['/partners/', 'For counselors & pros'], ['/es/', 'Español']].map(([h, l]) => (
                     <Link prefetch={false} key={h} href={h} className="rounded-xl px-3 py-3 hover:bg-white/5">{l}</Link>
                   ))}
                 </div>
@@ -59,6 +59,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Link prefetch={false} href="/engagement-checklist/" className="hover:text-teal">Engagement checklist</Link>
             <Link prefetch={false} href="/privacy/" className="hover:text-teal">Privacy</Link>
             <Link prefetch={false} href="/safety/" className="hover:text-teal">Safety &amp; consent</Link>
+            <Link prefetch={false} href="/partners/" className="hover:text-teal">For counselors &amp; pros</Link>
             <Link prefetch={false} href="/es/" hrefLang="es" className="hover:text-teal">Español</Link>
           </p>
         </footer>
