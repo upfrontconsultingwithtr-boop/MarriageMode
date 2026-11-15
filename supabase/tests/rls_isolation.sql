@@ -78,5 +78,16 @@ reset role;
 select pg_temp.as_user('00000000-0000-0000-0000-00000000000c');
 select pg_temp.check((select count(*) from app.couple_shares) = 0, 'outsider sees no couple data');
 reset role;
+-- synced audits: owner-only
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000b');
+insert into app.audit_snapshots (user_id, state) values ('00000000-0000-0000-0000-00000000000b', '{"platformIds":["tinder"]}');
+reset role;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
+select pg_temp.check((select count(*) from app.audit_snapshots) = 0, 'A cannot read B''s synced audit');
+do $$ begin
+  insert into app.audit_snapshots (user_id, state) values ('00000000-0000-0000-0000-00000000000b', '{}');
+  raise exception 'RLS FAIL: A wrote B''s synced audit';
+exception when insufficient_privilege then raise notice 'pass: A cannot write B''s synced audit'; end $$;
+reset role;
 rollback;
 \echo RLS_ISOLATION_ALL_PASSED

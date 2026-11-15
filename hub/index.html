@@ -53,6 +53,7 @@ a{color:var(--green)} button,input,textarea{font:inherit;color:inherit}
 .msg{max-width:88%;padding:10px 12px;border-radius:14px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px}
 .msg.you{align-self:flex-end;background:rgb(255 111 174/.14);border:1px solid rgb(255 111 174/.3)}
 .msg.claude{align-self:flex-start;background:rgb(52 226 155/.08);border:1px solid rgb(52 226 155/.25)}
+.msg.builder{background:rgb(139 124 255/.12);border-color:rgb(139 124 255/.4)}
 .msg small{display:block;color:var(--muted);font-size:11px;margin-bottom:2px}
 .compose{display:flex;gap:8px;margin-top:12px}
 .compose textarea{flex:1;min-width:0;min-height:48px;max-height:160px;resize:vertical;border-radius:14px;border:1px solid var(--line);background:#06111a;padding:12px}
@@ -111,7 +112,7 @@ a{color:var(--green)} button,input,textarea{font:inherit;color:inherit}
           <textarea id="msg" placeholder="Ask a question or ask for something to be done…" rows="2"></textarea>
           <button class="btn primary" id="send" type="submit">Send</button>
         </form>
-        <p class="hint">Claude answers here right away. Anything you ask to be <em>built or done</em> is also saved to the list, and your next Claude Code session does it.</p>
+        <p class="hint">Two ways Claude answers: a <strong>quick answer</strong> right away, and <strong>Claude Code, your builder</strong>, who gets your message (✓ sent to builder) and replies here when it acts on it. If the builder isn't running, it reads your messages first thing next session.</p>
       </section>
       <section class="panel">
         <h2>Quick links</h2>
@@ -130,7 +131,7 @@ a{color:var(--green)} button,input,textarea{font:inherit;color:inherit}
 
 <script>
 const $ = (id) => document.getElementById(id);
-let db = null, sample = null, tasks = [], msgs = [];
+let db = null, sample = null, comments = null, tasks = [], msgs = [];
 const statusEl = $('status');
 
 function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
@@ -166,7 +167,8 @@ function renderTasks() {
 function renderMsgs() {
   const box = $('msgs'); box.replaceChildren();
   if (!msgs.length) box.append(el('p', 'empty', 'Say hi, ask how something works, or ask for a change. Example: "Add a Spanish version to the list."'));
-  msgs.forEach(m => { const d = el('div', 'msg ' + (m.from === 'you' ? 'you' : 'claude')); d.append(el('small', null, m.from === 'you' ? 'You' : 'Claude')); d.append(document.createTextNode(m.text)); box.append(d); });
+  const who = { you: 'You', claude: 'Claude · quick answer', builder: 'Claude Code · your builder' };
+  msgs.forEach(m => { const d = el('div', 'msg ' + (m.from === 'you' ? 'you' : 'claude') + (m.from === 'builder' ? ' builder' : '')); d.append(el('small', null, (who[m.from] || 'Claude') + (m.from === 'you' && m.sentToBuilder ? ' · sent to builder ✓' : ''))); d.append(document.createTextNode(m.text)); box.append(d); });
   box.scrollTop = box.scrollHeight;
 }
 
@@ -190,7 +192,16 @@ async function send(ev) {
   const ta = $('msg'); const text = ta.value.trim(); if (!text || !db) return;
   ta.value = ''; $('send').disabled = true;
   const now = new Date().toISOString();
-  try { await db.collection('messages').add({ from: 'you', text, at: now, handled: false }); } catch (e) { ta.value = text; $('send').disabled = false; statusEl.textContent = 'Message not saved. Check your connection and try again.'; return; }
+  let ref;
+  try { ref = await db.collection('messages').add({ from: 'you', text, at: now, handled: false }); } catch (e) { ta.value = text; $('send').disabled = false; statusEl.textContent = 'Message not saved. Check your connection and try again.'; return; }
+  if (comments) {
+    try {
+      if ((await comments.canSendToClaude()) === 'available') {
+        await comments.sendToClaude({ anchor: await comments.anchorFor($('msgs')), text: 'From Tiffany\'s hub chat: ' + text.slice(0, 3800) });
+        await ref.update({ sentToBuilder: true });
+      }
+    } catch (e) { /* the builder still reads saved messages at the start of its next session */ }
+  }
   if (!sample) { $('send').disabled = false; return; }
   const history = msgs.slice(-12).map(m => ({ role: m.from === 'you' ? 'user' : 'assistant', content: m.text }));
   if (!history.length || history[history.length - 1].content !== text) history.push({ role: 'user', content: text });
@@ -220,6 +231,7 @@ renderTasks(); renderMsgs();
   const use = window.claude && window.claude.use ? (n) => window.claude.use(n) : null;
   db = use ? await use('db') : null;
   sample = use ? await use('sample') : null;
+  comments = use ? await use('comments') : null;
   if (!db) { clearTimeout(timer); statusEl.textContent = 'Sign in to claude.ai to see your list.'; return; }
   db.collection('tasks').onSnapshot(snap => { clearTimeout(timer); tasks = snap.docs.map(d => ({ id: d.id, ...d.data() })); statusEl.textContent = 'Updates live as Claude works.'; renderTasks(); },
     () => { clearTimeout(timer); statusEl.textContent = 'Couldn’t load the list. Reopen the page to try again.'; });

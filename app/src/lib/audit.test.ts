@@ -52,3 +52,13 @@ test('share summary never includes platform names', () => {
   assert.ok(!text.includes('Grindr'));
   assert.match(text, /Closed 1 of 1/);
 });
+
+import { merge } from './cloud.ts';
+test('merge keeps every app and every finished step from both devices', () => {
+  const a = { platformIds: ['tinder'], custom: [], done: { 'tinder:delete': true }, doneAt: { 'tinder:delete': '2026-11-01' } };
+  const b = { platformIds: ['hinge'], custom: ['Lovoo'], done: { 'hinge:app': true, 'tinder:delete': false }, doneAt: {} };
+  const m = merge(a, b);
+  assert.deepEqual(m.platformIds.sort(), ['hinge', 'tinder']);
+  assert.equal(m.done['tinder:delete'], true); assert.equal(m.done['hinge:app'], true);
+  assert.deepEqual(m.custom, ['Lovoo']);
+});

@@ -44,5 +44,7 @@ At the start of every session: read `messages` (newest first) for requests from
 Tiffany, and `tasks` for the priority list; do the work in that order. As work
 moves, update each task's `status` (todo, doing, blocked, done with `doneAt`),
 add new tasks, and put anything Tiffany must do in as `owner: "you"` with
-`steps` written as dummy instructions. Keep HUB.md in step as the backup.
+`steps` written as dummy instructions. Reply to Tiffany in the hub by adding a `messages` doc with `from: "builder"`
+and mark her message `handled: true`. Her hub messages also arrive as comments
+sent to Claude (two-way sync); answer those the same way. Keep HUB.md in step as the backup.
 Tiffany and her partner always get every product free (docs/14-MONETIZATION.md).
