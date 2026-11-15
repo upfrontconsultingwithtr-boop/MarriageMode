@@ -34,6 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <p className="mt-3 space-x-5">
             <Link href="/guides/" className="hover:text-teal">Delete-account guides</Link>
             <Link href="/worksheet/" className="hover:text-teal">Couples worksheet</Link>
+            <Link href="/engagement-checklist/" className="hover:text-teal">Engagement checklist</Link>
             <Link href="/privacy/" className="hover:text-teal">Privacy</Link>
             <Link href="/safety/" className="hover:text-teal">Safety &amp; consent</Link>
           </p>

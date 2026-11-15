@@ -41,7 +41,7 @@ export default function Home() {
               <Link href="/audit/" className="glow-mango rounded-full bg-mango px-7 py-3.5 font-semibold text-night hover:brightness-110">Start my free audit →</Link>
               <a href="#waitlist" className="rounded-full border border-white/15 bg-white/5 px-7 py-3.5 font-semibold backdrop-blur hover:border-lagoon/60">Get Couple Mode early</a>
             </div>
-            <p className="mt-4 text-sm text-ink/50">Free · no account · nothing uploaded</p>
+            <p className="mt-4 text-sm text-ink/50">Free · no account · nothing uploaded · <Link href="/engagement-checklist/" className="text-teal underline">Just engaged? Read the checklist</Link></p>
           </div>
           <div className="relative mx-auto w-full max-w-[520px]">
             <Halo className="h-auto w-full" />
