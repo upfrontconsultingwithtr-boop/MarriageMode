@@ -57,5 +57,5 @@ step in the hub and move straight on to the next item Claude can do alone.
 https://claude.ai/artifact/EdeL4o5f6JzbkBuLabLQWA (source `hub/updates.html`, data in
 its `updates` collection: title, area Site|Dashboard|Couple|Hub|Kit, summary, at,
 images, link). After every change that goes live, add an entry with at least one
-fresh screenshot (upload with the Artifact tool's asset upload, keep copies in
+fresh screenshot captured from the LIVE site URL, never a local copy (upload with the Artifact tool's asset upload, keep copies in
 `hub/screens/`). Prefer pictures over text when reporting to Tiffany.
