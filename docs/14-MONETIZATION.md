@@ -41,6 +41,8 @@ Founding members (waitlist): 40% off the first year of Couple ($47).
 
 ## Rules
 
+- **Founder accounts are free forever (Tiffany, 2026-11-15):** Tiffany and her partner get every product and plan, current and future, at $0, with no card and no expiry. When paid plans launch, their accounts get a permanent "founder" plan (or a 100% Stripe coupon), set up by Claude, never billed.
+
 - No ads, no data sales, ever. They contradict the product promise.
 - Cancel in two taps (Stripe Customer Portal). Refund the Cleanup Pass within 14 days, no questions.
 - Show prices including any tax note before checkout.

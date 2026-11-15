@@ -36,3 +36,13 @@ Customers must never need Claude, an AI account, a paid app or any special
 tool for Marriage Mode to work. Everything runs in a normal phone or computer
 browser, free, with no sign-up for the core audit. Any future AI feature runs
 on our side (capped, approved spend) and the product still works if it's off.
+
+## Standing rule: the live Hub page (Tiffany, 2026-11-15)
+Tiffany's main hub is the private page https://claude.ai/artifact/9A4nMECrwQFZYxBRjAbH9i
+(source `hub/index.html`; data in its `tasks` and `messages` collections).
+At the start of every session: read `messages` (newest first) for requests from
+Tiffany, and `tasks` for the priority list; do the work in that order. As work
+moves, update each task's `status` (todo, doing, blocked, done with `doneAt`),
+add new tasks, and put anything Tiffany must do in as `owner: "you"` with
+`steps` written as dummy instructions. Keep HUB.md in step as the backup.
+Tiffany and her partner always get every product free (docs/14-MONETIZATION.md).
