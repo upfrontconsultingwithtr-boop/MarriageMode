@@ -23,6 +23,8 @@ company if built as written, so the plan below changes them.
 
 ## What exists now (built 2026-11-15)
 
+**Live:** https://marriagemode.netlify.app (free Netlify, auto-publishes from this repo).
+
 - `app/`: a working MVP. A landing page, a private self-audit that runs
   in the browser (nothing leaves the device), Cleanup Progress and Digital
   Organization scores, a Gmail search link, a share-a-summary card for
