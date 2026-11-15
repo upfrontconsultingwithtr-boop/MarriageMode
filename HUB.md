@@ -87,3 +87,4 @@ Why: counselors and pastors who work with engaged couples are the fastest free w
 - 2026-11-15: Mia 2.0: real-human video face, natural voice, 29-topic couples knowledge base, assignments (shareable to partner space), sessions saved as video/audio/transcript.
 - 2026-11-15: Social media review (follows, groups, interactions since earlier partner date, likely-sex filter from both partners, review with Mia, always-on results); relationship survey (migration 0007); founders' access email sent to Tiffany and Reco.
 - 2026-11-15: Social search covers Instagram, Threads, Facebook, TikTok, Snapchat, YouTube, X, LinkedIn, Reddit; Connect buttons; Connect YouTube ready (needs Google key).
+- 2026-11-15: Hub moved off Claude to /founders/ (Supabase, founders-only, migration 0008), HQ links updated, scripts/hub.py; Mia lip sync follows voice activity + breathing motion.
