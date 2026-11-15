@@ -85,7 +85,12 @@ export default function AuditApp() {
     return () => clearTimeout(t);
   }, [state, syncEmail, ready]);
 
-  useEffect(() => { const s = load(); setState(s); setReady(true); if (s.platformIds.length + s.custom.length === 0) setTab('apps'); }, []);
+  useEffect(() => {
+    const s = load(); setState(s); setReady(true);
+    const q = new URLSearchParams(window.location.search); const want = q.get('tab');
+    if (want && TABS.some((x) => x.id === want)) setTab(want as Tab); else if (s.platformIds.length + s.custom.length === 0) setTab('apps');
+    if (q.get('scan') === 'social') setTimeout(() => document.getElementById('social-review')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 600);
+  }, []);
   useEffect(() => { if (ready) save(state); }, [state, ready]);
   useEffect(() => { if (ready && state.platformIds.length + state.custom.length > 0) track('audit-started'); }, [ready, state.platformIds.length, state.custom.length]);
 

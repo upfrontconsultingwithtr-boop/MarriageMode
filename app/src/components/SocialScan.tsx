@@ -44,7 +44,7 @@ export default function SocialScan() {
   const selected = flagged.filter((a) => pick[a.key] && !done[a.key]);
 
   return (
-    <div className="glass p-6 md:col-span-2">
+    <div id="social-review" className="glass scroll-mt-24 p-6 md:col-span-2">
       <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-mango">{t('Social follow review · your accounts only', 'Revisión de seguidos · solo tus cuentas')}</p>
       <h2 className="mt-1 text-lg font-semibold">{t('Find follows and friends that could put your relationship at risk', 'Encuentra seguidos y amistades que podrían poner en riesgo tu relación')}</h2>
       <p className="mt-1 text-sm text-ink/65">{t('Instagram, Facebook and TikTok let you download your own follow, friend and group lists. Marriage Mode scans that download on this device (nothing is uploaded) and flags exes you name, dating, hookup and adult accounts, influencers and groups that promote sex or dating, and anyone followed after your relationship began. It also sorts your connections by strength (mutual vs one-way), then walks you through unfollowing or leaving the ones you choose, one tap each.', 'Instagram, Facebook y TikTok te dejan descargar tus listas de seguidos, amistades y grupos. Marriage Mode revisa esa descarga en este dispositivo (nada se sube) y marca exparejas que nombres, cuentas de citas, encuentros o para adultos, influencers y grupos que promueven sexo o citas, y a quien seguiste después de que empezó su relación. También ordena tus conexiones por fuerza (mutuas o de un solo lado) y te guía para dejar de seguir o salir de las que elijas, un toque cada una.')}</p>
