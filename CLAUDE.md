@@ -24,3 +24,9 @@ best option and tell her what was done.
 Only stop for: spending money (ask with the exact amount), legal signatures,
 identity checks and account sign-ins, and steps Claude Code's own safety checks
 block. For those, give her the shortest one-tap steps.
+
+## Standing rule: the Hub (Tiffany, 2026-11-15)
+`HUB.md` is Tiffany's hub. Every step she must do goes in its to-do list as
+"dummy" instructions: one action per line, the exact link, the exact button
+words, which account to use, and what to tell Claude when done. Remove a step
+once it's done and add a line to the Done log. Send her the HUB link, not long chat steps.

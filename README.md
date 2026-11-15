@@ -8,6 +8,7 @@ surveillance.
 
 | Folder | What |
 |---|---|
+| `HUB.md` | **Tiffany's hub: to-do steps, links, done log** |
 | `docs/` | Plan of record. Start with [`docs/00-FOUNDER-BRIEF.md`](docs/00-FOUNDER-BRIEF.md) |
 | `app/` | Next.js MVP (static, deploys free to Netlify) |
 | `supabase/` | Production database schema and RLS isolation tests |

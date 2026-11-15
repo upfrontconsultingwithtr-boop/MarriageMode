@@ -31,6 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <footer className="relative mt-24 border-t border-white/[0.06] py-10 text-center text-sm text-ink/60">
           <p>Marriage Mode by <strong className="text-ink/85">Upfront Consulting with Tiff &amp; Reco LLC</strong></p>
           <p className="mt-3 space-x-5">
+            <Link href="/guides/" className="hover:text-teal">Delete-account guides</Link>
             <Link href="/privacy/" className="hover:text-teal">Privacy</Link>
             <Link href="/safety/" className="hover:text-teal">Safety &amp; consent</Link>
           </p>
