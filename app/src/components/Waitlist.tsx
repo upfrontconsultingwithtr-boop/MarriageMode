@@ -1,5 +1,9 @@
 'use client';
 import { useState } from 'react';
+import { BASE } from '@/lib/base';
+
+// Fallback when the form host can't store submissions: open an email to the business inbox.
+const MAILTO = 'mailto:upfrontconsultingwithtr@gmail.com?subject=' + encodeURIComponent('Marriage Mode waitlist');
 
 // Posts to Netlify Forms (form defined in public/__forms.html). Free plan.
 export default function Waitlist() {
@@ -11,14 +15,15 @@ export default function Waitlist() {
     const data = new FormData(e.currentTarget);
     data.set('form-name', 'waitlist');
     try {
-      const res = await fetch('/__forms.html', {
+      const res = await fetch(`${BASE}/__forms.html`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams(data as unknown as Record<string, string>).toString(),
       });
-      setState(res.ok ? 'done' : 'error');
+      if (res.ok) setState('done');
+      else { window.location.href = `${MAILTO}&body=${encodeURIComponent(`Please add me: ${data.get('email')} (${data.get('stage')})`)}`; setState('done'); }
     } catch {
-      setState('error');
+      window.location.href = MAILTO; setState('done');
     }
   }
 

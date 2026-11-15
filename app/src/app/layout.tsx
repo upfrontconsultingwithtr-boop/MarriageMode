@@ -3,13 +3,14 @@ import Link from 'next/link';
 import '@fontsource-variable/inter';
 import '@fontsource-variable/space-grotesk';
 import './globals.css';
+import { BASE } from '@/lib/base';
 
 export const metadata: Metadata = {
   title: 'Marriage Mode: close your dating chapter, privately',
   description: 'A free, private checklist to close old dating accounts, stop the emails and cancel the billing, so nothing old surprises your relationship. By Upfront Consulting with Tiff & Reco LLC.',
-  icons: { icon: '/icon.svg' },
-  manifest: '/manifest.webmanifest',
-  openGraph: { images: ['/og.png'], title: 'Marriage Mode', description: 'Close your dating chapter. Completely. Private, free, self-led.' },
+  icons: { icon: `${BASE}/icon.svg` },
+  manifest: `${BASE}/manifest.webmanifest`,
+  openGraph: { images: [`${BASE}/og.png`], title: 'Marriage Mode', description: 'Close your dating chapter. Completely. Private, free, self-led.' },
 };
 export const viewport: Viewport = { themeColor: '#03080C', width: 'device-width', initialScale: 1, colorScheme: 'dark' };
 
@@ -20,7 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-night/70 backdrop-blur-xl">
           <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
             <Link href="/" className="flex items-center gap-2.5 font-display text-lg font-bold tracking-tight">
-              <img src="/icon.svg" alt="" width={30} height={30} /> Marriage Mode
+              <img src={`${BASE}/icon.svg`} alt="" width={30} height={30} /> Marriage Mode
             </Link>
             <Link href="/audit/" className="glow-mango rounded-full bg-mango px-4 py-1.5 text-sm font-semibold text-night hover:brightness-110">
               Start free audit
