@@ -4,6 +4,7 @@ import { PLATFORMS, CATEGORY_LABEL, BILLING_LINKS, helpSearchUrl, CATALOG_VERIFI
 import { buildSteps, score, emailDomainsFor, gmailQuery, gmailSearchUrl, shareSummary, EMPTY_STATE, type AuditState, type Step } from '@/lib/audit';
 import { track } from '@/lib/track';
 import Ring from '@/components/Ring';
+import Aurora from '@/components/Aurora';
 import PartnerTab from '@/components/PartnerTab';
 import SettingsTab from '@/components/SettingsTab';
 import WebSearch from '@/components/WebSearch';
@@ -145,6 +146,7 @@ export default function AuditApp() {
 
   return (
     <div className="relative isolate z-10 pb-28 md:pb-10">
+      <Aurora className="absolute inset-x-0 top-0 -z-10 h-[560px] w-full opacity-70 print:hidden [mask-image:linear-gradient(#000,transparent)]" />
       <div className="grid-bg absolute inset-x-0 top-0 -z-10 h-[520px] print:hidden" aria-hidden="true" />
 
       {/* Celebration */}

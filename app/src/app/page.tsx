@@ -2,27 +2,12 @@ import Link from 'next/link';
 import Halo, { HaloIcon } from '@/components/Halo';
 import HeroDemo from '@/components/HeroDemo';
 import Ring from '@/components/Ring';
+import Aurora from '@/components/Aurora';
+import Phone from '@/components/Phone';
+import Marquee from '@/components/Marquee';
+import StickyStory from '@/components/StickyStory';
 import { PLATFORMS } from '@/lib/catalog';
 import { KIT_URL } from '@/lib/base';
-
-const facts = [
-  `${PLATFORMS.length} dating apps covered`,
-  'No account needed',
-  'Nothing leaves your device',
-  'Free',
-];
-
-const leftovers = [
-  { t: 'Profiles that stay live', d: 'Deleting the app hides nothing. The profile can still show up for others.', tone: 'mango' as const },
-  { t: 'Billing that never stopped', d: 'App store subscriptions keep charging after the app is gone.', tone: 'violet' as const },
-  { t: '"Someone liked you" emails', d: 'Match alerts keep landing in the inbox you both see.', tone: 'lagoon' as const },
-];
-
-const steps = [
-  { n: '01', t: 'Pick every app you ever used', d: `Search ${PLATFORMS.length} apps or add any other. Not sure? One tap searches your own inbox for old sign-ups.` },
-  { n: '02', t: 'Close each one, step by step', d: 'Delete the profile, cancel the billing, remove the app, stop the emails. Every step says exactly where to tap.' },
-  { n: '03', t: 'Share proof, if you choose', d: 'A simple summary for your partner that names no apps. You decide what it says, and whether to send it.' },
-];
 
 const faqs = [
   { q: 'Is it really free?', a: 'Yes. The full audit, the guides and the worksheet are free, with no account and no card.' },
@@ -40,89 +25,78 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 export default function Home() {
   return (
     <>
-      {/* HERO: promise + live demo */}
+      {/* HERO: cinematic */}
       <section className="relative isolate overflow-hidden">
-        <div className="grid-bg absolute inset-0 -z-10" aria-hidden="true" />
-        <div className="pointer-events-none absolute -right-40 -top-24 -z-10 w-[720px] opacity-60 md:-right-24" aria-hidden="true"><Halo className="h-auto w-full" /></div>
-        <div className="absolute inset-x-0 bottom-0 -z-10 h-40 overflow-hidden opacity-70" aria-hidden="true"><div className="grid-floor absolute -inset-x-1/2 top-0 h-[200%]" /></div>
-        <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 pb-20 pt-14 md:grid-cols-[1.15fr_1fr] md:pt-24">
-          <div>
-            <span className="rise inline-flex items-center gap-2 rounded-full border border-lagoon/30 bg-lagoon/10 px-3 py-1 text-xs font-medium text-teal">
-              <span className="size-1.5 rounded-full bg-lagoon shadow-[0_0_10px_#34E29B]" /> For the newly exclusive, engaged and married
-            </span>
-            <h1 className="rise rise-2 mt-6 text-[2.6rem] font-bold leading-[1.04] sm:text-6xl">
-              Close your dating chapter.<br /><span className="text-glow">Completely.</span>
-            </h1>
-            <p className="rise rise-3 mt-6 max-w-xl text-lg text-ink/75">
-              Marriage Mode finds every dating account you ever opened and walks you through closing it for good:
-              profile, billing, app and emails. Private, free, done in about 20 minutes.
-            </p>
-            <div className="rise rise-4 mt-8 flex flex-wrap gap-3">
-              <Link href="/audit/" className="glow-mango min-h-12 rounded-full bg-mango px-7 py-3.5 font-semibold text-night hover:brightness-110">Start my free audit →</Link>
-              <Link href="/engagement-checklist/" className="min-h-12 rounded-full border border-white/15 bg-white/5 px-7 py-3.5 font-semibold backdrop-blur hover:border-lagoon/60">Just engaged? Read the checklist</Link>
-            </div>
+        <Aurora className="absolute inset-0 -z-20 h-full w-full" />
+        <div className="noise absolute inset-0 -z-10" aria-hidden="true" />
+        <div className="grid-bg absolute inset-0 -z-10 opacity-60" aria-hidden="true" />
+        <div className="mx-auto max-w-6xl px-4 pb-10 pt-16 text-center md:pt-24">
+          <span className="rise inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-3.5 py-1.5 text-xs font-medium text-ink/80 backdrop-blur">
+            <span className="size-1.5 rounded-full bg-lagoon shadow-[0_0_10px_#34E29B]" /> Free · private · made for couples
+          </span>
+          <h1 className="rise rise-2 mx-auto mt-7 max-w-5xl text-[clamp(2.8rem,9vw,7rem)] font-bold leading-[0.95] tracking-[-0.04em]">
+            Close your dating chapter. <span className="text-shimmer">Completely.</span>
+          </h1>
+          <p className="rise rise-3 mx-auto mt-7 max-w-2xl text-lg text-ink/75 sm:text-xl">
+            Marriage Mode finds every dating account you ever opened and walks you through closing it for good: profile, billing, app and emails. Then share the clean slate with your partner.
+          </p>
+          <div className="rise rise-4 mt-9 flex flex-wrap justify-center gap-3">
+            <Link href="/audit/" className="glow-mango min-h-12 rounded-full bg-mango px-8 py-4 text-lg font-semibold text-night hover:brightness-110">Start my free audit →</Link>
+            <Link href="#how" className="min-h-12 rounded-full border border-white/15 bg-white/5 px-8 py-4 text-lg font-semibold backdrop-blur hover:border-lagoon/60">See how it works</Link>
           </div>
-          <HeroDemo />
         </div>
-      </section>
-
-      {/* FACTS STRIP: honest, checkable proof */}
-      <section className="border-y border-white/[0.06] bg-white/[0.02]">
-        <ul className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-8 gap-y-2 px-4 py-4 text-sm text-ink/70">
-          {facts.map((f) => <li key={f} className="flex items-center gap-2"><span className="text-lagoon">✓</span>{f}</li>)}
-        </ul>
-      </section>
-
-      {/* PROBLEM */}
-      <section className="mx-auto max-w-6xl px-4 pt-24">
-        <Eyebrow>What stays behind</Eyebrow>
-        <h2 className="mt-3 max-w-3xl text-3xl font-bold sm:text-4xl">You committed. Your phone didn&apos;t get the memo.</h2>
-        <div className="mt-10 grid gap-4 md:grid-cols-3">
-          {leftovers.map((l) => (
-            <div key={l.t} className="glass p-6"><HaloIcon tone={l.tone} /><h3 className="mt-4 text-lg font-semibold">{l.t}</h3><p className="mt-1 text-ink/65">{l.d}</p></div>
-          ))}
-        </div>
-      </section>
-
-      {/* HOW IT WORKS: numbered rail */}
-      <section id="how" className="mx-auto max-w-6xl scroll-mt-24 px-4 pt-24">
-        <Eyebrow>How it works</Eyebrow>
-        <h2 className="mt-3 text-3xl font-bold sm:text-4xl">Three steps to a clean slate</h2>
-        <ol className="relative mt-10 grid gap-4 md:grid-cols-3">
-          <div className="absolute left-0 right-0 top-[38px] hidden h-px bg-gradient-to-r from-lagoon/0 via-lagoon/40 to-mango/0 md:block" aria-hidden="true" />
-          {steps.map((s) => (
-            <li key={s.n} className="glass relative p-6">
-              <span className="relative grid size-10 place-items-center rounded-full bg-night font-mono text-sm text-teal ring-1 ring-lagoon/50 shadow-[0_0_20px_-6px_#34E29B]">{s.n}</span>
-              <h3 className="mt-4 text-lg font-semibold">{s.t}</h3><p className="mt-1 text-ink/65">{s.d}</p>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      {/* DASHBOARD PREVIEW */}
-      <section className="mx-auto max-w-6xl px-4 pt-24">
-        <div className="grid items-center gap-10 md:grid-cols-2">
-          <div>
-            <Eyebrow>Your dashboard</Eyebrow>
-            <h2 className="mt-3 text-3xl font-bold sm:text-4xl">See exactly where you stand</h2>
-            <p className="mt-3 text-ink/70">Every app gets a status: not started, in progress or closed. A dated timeline records what you did, and a printable report is ready when you want it.</p>
-            <Link href="/audit/" className="mt-6 inline-block text-teal underline">Open my dashboard →</Link>
-          </div>
-          <div className="halo-border" aria-hidden="true">
-            <div className="rounded-[1.75rem] bg-deep/95 p-5">
-              <div className="flex flex-wrap items-center gap-6"><Ring value={82} label="Clean-slate score" sub="4 of 5 apps closed" /><Ring value={76} size={76} label="Steps done" sub="19 of 25" /></div>
-              <div className="mt-5 space-y-2.5">
-                {[['Tinder', 'Closed', 100], ['Hinge', 'Closed', 100], ['Bumble', 'In progress', 50]].map(([n, st, v]) => (
-                  <div key={n as string} className="rounded-xl bg-white/[0.03] p-3 ring-1 ring-white/[0.07]">
-                    <div className="flex items-center justify-between text-sm"><span className="font-medium">{n}</span>
-                      <span className={`rounded-full px-2 py-0.5 text-[11px] ${st === 'Closed' ? 'bg-palm/15 text-palm' : 'bg-mango/15 text-mango'}`}>{st}</span></div>
-                    <div className="mt-2 h-1.5 rounded-full bg-white/[0.06]"><div className="h-full rounded-full bg-gradient-to-r from-lagoon to-mango" style={{ width: `${v}%` }} /></div>
-                  </div>
-                ))}
+        <div className="relative mx-auto max-w-5xl px-4 pb-24 pt-6">
+          <div className="absolute left-1/2 top-10 -z-10 w-[520px] max-w-[95vw] -translate-x-1/2 opacity-70" aria-hidden="true"><Halo className="h-auto w-full" /></div>
+          <Phone tilt><HeroDemo /></Phone>
+          <div className="pointer-events-none absolute inset-0 hidden md:block" aria-hidden="true">
+            {[['left-[6%] top-[18%]', 'Tinder', 'Closed', 'float'], ['right-[5%] top-[28%]', 'Billing', 'Cancelled', 'float float-2'], ['left-[9%] bottom-[22%]', 'Emails', 'Stopped', 'float float-3'], ['right-[8%] bottom-[16%]', 'Partner', 'Linked 💞', 'float']].map(([pos, a, b, f]) => (
+              <div key={a} className={`glass absolute ${pos} ${f} flex items-center gap-3 px-4 py-3 shadow-2xl`}>
+                <span className="grid size-8 place-items-center rounded-full bg-lagoon text-sm text-night shadow-[0_0_16px_#34E29B]">✓</span>
+                <div className="text-left leading-tight"><p className="text-sm font-semibold">{a}</p><p className="text-xs text-ink/60">{b}</p></div>
               </div>
-            </div>
+            ))}
           </div>
         </div>
+      </section>
+
+      {/* APPS MARQUEE */}
+      <section className="border-y border-white/[0.06] bg-white/[0.02]">
+        <p className="pt-6 text-center font-mono text-[11px] uppercase tracking-[0.25em] text-ink/50">Step-by-step for {PLATFORMS.length} dating apps and sites</p>
+        <Marquee />
+      </section>
+
+      {/* BEFORE / AFTER */}
+      <section className="mx-auto max-w-6xl px-4 pt-28">
+        <Eyebrow>What stays behind</Eyebrow>
+        <h2 className="mt-3 max-w-3xl text-4xl font-bold leading-tight sm:text-5xl">You committed. Your phone didn&apos;t get the memo.</h2>
+        <div className="mt-12 grid gap-6 md:grid-cols-2 [&>*]:min-w-0">
+          <div className="relative overflow-hidden rounded-[2rem] border border-coral/25 bg-coral/[0.05] p-6">
+            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-coral">Before</p>
+            <div className="mt-5 space-y-3">
+              {[['Someone new liked you 👀', 'Dating app · now'], ['Your subscription renewed: $29.99', 'App Store · 2h ago'], ['You have 3 new matches waiting', 'Email · yesterday'], ['Your profile is getting views', 'Dating app · 3d ago']].map(([t, m], i) => (
+                <div key={t} className="flex items-center gap-3 rounded-2xl bg-night/70 p-3.5 ring-1 ring-white/10" style={{ transform: `rotate(${[-1.5, 1, -0.5, 1.5][i]}deg)` }}>
+                  <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-coral/20 text-coral">!</span>
+                  <div className="min-w-0"><p className="truncate text-sm font-medium">{t}</p><p className="text-xs text-ink/50">{m}</p></div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="halo-border"><div className="relative h-full overflow-hidden rounded-[2rem] bg-deep/95 p-6">
+            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-lagoon">After Marriage Mode</p>
+            <div className="mt-5 flex flex-col items-center gap-4 text-center">
+              <Ring value={100} size={150} />
+              <p className="text-2xl font-bold">Clean slate.</p>
+              <p className="max-w-xs text-ink/65">Profiles deleted, billing cancelled, apps gone, emails stopped. Nothing old in the way.</p>
+            </div>
+          </div></div>
+        </div>
+      </section>
+
+      {/* HOW IT WORKS: sticky phone story */}
+      <section id="how" className="mx-auto max-w-6xl scroll-mt-24 px-4 pt-28">
+        <Eyebrow>How it works</Eyebrow>
+        <h2 className="mt-3 text-4xl font-bold sm:text-5xl">Three steps to a clean slate</h2>
+        <div className="mt-6"><StickyStory /></div>
       </section>
 
       {/* PRIVACY PROMISE */}
@@ -211,9 +185,10 @@ export default function Home() {
       </section>
 
       {/* FINAL CTA */}
-      <section className="mx-auto max-w-6xl px-4 pt-24 text-center">
-        <h2 className="text-3xl font-bold sm:text-4xl">Twenty minutes. <span className="text-glow">Nothing left behind.</span></h2>
-        <Link href="/audit/" className="glow-mango mt-7 inline-block rounded-full bg-mango px-8 py-4 font-semibold text-night hover:brightness-110">Start my free audit →</Link>
+      <section className="relative isolate mx-auto mt-28 max-w-6xl overflow-hidden rounded-[2.5rem] px-4 py-24 text-center">
+        <Aurora className="absolute inset-0 -z-10 h-full w-full" />
+        <h2 className="text-4xl font-bold sm:text-6xl">Twenty minutes. <span className="text-shimmer">Nothing left behind.</span></h2>
+        <Link href="/audit/" className="glow-mango mt-9 inline-block rounded-full bg-mango px-9 py-4 text-lg font-semibold text-night hover:brightness-110">Start my free audit →</Link>
       </section>
     </>
   );

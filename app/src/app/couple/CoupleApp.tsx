@@ -5,6 +5,7 @@ import { buildSteps, score, EMPTY_STATE, type AuditState } from '@/lib/audit';
 import { decodeSpace, encodeSpace, upsertPerson, EMPTY_SPACE, type Space, type Person } from '@/lib/couple';
 import { track } from '@/lib/track';
 import Ring from '@/components/Ring';
+import Aurora from '@/components/Aurora';
 
 const AUDIT_KEY = 'marriage-mode:audit:v1', SPACE_KEY = 'marriage-mode:couple:v1', NAME_KEY = 'marriage-mode:couple:name';
 const SUGGESTED = ['Agree on what is okay for follows and DMs', 'Both finish our own audits', 'Fill in the Digital Boundaries worksheet together', 'Check in again in one month'];
@@ -83,6 +84,7 @@ export default function CoupleApp() {
 
   return (
     <div className="relative isolate">
+      <Aurora className="absolute inset-x-0 top-0 -z-10 h-[520px] w-full opacity-70 [mask-image:linear-gradient(#000,transparent)]" />
       <div className="grid-bg absolute inset-x-0 top-0 -z-10 h-[480px]" aria-hidden="true" />
       <div className="mx-auto max-w-5xl px-4 py-8">
         <div className="flex flex-wrap items-start justify-between gap-3">

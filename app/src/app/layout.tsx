@@ -22,7 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen overflow-x-hidden antialiased print:bg-white">
         <header className="print:hidden sticky top-0 z-50 border-b border-white/[0.06] bg-night/75 backdrop-blur-xl">
           <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3" aria-label="Main">
-            <Link href="/" className="flex items-center gap-2.5 font-display text-lg font-bold tracking-tight">
+            <Link href="/" className="flex items-center gap-2.5 whitespace-nowrap font-display text-lg font-bold tracking-tight">
               <img src={`${BASE}/icon.svg`} alt="" width={30} height={30} /> Marriage Mode
             </Link>
             <div className="hidden items-center gap-6 text-sm text-ink/70 md:flex">
@@ -33,7 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Link href="/audit/" className="hover:text-ink">My dashboard</Link>
             </div>
             <div className="flex items-center gap-2">
-              <Link href="/audit/" className="btn-press glow-mango rounded-full bg-mango px-4 py-1.5 text-sm font-semibold text-night hover:brightness-110">Start free audit</Link>
+              <Link href="/audit/" className="btn-press glow-mango whitespace-nowrap rounded-full bg-mango px-4 py-1.5 text-sm font-semibold text-night hover:brightness-110"><span className="sm:hidden">Free audit</span><span className="hidden sm:inline">Start free audit</span></Link>
               <details className="relative md:hidden">
                 <summary className="grid size-10 cursor-pointer list-none place-items-center rounded-full ring-1 ring-white/15 [&::-webkit-details-marker]:hidden" aria-label="Menu">☰</summary>
                 <div className="glass absolute right-0 top-12 flex w-56 flex-col p-2 text-sm shadow-2xl">
