@@ -9,6 +9,7 @@ import PartnerTab from '@/components/PartnerTab';
 import SettingsTab from '@/components/SettingsTab';
 import WebSearch from '@/components/WebSearch';
 import DataScan from '@/components/DataScan';
+import DeletionRequests from '@/components/DeletionRequests';
 import { cloud, cloudEnabled, sendLink, pull, push, merge, signOut } from '@/lib/cloud';
 import { BASE, KIT_URL } from '@/lib/base';
 
@@ -331,6 +332,7 @@ export default function AuditApp() {
         {/* CLEAN UP */}
         {tab === 'clean' && (
           <section className="mt-6 space-y-4">
+            <DeletionRequests apps={groups.filter((g) => g.title !== 'Everywhere else').map((g) => g.title)} state={state} setState={setState} />
             {groups.map((g) => (
               <details key={g.title} open={g.status !== 'Closed'} className="glass group p-5 [&_summary::-webkit-details-marker]:hidden">
                 <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-3">

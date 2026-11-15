@@ -37,6 +37,16 @@ be added; no phone-number web searches (people-search sites are data brokers
 and a stalking risk); phone sign-ups are checked by logging in to each app,
 which only the phone's owner can complete.
 
+## Deletion requests (live 2026-11-15)
+
+The app writes a formal privacy deletion request for each app the user picked;
+the user sends it from their own email or the company's privacy form. The app
+never asks for or stores dating-app passwords and never logs in on anyone's
+behalf (that would break those apps' terms and put accounts at risk). Email
+buttons are added only for privacy addresses confirmed on the company's own
+site. A "done for you" authorized-agent service waits on legal review
+(DECISIONS-NEEDED #12).
+
 ## Coercion safeguards
 
 - Couple invites can be accepted only on the invitee's own signed-in device.
