@@ -12,7 +12,7 @@ churn and refund requests.
 | Plan | Price | What's in it | Why it exists |
 |---|---|---|---|
 | **Free** | $0 forever | Full self-audit, catalog, email search link, share card, guides | Top of funnel; trust; SEO |
-| **Starter: Cleanup Pass** | **$19 one time** | Synced account across devices, data-file scanner (Takeout/Facebook), a dated cleanup report (PDF), monthly re-check reminders for 12 months | Captures the one-time job |
+| **Starter: Clean Slate Kit** | **$19 one time** (Payhip: $0 monthly, small cut per sale) | Printable kit: cleanup report, 30-day boundaries plan, 12 conversation cards, monthly re-check (products/Clean-Slate-Kit.pdf). Sync across devices stays free. | Captures the one-time job with no paid tools |
 | **Premium** | **$6.99/mo or $49/yr** | Starter, plus Watch mode (new dating-signup alerts, once Gmail access is approved), AI coach (fair-use cap), private reflections | For people who want ongoing support |
 | **Couple** | **$9.99/mo or $79/yr for two** | Premium for both, plus the shared couple space, goals and opt-in sharing | Core paid plan; both people must consent |
 | **Family** | Not at launch | — | No clear buyer yet. Reconsider if users ask for it (e.g. adult family members planning a wedding). Recorded so it isn't forgotten. |

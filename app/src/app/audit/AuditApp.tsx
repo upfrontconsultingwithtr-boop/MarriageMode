@@ -5,7 +5,7 @@ import { buildSteps, score, emailDomainsFor, gmailQuery, gmailSearchUrl, shareSu
 import { track } from '@/lib/track';
 import Ring from '@/components/Ring';
 import { cloud, cloudEnabled, sendLink, pull, push, merge, signOut } from '@/lib/cloud';
-import { SITE } from '@/lib/base';
+import { SITE, KIT_URL } from '@/lib/base';
 
 const KEY = 'marriage-mode:audit:v1';
 const TABS = [
@@ -248,6 +248,16 @@ export default function AuditApp() {
               </ul>
             </div>
 
+            {KIT_URL && (
+              <div className="glass flex flex-wrap items-center justify-between gap-4 p-6 lg:col-span-3">
+                <div>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-mango">Optional · $19 one time</p>
+                  <h2 className="mt-1 text-lg font-semibold">Clean Slate Kit</h2>
+                  <p className="text-sm text-ink/65">A printable companion: cleanup report, 30-day boundaries plan and 12 conversation cards. The audit stays free.</p>
+                </div>
+                <a href={KIT_URL} target="_blank" rel="noopener noreferrer" className="glow-mango min-h-11 shrink-0 rounded-full bg-mango px-5 py-3 text-sm font-semibold text-night">Get the kit ↗</a>
+              </div>
+            )}
             <div className="glass p-6 lg:col-span-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <h2 className="font-semibold">Timeline</h2>
