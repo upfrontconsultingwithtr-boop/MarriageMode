@@ -28,6 +28,15 @@ stated on the page: anyone holding the link can read it, so it is sent only
 to the partner. The synced-account version (database tables already built)
 comes later.
 
+## Web self-search (live 2026-11-15)
+
+Users add their **own** usernames and emails; the dashboard builds web
+searches that open in their own browser (free, nothing sent to us), and they
+mark findings. Safeguards: a "these are mine" confirmation before anything can
+be added; no phone-number web searches (people-search sites are data brokers
+and a stalking risk); phone sign-ups are checked by logging in to each app,
+which only the phone's owner can complete.
+
 ## Coercion safeguards
 
 - Couple invites can be accepted only on the invitee's own signed-in device.

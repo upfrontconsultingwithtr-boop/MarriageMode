@@ -62,3 +62,14 @@ test('merge keeps every app and every finished step from both devices', () => {
   assert.equal(m.done['tinder:delete'], true); assert.equal(m.done['hinge:app'], true);
   assert.deepEqual(m.custom, ['Lovoo']);
 });
+
+import { buildSearches } from './websearch.ts';
+test('web self-search: merge keeps saved searches; queries stay short', () => {
+  const m = merge({ platformIds: [], custom: [], done: {}, web: { usernames: ['tiff'], emails: [], results: { x: 'found' } } },
+                  { platformIds: [], custom: [], done: {}, web: { usernames: ['tr22'], emails: ['a@b.co'], results: {} } });
+  assert.deepEqual(m.web?.usernames.sort(), ['tiff', 'tr22']); assert.equal(m.web?.results.x, 'found');
+  const s = buildSearches(['@tiff'], ['A@B.co', 'not-an-email']);
+  assert.ok(s.every((x) => decodeURIComponent(x.url).split(/\s+/).length <= 32));
+  assert.ok(s.some((x) => x.label.includes('"tiff"')) && s.some((x) => x.label.includes('a@b.co')));
+  assert.equal(s.filter((x) => x.kind === 'email').length, 2);
+});

@@ -48,5 +48,10 @@ export function merge(a: AuditState, b: AuditState): AuditState {
     platformIds: [...new Set([...a.platformIds, ...b.platformIds])],
     custom: [...new Set([...a.custom, ...b.custom])],
     done, doneAt, startedAt: [a.startedAt, b.startedAt].filter(Boolean).sort()[0],
+    ...(a.web || b.web ? { web: {
+      usernames: [...new Set([...(a.web?.usernames ?? []), ...(b.web?.usernames ?? [])])],
+      emails: [...new Set([...(a.web?.emails ?? []), ...(b.web?.emails ?? [])])],
+      results: { ...(b.web?.results ?? {}), ...(a.web?.results ?? {}) },
+    } } : {}),
   };
 }

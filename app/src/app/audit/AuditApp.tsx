@@ -6,6 +6,7 @@ import { track } from '@/lib/track';
 import Ring from '@/components/Ring';
 import PartnerTab from '@/components/PartnerTab';
 import SettingsTab from '@/components/SettingsTab';
+import WebSearch from '@/components/WebSearch';
 import { cloud, cloudEnabled, sendLink, pull, push, merge, signOut } from '@/lib/cloud';
 import { BASE, KIT_URL } from '@/lib/base';
 
@@ -328,7 +329,7 @@ export default function AuditApp() {
 
         {/* FIND (shown inside My apps) */}
         {tab === 'apps' && (
-          <section className="mt-6 grid gap-4 md:grid-cols-2">
+          <section className="mt-6 grid gap-4 md:grid-cols-2 [&>*]:min-w-0">
             <div className="glass p-6">
               <h2 className="text-lg font-semibold">Search your own inbox</h2>
               <p className="mt-1 text-ink/65">Opens a search in your Gmail. We never connect to your email or see results.{state.platformIds.length ? ' Covers the apps you picked.' : ' With no apps picked it looks for all of them, to find ones you forgot.'}</p>
@@ -340,6 +341,7 @@ export default function AuditApp() {
                 <button onClick={() => copy(gmailQuery(domains), 'q')} className="min-h-11 rounded-lg px-4 text-sm font-semibold ring-1 ring-white/15">{copied === 'q' ? 'Copied' : 'Copy'}</button>
               </div>
             </div>
+            <WebSearch state={state} setState={setState} addApps={() => window.scrollTo({ top: 0, behavior: 'smooth' })} />
             <div className="glass p-6">
               <h2 className="text-lg font-semibold">Other places to look</h2>
               <ul className="mt-3 list-disc space-y-2 pl-5 text-ink/70">

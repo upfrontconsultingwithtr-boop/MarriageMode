@@ -17,6 +17,7 @@ export interface AuditState {
   custom: string[];          // platforms the user typed in
   done: Record<string, boolean>;
   doneAt?: Record<string, string>;   // ISO time each step was ticked (for the timeline)
+  web?: { usernames: string[]; emails: string[]; results: Record<string, 'found' | 'none'> };  // own identifiers for the web self-search
   startedAt?: string;
 }
 
