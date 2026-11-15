@@ -95,6 +95,10 @@ export default function SocialScan() {
                 {([['flagged', t('Flagged', 'Marcadas')], ...(dates ? [['likely', t('Likely the sex you date', 'Probablemente del sexo con quien sales')]] as const : []), ['oneway', t('Only you follow (weak link)', 'Solo tú sigues (vínculo débil)')], ['fans', t('Only they follow you', 'Solo te siguen')], ['mutual', t('Mutual (strong link)', 'Mutuos (vínculo fuerte)')], ['close', t('Close friends', 'Mejores amigos')], ['groups', t('Groups', 'Grupos')], ['all', t('All', 'Todas')]] as const).map(([k, l]) => (
                   <button key={k} onClick={() => { setFilter(k); setShowAll(false); }} aria-pressed={filter === k && !showAll} className={`min-h-9 rounded-full px-3 text-xs ring-1 ${filter === k && !showAll ? 'bg-lagoon/20 ring-lagoon/60' : 'ring-white/15'}`}>{l} ({flagged.filter(FILTERS[k]).length})</button>))}
               </div>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                <button onClick={() => setPick((p) => ({ ...p, ...Object.fromEntries(shown.filter((a) => !done[a.key]).map((a) => [a.key, true])) }))} className="min-h-9 rounded-full bg-lagoon/15 px-3 text-xs font-semibold ring-1 ring-lagoon/50">{t(`Select all ${shown.filter((a) => !done[a.key]).length} shown`, `Seleccionar las ${shown.filter((a) => !done[a.key]).length} mostradas`)}</button>
+                <button onClick={() => setPick({})} className="min-h-9 rounded-full px-3 text-xs ring-1 ring-white/15">{t('Clear selection', 'Quitar selección')}</button>
+              </div>
               <ul className="mt-3 max-h-96 space-y-1.5 overflow-y-auto pr-1">{shown.map((a) => (
                 <li key={a.key} className={`flex items-center gap-3 rounded-lg p-2 ring-1 ${done[a.key] ? 'opacity-50 ring-white/5' : 'ring-white/10'}`}>
                   <input type="checkbox" disabled={!!done[a.key]} checked={!!pick[a.key]} onChange={() => setPick((p) => ({ ...p, [a.key]: !p[a.key] }))} className="size-5 shrink-0 accent-[#D9B77E]" aria-label={a.handle} />
