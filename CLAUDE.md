@@ -16,3 +16,11 @@ no spending without Tiffany's yes, truth only, never delete: archive).
 - Replies to Tiffany: short, plain, step-by-step only when she must act.
 - Never trade away quality to save usage: still test, verify live results and
   tell the truth about anything not done.
+
+## Standing permission: decide and act for Tiffany (2026-11-15)
+Do and decide everything on Tiffany's behalf without asking first: build, fix,
+design, commit, push, publish to free hosts, keep records current. Pick the
+best option and tell her what was done.
+Only stop for: spending money (ask with the exact amount), legal signatures,
+identity checks and account sign-ins, and steps Claude Code's own safety checks
+block. For those, give her the shortest one-tap steps.
