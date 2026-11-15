@@ -44,7 +44,7 @@ export default function CoachSessions() {
               </span>
             </div>
             {open === s.id && s.parts?.map((p) => <PartPlayer key={p.key} k={p.key} kind={p.kind} label={p.kind === 'video' ? t('Download video', 'Descargar video') : t('Download audio', 'Descargar audio')} />)}
-            {open === s.id && <div className="mt-3 max-h-80 space-y-2 overflow-y-auto">{s.msgs.map((m, i) => <p key={i} className={`max-w-[90%] rounded-2xl px-3 py-2 text-sm [overflow-wrap:anywhere] ${m.role === 'user' ? 'ml-auto bg-mango/15 ring-1 ring-mango/30' : 'bg-lagoon/10 ring-1 ring-lagoon/30'}`}><b className="block text-[11px] text-ink/50">{m.role === 'user' ? t('You', 'Tú') : 'Mia'}</b>{m.content}</p>)}</div>}
+            {open === s.id && <div className="mt-3 max-h-80 space-y-2 overflow-y-auto">{s.msgs.map((m, i) => <p key={i} className={`max-w-[90%] whitespace-pre-line rounded-2xl px-3 py-2 text-sm [overflow-wrap:anywhere] ${m.role === 'user' ? 'ml-auto bg-mango/15 ring-1 ring-mango/30' : 'bg-lagoon/10 ring-1 ring-lagoon/30'}`}><b className="block text-[11px] text-ink/50">{m.role === 'user' ? t('You', 'Tú') : 'Mia'}</b>{m.content}</p>)}</div>}
           </li>))}</ul>
       )}
     </div>

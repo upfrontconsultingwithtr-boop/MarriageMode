@@ -252,7 +252,7 @@ export default function CoachApp() {
               {face3d === 'loading' && <p className="absolute inset-x-0 bottom-2 text-center text-[11px] text-ink/60">{t('Loading Mia’s 3D face…', 'Cargando el rostro 3D de Mia…')} {Math.round(faceP * 100)}%</p>}
             </div>
             {cam && <video ref={video} autoPlay muted playsInline className="absolute bottom-24 right-4 h-28 w-20 rounded-xl object-cover ring-2 ring-white/20 sm:h-36 sm:w-28" aria-label={t('Your camera (stays on your device)', 'Tu cámara (se queda en tu dispositivo)')} />}
-            <p aria-live="polite" className="mt-4 min-h-[4.5rem] text-center text-lg leading-snug">{busy && !live ? <span className="text-ink/50">{t('Mia is thinking…', 'Mia está pensando…')}</span> : lastCoach}</p>
+            <p aria-live="polite" className="mt-4 line-clamp-4 min-h-[4.5rem] text-center text-lg leading-snug">{busy && !live ? <span className="text-ink/50">{t('Mia is thinking…', 'Mia está pensando…')}</span> : lastCoach}</p>
             <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
               <button onClick={toggleMic} aria-pressed={listening} className={`grid size-14 place-items-center rounded-full text-xl ${listening ? 'bg-mango text-night shadow-[0_0_24px_#E7A3AE]' : 'bg-white/10'}`} aria-label={listening ? t('Stop listening', 'Dejar de escuchar') : t('Talk', 'Hablar')}>🎙</button>
               <button onClick={toggleCam} aria-pressed={cam} className={`grid size-14 place-items-center rounded-full text-xl ${cam ? 'bg-lagoon/30' : 'bg-white/10'}`} aria-label={t('Show my camera', 'Mostrar mi cámara')}>📷</button>
@@ -263,8 +263,8 @@ export default function CoachApp() {
           <div className="glass flex flex-col p-5">
             <h2 className="font-semibold">{t('Conversation', 'Conversación')}</h2>
             <div className="mt-3 flex max-h-[420px] min-h-56 flex-col gap-2 overflow-y-auto pr-1">
-              {msgs.map((m, i) => <p key={i} className={`max-w-[88%] rounded-2xl px-3 py-2 text-sm [overflow-wrap:anywhere] ${m.role === 'user' ? 'self-end bg-mango/15 ring-1 ring-mango/30' : 'self-start bg-lagoon/10 ring-1 ring-lagoon/30'}`}>{m.content}</p>)}
-              {live && <p className="max-w-[88%] self-start rounded-2xl bg-lagoon/10 px-3 py-2 text-sm ring-1 ring-lagoon/30">{live}</p>}
+              {msgs.map((m, i) => <p key={i} className={`max-w-[88%] whitespace-pre-line rounded-2xl px-3 py-2 text-sm [overflow-wrap:anywhere] ${m.role === 'user' ? 'self-end bg-mango/15 ring-1 ring-mango/30' : 'self-start bg-lagoon/10 ring-1 ring-lagoon/30'}`}>{m.content}</p>)}
+              {live && <p className="max-w-[88%] self-start whitespace-pre-line rounded-2xl bg-lagoon/10 px-3 py-2 text-sm ring-1 ring-lagoon/30">{live}</p>}
             </div>
             <form onSubmit={(e) => { e.preventDefault(); void send(input); }} className="mt-3 flex gap-2">
               <label htmlFor="coach-in" className="sr-only">{t('Message Mia', 'Mensaje para Mia')}</label>
