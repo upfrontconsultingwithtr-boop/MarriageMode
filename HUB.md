@@ -82,3 +82,4 @@ Why: counselors and pastors who work with engaged couples are the fastest free w
 - 2026-11-15: Gmail drafts point to /partners/ (links cleaned); posts #2 and #3 drafted in Metricool with hub previews; safety copy wording.
 - 2026-11-15: Clean Slate Kit listed on Payhip (you) and Buy button live on site + dashboard (payhip.com/b/nVh3D).
 - 2026-11-15: Allow list: payhip.com + 8 dating privacy sites. One-tap 'Send from my email' deletion requests (Bumble, eharmony).
+- 2026-11-15: Phase 1 competitor features live: re-check + calendar, proof per account, effort ratings, /charges/ guide, daily couple question + streak (migration 0005), installable app (sw.js).
