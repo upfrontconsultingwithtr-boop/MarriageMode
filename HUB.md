@@ -44,6 +44,7 @@ Why: counselors and pastors who work with engaged couples are the fastest free w
 | Design look (green & pink) | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/DESIGN-SYSTEM.md |
 
 ## 📝 Done log (newest first)
+- **Nov 15:** Full redesign from competitor research: live demo on the home page, new customer dashboard (app statuses, next best step, milestones, timeline, printable report, celebration). Research: docs/research/DESIGN-RESEARCH-2026-11.md
 - **Nov 15:** Visitor counter connected (GoatCounter, free, no cookies). See your numbers: https://upfront-with-tr.goatcounter.com
 - **Nov 15:** "Digital checklist for newly engaged couples" page for Google search, linked from the home page.
 - **Nov 15:** Built your AI team: 7 expert agents (chief of staff, engineer, growth, trust & safety, finance & ops, customer success, analyst). See docs/AI-TEAM.md.

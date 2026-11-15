@@ -16,10 +16,11 @@ export interface AuditState {
   platformIds: string[];
   custom: string[];          // platforms the user typed in
   done: Record<string, boolean>;
+  doneAt?: Record<string, string>;   // ISO time each step was ticked (for the timeline)
   startedAt?: string;
 }
 
-export const EMPTY_STATE: AuditState = { platformIds: [], custom: [], done: {} };
+export const EMPTY_STATE: AuditState = { platformIds: [], custom: [], done: {}, doneAt: {} };
 
 export const GENERAL_STEPS: Step[] = [
   { id: 'g:contacts', kind: 'contacts', label: 'Review phone contacts saved from dating apps', detail: 'Delete or rename numbers you no longer need. Your call, your list.' },
