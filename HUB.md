@@ -84,3 +84,4 @@ Why: counselors and pastors who work with engaged couples are the fastest free w
 - 2026-11-15: Allow list: payhip.com + 8 dating privacy sites. One-tap 'Send from my email' deletion requests (Bumble, eharmony).
 - 2026-11-15: Phase 1 competitor features live: re-check + calendar, proof per account, effort ratings, /charges/ guide, daily couple question + streak (migration 0005), installable app (sw.js).
 - 2026-11-15: AI coach (free, on-device) + lessons + follow-up assistant + founders' access live; weekly AI-team run scheduled (Mon 1:13 PM CT).
+- 2026-11-15: Mia 2.0: real-human video face, natural voice, 29-topic couples knowledge base, assignments (shareable to partner space), sessions saved as video/audio/transcript.
