@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import Waitlist from '@/components/Waitlist';
 import Halo, { HaloIcon } from '@/components/Halo';
 import HeroDemo from '@/components/HeroDemo';
 import Ring from '@/components/Ring';
@@ -30,7 +29,7 @@ const faqs = [
   { q: 'Can I use it to check my partner?', a: 'No, and that is on purpose. Marriage Mode only works on your own accounts, by you. Trust is built by choosing to share, not by checking.' },
   { q: 'Does deleting the app close my account?', a: 'Usually not. You need to delete the profile inside the app or on the website, and cancel billing where you paid. The checklist covers each step.' },
   { q: 'What if an app is not on the list?', a: 'Add it by name and you get the same steps: delete, cancel, remove, unsubscribe.' },
-  { q: 'What is Couple Mode?', a: 'A coming feature: shared goals and a private space for two, where each person shares only what they choose and either can leave anytime.' },
+  { q: 'How does Couple Mode work?', a: 'Each of you adds a card with only what you choose to share, plus shared goals. It lives inside a private link you send each other, so there are no accounts and nothing is stored on our servers. Either of you can stop anytime.' },
 ];
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
@@ -151,16 +150,19 @@ export default function Home() {
         </div>
       </section>
 
-      {/* COUPLE MODE WAITLIST */}
-      <section id="waitlist" className="mx-auto max-w-4xl scroll-mt-24 px-4 pt-24">
+      {/* COUPLE MODE */}
+      <section id="couple" className="mx-auto max-w-4xl scroll-mt-24 px-4 pt-24">
         <div className="halo-border">
           <div className="relative overflow-hidden rounded-[1.75rem] bg-deep/90 p-7 sm:p-10">
             <div className="grid-bg absolute inset-0 opacity-60" aria-hidden="true" />
-            <div className="relative">
-              <Eyebrow>Coming soon</Eyebrow>
-              <h2 className="mt-3 text-3xl font-bold">Couple Mode</h2>
-              <p className="mt-2 max-w-xl text-ink/70">Shared goals and a private space for the two of you. Each person shares only what they choose; either can leave anytime. Join for early access and founding-member pricing.</p>
-              <div className="mt-7"><Waitlist /></div>
+            <div className="relative grid items-center gap-6 md:grid-cols-[1.4fr_1fr]">
+              <div>
+                <Eyebrow>New · Couple Mode</Eyebrow>
+                <h2 className="mt-3 text-3xl font-bold">A private space for the two of you</h2>
+                <p className="mt-2 text-ink/70">Shared goals and the progress each of you chooses to share. It lives inside a private link you send each other: no accounts, nothing stored on our servers, and either of you can stop anytime.</p>
+                <Link href="/couple/" className="glow-mango mt-6 inline-block rounded-full bg-mango px-7 py-3.5 font-semibold text-night hover:brightness-110">Open Couple Mode →</Link>
+              </div>
+              <div className="hidden justify-center md:flex" aria-hidden="true"><Halo className="h-auto w-56" /></div>
             </div>
           </div>
         </div>

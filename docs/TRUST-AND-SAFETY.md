@@ -18,6 +18,16 @@ founder decision recorded in writing.
    only "sharing ended", with no reason and no countdown.
 5. **No covert mode.** The app never hides its icon, its notifications or itself.
 
+## Couple Mode, link edition (live 2026-11-15)
+
+The couple space lives in the link's #fragment, which browsers never send to
+any server: no accounts, no database. Each card shows only what its owner
+ticked (nothing by default). Either person stops by not sending updates and
+removing it from their device; a Quick exit button leaves instantly. Limits,
+stated on the page: anyone holding the link can read it, so it is sent only
+to the partner. The synced-account version (database tables already built)
+comes later.
+
 ## Coercion safeguards
 
 - Couple invites can be accepted only on the invitee's own signed-in device.

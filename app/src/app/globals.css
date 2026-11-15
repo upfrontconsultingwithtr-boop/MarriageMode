@@ -64,6 +64,7 @@ h1, h2, h3, .font-display { font-family: var(--font-display); letter-spacing: -0
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor; mask-composite: exclude;
   animation: halo-turn 8s linear infinite;
+  pointer-events: none;   /* the glowing edge must never block taps on what's inside */
 }
 @property --a { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
 @keyframes halo-turn { to { --a: 360deg; } }

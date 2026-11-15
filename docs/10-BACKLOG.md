@@ -36,10 +36,10 @@ Status: ✅ done · ▶ next · ○ later.
 ## Epic D · Couple Mode
 | D1 | Create invite link (hashed token, 7-day expiry) | 3 | ✅ (DB) |
 | D2 | Accept invite on own signed-in device | 3 | ✅ (DB) |
-| D3 | Pick items to share; partner view of shared items only | 5 | ○ |
-| D4 | Shared goals | 3 | ○ |
-| D5 | Instant unlink + quick-exit button | 2 | ✅ (DB) / ○ UI |
-| D6 | Safety resources inside Couple Mode | 1 | ○ |
+| D3 | Pick items to share; partner view of shared items only (link edition, no server) | 5 | ✅ |
+| D4 | Shared goals | 3 | ✅ |
+| D5 | Instant unlink + quick-exit button | 2 | ✅ |
+| D6 | Safety resources inside Couple Mode | 1 | ✅ |
 
 ## Epic E · Coach
 | E1 | Written guidance library | 3 | ✅ (v0 in Talk & share) |

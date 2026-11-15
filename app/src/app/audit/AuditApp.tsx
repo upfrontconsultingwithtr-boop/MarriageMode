@@ -307,6 +307,7 @@ export default function AuditApp() {
                 <li>Offer, don&apos;t demand. Your partner can do their own audit if and when they choose.</li>
                 <li>Agree on boundaries together with the <a href="../worksheet/" className="text-teal underline">free worksheet</a>.</li>
                 <li>Plan a check-in in a month, each on your own.</li>
+                <li>Want a shared space? Try <a href="../couple/" className="text-teal underline">Couple Mode</a>: goals and only what you each choose to share.</li>
               </ul>
               <p className="mt-4 text-sm text-ink/60">If anyone pressures you to prove things, hand over passwords or be tracked, that isn&apos;t trust. Free, confidential help: National Domestic Violence Hotline, 1-800-799-7233, or text START to 88788.</p>
             </div>
