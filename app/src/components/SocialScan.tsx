@@ -3,12 +3,17 @@ import { useEffect, useMemo, useState } from 'react';
 import { readExport, flag, type Account, type RawFile, type Dates } from '@/lib/follows';
 import { scanInteractions } from '@/lib/interactions';
 import { saveReview } from '@/lib/review';
+import { connectYouTube, GOOGLE_CLIENT_ID } from '@/lib/youtube';
 import { useT } from '@/lib/i18n';
 import { track } from '@/lib/track';
 
 const KEY = 'marriage-mode:social-removed';
 const loadDone = (): Record<string, string> => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { return {}; } };
 const saveDone = (d: Record<string, string>) => { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch { /* full */ } };
+const CONNECT: Record<string, string> = {
+  Instagram: 'https://accountscenter.instagram.com/info_and_permissions/dyi/', Facebook: 'https://accountscenter.facebook.com/info_and_permissions/dyi/', TikTok: 'https://www.tiktok.com/setting/download-your-data', Threads: 'https://accountscenter.instagram.com/info_and_permissions/dyi/',
+  Snapchat: 'https://accounts.snapchat.com/accounts/downloadmydata', YouTube: 'https://takeout.google.com/', 'X (Twitter)': 'https://x.com/settings/download_your_data', LinkedIn: 'https://www.linkedin.com/mypreferences/d/download-my-data', Reddit: 'https://www.reddit.com/settings/data-request',
+};
 const NET: Record<string, string> = { instagram: 'Instagram', threads: 'Threads', facebook: 'Facebook', tiktok: 'TikTok', snapchat: 'Snapchat', youtube: 'YouTube', x: 'X (Twitter)', linkedin: 'LinkedIn', reddit: 'Reddit', other: '—' };
 
 // Social follow review: your own follows/friends from your own data download, scanned on this device.
@@ -66,10 +71,17 @@ export default function SocialScan() {
               ['X (Twitter)', t('Settings → Your account → Download an archive of your data → verify → Request archive. Download when it’s ready.', 'Configuración → Tu cuenta → Descargar un archivo de tus datos → verifica → Solicitar archivo. Descárgalo cuando esté listo.')],
               ['LinkedIn', t('Me → Settings & Privacy → Data privacy → Get a copy of your data → “Connections” → Request archive.', 'Yo → Configuración y privacidad → Privacidad de datos → Obtener una copia de tus datos → “Contactos” → Solicitar archivo.')],
               ['Reddit', t('reddit.com/settings/data-request → request your data. The download lists the communities you joined.', 'reddit.com/settings/data-request → solicita tus datos. La descarga muestra las comunidades a las que te uniste.')]].map(([n, s]) => (
-              <details key={n} className="rounded-xl bg-white/[0.03] p-3 text-sm ring-1 ring-white/[0.07]"><summary className="cursor-pointer font-semibold">{t(`Get your ${n} download`, `Obtén tu descarga de ${n}`)}</summary><p className="mt-2 text-ink/70">{s}</p></details>
+              <div key={n} className="rounded-xl bg-white/[0.03] p-3 text-sm ring-1 ring-white/[0.07]">
+                <div className="flex items-center justify-between gap-2"><span className="font-semibold">{n}</span>
+                  {n === 'YouTube' && GOOGLE_CLIENT_ID
+                    ? <button onClick={async () => { setErr(''); setBusy(t('Connecting to YouTube…', 'Conectando con YouTube…')); try { const yt = await connectYouTube(); const seen = new Set<string>(); setList((l) => [...l, ...yt].filter((a) => !seen.has(a.key) && seen.add(a.key))); track('youtube-connected'); } catch { setErr(t('YouTube connection was cancelled or failed. You can use the download instead.', 'La conexión con YouTube se canceló o falló. Puedes usar la descarga.')); } finally { setBusy(''); } }} className="min-h-9 rounded-full bg-mango px-3 text-xs font-semibold text-night">{t('Connect with Google', 'Conectar con Google')}</button>
+                    : <a href={CONNECT[n as string]} target="_blank" rel="noopener noreferrer" onClick={() => track('social-connect-open')} className="inline-flex min-h-9 items-center rounded-full bg-lagoon/15 px-3 text-xs font-semibold ring-1 ring-lagoon/50">{t('Connect ↗', 'Conectar ↗')}</a>}
+                </div>
+                <details className="mt-1"><summary className="cursor-pointer text-xs text-ink/60">{t('Step by step', 'Paso a paso')}</summary><p className="mt-1 text-ink/70">{s}</p></details>
+              </div>
             ))}
           </div>
-          <p className="mt-2 text-xs text-ink/50">{t('Menu names change a little over time. The download can take from minutes to a day to arrive by email.', 'Los nombres de los menús cambian un poco con el tiempo. La descarga puede tardar de minutos a un día en llegar por correo.')}</p>
+          <p className="mt-2 text-xs text-ink/50">{t('Connect opens the app’s own secure page, already on the right screen. Ask for your data there; when the file arrives (minutes to a day), choose it below and Marriage Mode reads it on this device. Instagram, Facebook, TikTok and others don’t let outside apps read your follows directly, so this is the safe, allowed way. Menu names change a little over time.', 'Conectar abre la página segura de la propia app, ya en la pantalla correcta. Pide tus datos ahí; cuando llegue el archivo (de minutos a un día), elígelo abajo y Marriage Mode lo lee en este dispositivo. Instagram, Facebook, TikTok y otras no dejan que otras apps lean tus seguidos directamente, así que esta es la forma segura y permitida. Los nombres de los menús cambian un poco.')}</p>
           <label className="mt-4 block text-sm text-ink/75">{t('Names or usernames to look for, separated by commas (optional: exes, old flings)', 'Nombres o usuarios a buscar, separados por comas (opcional: exparejas, antiguos ligues)')}
             <input value={names} onChange={(e) => setNames(e.target.value)} placeholder={t('e.g. Jake, maria.lopez', 'p. ej. Jake, maria.lopez')} className="mt-1 min-h-11 w-full rounded-full border border-white/15 bg-night/60 px-4" /></label>
           <div className="mt-3 grid gap-3 sm:grid-cols-2 [&>*]:min-w-0">
