@@ -11,7 +11,8 @@ to requests). Tiffany keeps her own passwords in the iPad Passwords app.
 | Gmail (business) | Drafts for outreach, reading replies | Connector | ✅ Connected |
 | Google Drive | Documents | Connector | ✅ Connected |
 | Netlify | Old paused copy only | Connector (business team) | ✅ Connected (not used) |
-| HubSpot, Canva, Monday.com, Metricool | CRM, design, boards, social scheduling | Connector | ✅ Connected |
+| Metricool (brand: Upfront Consulting with Tiff & Reco, id 7491123) | Social posts: Facebook, Instagram, LinkedIn, TikTok, Bluesky, YouTube, Google Business Profile | Connector | ✅ Connected (correct account, 2026-11-15) |
+| HubSpot, Canva, Monday.com | CRM, design, boards | Connector | ✅ Connected |
 | Supabase (org: Upfront Businesses & Head Quarters) | Database for synced accounts: project `marriage-mode` (free); `cos-core` is the separate COS | Secure key (personal access token) | ✅ Connected; kept awake by .github/workflows/supabase-keepalive.yml |
 | GoatCounter (upfront-with-tr) | Visitor numbers | Secure key (API token), optional | Not yet |
 | Payhip | Selling the Clean Slate Kit | Tiffany's sign-in (no Claude access) | Tiffany |
