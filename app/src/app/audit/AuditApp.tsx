@@ -18,7 +18,7 @@ function Ring({ value, label }: { value: number; label: string }) {
     <div className="flex items-center gap-3">
       <svg width="84" height="84" viewBox="0 0 84 84" role="img" aria-label={`${label}: ${value} out of 100`}>
         <circle cx="42" cy="42" r={r} fill="none" stroke="currentColor" strokeOpacity=".12" strokeWidth="9" />
-        <circle cx="42" cy="42" r={r} fill="none" stroke={value === 100 ? '#34D399' : '#4FA8FF'} style={{ transition: 'stroke-dashoffset .4s', filter: 'drop-shadow(0 0 6px #4FA8FF)' }} strokeWidth="9" strokeLinecap="round"
+        <circle cx="42" cy="42" r={r} fill="none" stroke={value === 100 ? '#34D399' : '#34E29B'} style={{ transition: 'stroke-dashoffset .4s', filter: 'drop-shadow(0 0 6px #34E29B)' }} strokeWidth="9" strokeLinecap="round"
           strokeDasharray={c} strokeDashoffset={c * (1 - value / 100)} transform="rotate(-90 42 42)" />
         <text x="42" y="48" textAnchor="middle" fontSize="20" fontWeight="800" fill="currentColor">{value}</text>
       </svg>
@@ -98,7 +98,7 @@ export default function AuditApp() {
                     const on = state.platformIds.includes(p.id);
                     return (
                       <button key={p.id} onClick={() => toggle(p.id)} aria-pressed={on}
-                        className={`rounded-full px-4 py-2 text-sm font-medium ring-1 ${on ? 'bg-lagoon/15 ring-lagoon/70 text-ink shadow-[0_0_18px_-6px_#4FA8FF]' : 'bg-white/5 ring-white/10 text-ink/80 hover:ring-lagoon/40'}`}>
+                        className={`rounded-full px-4 py-2 text-sm font-medium ring-1 ${on ? 'bg-lagoon/15 ring-lagoon/70 text-ink shadow-[0_0_18px_-6px_#34E29B]' : 'bg-white/5 ring-white/10 text-ink/80 hover:ring-lagoon/40'}`}>
                         {on ? '✓ ' : ''}{p.name}
                       </button>
                     );
@@ -136,7 +136,7 @@ export default function AuditApp() {
                   {g.items.map((st) => (
                     <li key={st.id}>
                       <label className="flex cursor-pointer gap-3">
-                        <input type="checkbox" checked={!!state.done[st.id]} onChange={() => tick(st.id)} className="mt-1 size-5 accent-[#4FA8FF]" />
+                        <input type="checkbox" checked={!!state.done[st.id]} onChange={() => tick(st.id)} className="mt-1 size-5 accent-[#34E29B]" />
                         <span>
                           <span className={`font-medium ${state.done[st.id] ? 'text-ink/50 line-through' : ''}`}>{st.label}</span>
                           {st.detail && <span className="block text-sm text-ink/70">{st.detail}</span>}

@@ -2,15 +2,15 @@
 // Pure SVG: sharp at any size, ~2 KB, no image requests.
 export default function Halo({ className = '' }: { className?: string }) {
   return (
-    <svg viewBox="0 0 600 600" className={className} role="img" aria-label="Two interlocking glowing rings, one blue and one pink">
+    <svg viewBox="0 0 600 600" className={className} role="img" aria-label="Two interlocking glowing rings, one green and one pink">
       <defs>
         <radialGradient id="h-core" cx="50%" cy="50%" r="50%">
-          <stop offset="0" stopColor="#4FA8FF" stopOpacity=".35" />
+          <stop offset="0" stopColor="#34E29B" stopOpacity=".35" />
           <stop offset=".45" stopColor="#8B7CFF" stopOpacity=".12" />
           <stop offset="1" stopColor="#03080C" stopOpacity="0" />
         </radialGradient>
         <linearGradient id="h-a" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#BFE0FF" /><stop offset=".5" stopColor="#4FA8FF" /><stop offset="1" stopColor="#1E4FA8" />
+          <stop offset="0" stopColor="#C2F9DF" /><stop offset=".5" stopColor="#34E29B" /><stop offset="1" stopColor="#0F7A50" />
         </linearGradient>
         <linearGradient id="h-b" x1="1" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#FFD1E6" /><stop offset=".5" stopColor="#FF6FAE" /><stop offset="1" stopColor="#D9468F" />
@@ -25,16 +25,16 @@ export default function Halo({ className = '' }: { className?: string }) {
       <circle cx="300" cy="300" r="300" fill="url(#h-core)" className="pulse-soft" />
 
       {/* HUD orbits */}
-      <g className="spin-slow" fill="none" stroke="#8EC5FF">
+      <g className="spin-slow" fill="none" stroke="#8EF0C2">
         <circle cx="300" cy="300" r="270" strokeOpacity=".18" strokeDasharray="2 10" />
         <circle cx="300" cy="300" r="250" strokeOpacity=".10" />
-        <circle cx="300" cy="30" r="5" fill="#4FA8FF" stroke="none" filter="url(#h-glow)" />
+        <circle cx="300" cy="30" r="5" fill="#34E29B" stroke="none" filter="url(#h-glow)" />
       </g>
       <g className="spin-rev" fill="none" stroke="#FF6FAE">
         <circle cx="300" cy="300" r="222" strokeOpacity=".16" strokeDasharray="60 14 4 14" />
         <circle cx="522" cy="300" r="4" fill="#FF6FAE" stroke="none" filter="url(#h-glow)" />
       </g>
-      <g stroke="#8EC5FF" strokeOpacity=".25">
+      <g stroke="#8EF0C2" strokeOpacity=".25">
         <line x1="300" y1="8" x2="300" y2="44" /><line x1="300" y1="556" x2="300" y2="592" />
         <line x1="8" y1="300" x2="44" y2="300" /><line x1="556" y1="300" x2="592" y2="300" />
       </g>
@@ -46,7 +46,7 @@ export default function Halo({ className = '' }: { className?: string }) {
         <path d="M 250 195 A 105 105 0 0 1 355 300" stroke="url(#h-a)" clipPath="url(#h-top)" />
       </g>
       <g fill="none" strokeWidth="2" strokeOpacity=".9">
-        <circle cx="250" cy="300" r="105" stroke="#E6F1FF" strokeOpacity=".35" />
+        <circle cx="250" cy="300" r="105" stroke="#E6FFF3" strokeOpacity=".35" />
         <circle cx="350" cy="300" r="105" stroke="#FFE6F2" strokeOpacity=".35" />
       </g>
     </svg>
@@ -55,7 +55,7 @@ export default function Halo({ className = '' }: { className?: string }) {
 
 // Small halo used as an icon in cards
 export function HaloIcon({ tone = 'lagoon' }: { tone?: 'lagoon' | 'mango' | 'violet' }) {
-  const c = tone === 'mango' ? '#FF6FAE' : tone === 'violet' ? '#8B7CFF' : '#4FA8FF';
+  const c = tone === 'mango' ? '#FF6FAE' : tone === 'violet' ? '#8B7CFF' : '#34E29B';
   return (
     <svg viewBox="0 0 48 48" width="44" height="44" aria-hidden="true">
       <circle cx="24" cy="24" r="22" fill={c} fillOpacity=".08" />

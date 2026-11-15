@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
-/* Dark, futurist theme. Couple colors: lagoon = blue, mango = pink (token names kept). */
+/* Dark, futurist theme. Couple colors: lagoon = green, mango = pink (token names kept). */
 @theme {
   --color-night: #03080C;      /* page background */
   --color-deep: #071820;       /* raised surface */
   --color-ink: #E4F4F3;        /* main text (light on dark) */
-  --color-ocean: #1E4FA8;
-  --color-lagoon: #4FA8FF;      /* blue */
-  --color-teal: #8EC5FF;       /* links */
+  --color-ocean: #0F7A50;
+  --color-lagoon: #34E29B;      /* green */
+  --color-teal: #8EF0C2;       /* links */
   --color-mango: #FF6FAE;       /* pink */
   --color-coral: #FF7A66;
   --color-palm: #34D399;
@@ -21,28 +21,28 @@
 html { background: var(--color-night); }
 body {
   background:
-    radial-gradient(1200px 600px at 80% -10%, rgb(79 168 255 / .10), transparent 60%),
+    radial-gradient(1200px 600px at 80% -10%, rgb(52 226 155 / .10), transparent 60%),
     radial-gradient(900px 500px at -10% 30%, rgb(139 124 255 / .08), transparent 60%),
     var(--color-night);
   color: var(--color-ink);
 }
 h1, h2, h3, .font-display { font-family: var(--font-display); letter-spacing: -0.02em; }
 :focus-visible { outline: 2px solid var(--color-mango); outline-offset: 3px; }
-::selection { background: rgb(79 168 255 / .35); }
+::selection { background: rgb(52 226 155 / .35); }
 
 /* Grid backdrop, fading out toward the edges */
 .grid-bg {
   background-image:
-    linear-gradient(rgb(142 197 255 / .07) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(142 197 255 / .07) 1px, transparent 1px);
+    linear-gradient(rgb(142 240 194 / .07) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(142 240 194 / .07) 1px, transparent 1px);
   background-size: 56px 56px;
   mask-image: radial-gradient(ellipse 70% 60% at 50% 35%, #000 25%, transparent 75%);
 }
 /* Perspective "floor" grid under the hero */
 .grid-floor {
   background-image:
-    linear-gradient(rgb(79 168 255 / .22) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(79 168 255 / .22) 1px, transparent 1px);
+    linear-gradient(rgb(52 226 155 / .22) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(52 226 155 / .22) 1px, transparent 1px);
   background-size: 64px 64px;
   transform: perspective(520px) rotateX(62deg);
   transform-origin: 50% 0;
@@ -72,7 +72,7 @@ h1, h2, h3, .font-display { font-family: var(--font-display); letter-spacing: -0
   background: linear-gradient(100deg, #fff 10%, var(--color-lagoon) 45%, var(--color-mango) 85%);
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
-.glow-lagoon { box-shadow: 0 0 0 1px rgb(79 168 255 / .4), 0 10px 40px -10px rgb(79 168 255 / .7); }
+.glow-lagoon { box-shadow: 0 0 0 1px rgb(52 226 155 / .4), 0 10px 40px -10px rgb(52 226 155 / .7); }
 .glow-mango  { box-shadow: 0 10px 40px -8px rgb(255 111 174 / .65); }
 
 .spin-slow { animation: spin 60s linear infinite; transform-origin: center; transform-box: fill-box; }
