@@ -23,14 +23,14 @@ function VideoAvatar({ speaking, listening }: { speaking: boolean; listening: bo
   const idle = useRef<HTMLVideoElement>(null); const talk = useRef<HTMLVideoElement>(null);
   useEffect(() => {
     const t = talk.current; if (!t) return;
-    if (speaking) { try { t.currentTime = Math.random() * Math.max(0, (t.duration || 7) - 2); } catch { /* not ready */ } void t.play().catch(() => {}); }
-    else { const h = setTimeout(() => t.pause(), 300); return () => clearTimeout(h); }
+    if (speaking) { if (t.paused) { try { t.currentTime = Math.random() * Math.max(0, (t.duration || 7) - 2); } catch { /* not ready */ } } void t.play().catch(() => {}); }
+    else { const h = setTimeout(() => t.pause(), 900); return () => clearTimeout(h); }
   }, [speaking]);
   useEffect(() => { void idle.current?.play().catch(() => {}); }, []);
   return (
-    <div className="absolute inset-0">
+    <div className="mia-alive absolute inset-0">
       <video ref={idle} src={`${BASE}/coach/mia-idle.mp4`} poster={`${BASE}/coach/mia-poster.jpg`} muted loop playsInline autoPlay preload="auto" className="absolute inset-0 h-full w-full object-cover" aria-hidden="true" />
-      <video ref={talk} src={`${BASE}/coach/mia-talk.mp4`} muted loop playsInline preload="auto" className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${speaking ? 'opacity-100' : 'opacity-0'}`} aria-hidden="true" />
+      <video ref={talk} src={`${BASE}/coach/mia-talk.mp4`} muted loop playsInline preload="auto" className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-150 ${speaking ? 'opacity-100' : 'opacity-0'}`} aria-hidden="true" />
       {listening && <span className="absolute left-3 top-3 rounded-full bg-night/70 px-3 py-1 text-xs text-mango">● listening</span>}
     </div>
   );
@@ -100,6 +100,16 @@ export default function CoachApp() {
     saveSession({ ...session.current, updatedAt: '', mode, lang, msgs, format, parts: parts.current });
   }, [msgs, phase, mode, lang, format]);
   useEffect(() => { speakingRef.current = speaking; }, [speaking]);
+  // Lip sync: show the talking clip only while sound is actually coming out (mouth rests on pauses).
+  const [mouth, setMouth] = useState(false);
+  useEffect(() => {
+    if (!speaking) { setMouth(false); return; }
+    let raf = 0; let on = false; let off = 0;
+    const tick = () => { const a = voice.current ? voice.current.active() : true; const now = performance.now();
+      if (a) { off = now; if (!on) { on = true; setMouth(true); } } else if (on && now - off > 180) { on = false; setMouth(false); }
+      raf = requestAnimationFrame(tick); };
+    raf = requestAnimationFrame(tick); return () => cancelAnimationFrame(raf);
+  }, [speaking]);
 
   // Record in the format the session happens in: voice when the mic is used, video when the camera is on.
   const record = async (kind: 'voice' | 'video') => {
@@ -251,7 +261,7 @@ export default function CoachApp() {
             <div className="flex items-center justify-between text-xs text-ink/60"><span className="flex items-center gap-2"><span className="size-2 rounded-full bg-palm shadow-[0_0_8px_#7BC59A]" />{t('Live session with Mia', 'Sesión en vivo con Mia')} · {mode === 'ai' ? t('AI on your device', 'IA en tu dispositivo') : t('Lite mode', 'Modo Lite')}</span><span>{t('AI coach · not a counselor', 'Coach de IA · no es consejera')}</span></div>
             <div className="relative mx-auto mt-4 aspect-square w-full max-w-[420px] overflow-hidden rounded-[1.5rem] bg-gradient-to-b from-[#2A1520] to-night" style={{ boxShadow: listening ? '0 0 0 4px #D9B77E66, 0 0 50px #D9B77E55' : speaking ? '0 0 40px #E7A3AE44' : undefined }}>
               <div ref={stage} className={`absolute inset-0 ${face3d === 'on' ? '' : 'invisible'}`} aria-label={t('Mia, the AI coach (3D)', 'Mia, la coach de IA (3D)')} role="img" />
-              {face3d !== 'on' && face3d !== 'loading' && <div ref={faceBox} className="absolute inset-0"><VideoAvatar speaking={speaking} listening={listening} /></div>}
+              {face3d !== 'on' && face3d !== 'loading' && <div ref={faceBox} className="absolute inset-0"><VideoAvatar speaking={mouth} listening={listening} /></div>}
               {format !== 'text' && <span className="absolute right-3 top-3 rounded-full bg-night/70 px-3 py-1 text-xs text-coral">● {format === 'video' ? t('Recording video to this device', 'Grabando video en este dispositivo') : t('Recording audio to this device', 'Grabando audio en este dispositivo')}</span>}
               {face3d === 'loading' && <p className="absolute inset-x-0 bottom-2 text-center text-[11px] text-ink/60">{t('Loading Mia’s 3D face…', 'Cargando el rostro 3D de Mia…')} {Math.round(faceP * 100)}%</p>}
             </div>
