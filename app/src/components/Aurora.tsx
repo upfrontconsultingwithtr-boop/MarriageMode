@@ -10,10 +10,10 @@ export default function Aurora({ className = '' }: { className?: string }) {
     const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches || document.documentElement.dataset.motion === 'reduce';
     const light = document.documentElement.dataset.theme === 'light';
     const blobs = [
-      { c: '52,226,155', x: .25, y: .35, r: .55, sx: .00011, sy: .00008 },
-      { c: '255,111,174', x: .75, y: .30, r: .5, sx: -.00009, sy: .00012 },
-      { c: '139,124,255', x: .55, y: .75, r: .45, sx: .00007, sy: -.0001 },
-      { c: '52,226,155', x: .9, y: .85, r: .35, sx: -.00012, sy: -.00006 },
+      { c: '217,183,126', x: .25, y: .35, r: .55, sx: .00011, sy: .00008 },
+      { c: '232,164,169', x: .75, y: .30, r: .5, sx: -.00009, sy: .00012 },
+      { c: '181,139,176', x: .55, y: .75, r: .45, sx: .00007, sy: -.0001 },
+      { c: '217,183,126', x: .9, y: .85, r: .35, sx: -.00012, sy: -.00006 },
     ];
     let raf = 0, t0 = performance.now(), visible = true;
     const size = () => { const r = cv.getBoundingClientRect(); cv.width = Math.max(1, r.width / 2); cv.height = Math.max(1, r.height / 2); };

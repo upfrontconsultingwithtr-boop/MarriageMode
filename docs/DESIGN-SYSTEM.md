@@ -1,12 +1,15 @@
-# Design system (founder direction 2026-11-15: futurist, modern, halo graphics and grids)
+# Design system: Champagne (founder pick, 2026-11-15)
+
+Chosen by Tiffany from three directions (A Midnight Aurora, B Champagne, C Daylight).
+Applies to everything: site, dashboard, Couple Mode, the hub, the Clean Slate Kit.
 
 | Element | Rule |
 |---|---|
-| Theme | Dark only. Background `night` #03080C, surfaces `deep` #071820, text `ink` #E4F4F3 |
-| Glow colors | Green and pink couple colors (founder, 2026-11-15). Green #34E29B (primary; token `lagoon`), pink #FF6FAE (calls to action; token `mango`), violet #8B7CFF where they blend. Links #8EF0C2 |
-| Type | Space Grotesk (headings), Inter (body), mono for small uppercase labels. Self-hosted through @fontsource, no outside font requests |
-| Halo | `components/Halo.tsx`: two interlocking glowing rings, one green and one pink (the couple) inside rotating HUD orbits. `HaloIcon` for cards. Pure SVG |
-| Grids | `.grid-bg` fading square grid behind sections; `.grid-floor` perspective floor under the hero; bento card grid for features |
-| Surfaces | `.glass` translucent panels with blur; `.halo-border` animated conic-gradient edge for the key panel |
-| Motion | Slow orbit spin, soft pulse, rotating border. All switched off under "reduce motion" |
-| Accessibility | Body text at least 60% ink on night; focus ring in mango; decorative graphics `aria-hidden` |
+| Mood | Luxury and romance, like a modern wedding invitation; calm, never loud |
+| Background | Deep plum-black `#0C0709`; surfaces `#1B1016`; soft plum and gold light (Aurora canvas) |
+| Text | Warm ivory `#F5E9DA`; muted text at 60–75% |
+| Accents | Champagne gold `#D9B77E` (token `lagoon`: rings, ticks, highlights), light gold `#E8C99A` (token `teal`: links), rose `#E8A4A9` (token `mango`: main buttons), mauve `#B58BB0` (token `violet`) |
+| Type | Fraunces (headlines, weight 500; italic gold for the emphasis word), Inter (body and spaced-caps labels) |
+| Signature | Two interlocking rings (gold + rose), tilted phone with the live demo, floating "Closed ✓" cards |
+| Motion | Slow aurora, gentle float, shimmer on the italic word; all off under "reduce motion" |
+| Light theme | Ivory `#FBF7F2`, ink `#2A1A20`, gold `#A8823F`, rose `#C76B7A` (Settings → Appearance) |

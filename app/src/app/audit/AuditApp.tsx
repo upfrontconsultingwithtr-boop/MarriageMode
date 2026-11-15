@@ -127,7 +127,7 @@ export default function AuditApp() {
     return (
       <li key={st.id}>
         <label className="flex min-h-11 cursor-pointer gap-3 rounded-xl p-2 hover:bg-white/[0.03]">
-          <input type="checkbox" checked={!!state.done[st.id]} onChange={() => tick(st.id)} className="mt-1 size-5 shrink-0 accent-[#34E29B]" />
+          <input type="checkbox" checked={!!state.done[st.id]} onChange={() => tick(st.id)} className="mt-1 size-5 shrink-0 accent-[#D9B77E]" />
           <span>
             <span className={`font-medium ${state.done[st.id] ? 'text-ink/45 line-through' : ''}`}>{st.label}</span>
             {st.detail && <span className="block text-sm text-ink/60">{st.detail}</span>}
@@ -174,7 +174,7 @@ export default function AuditApp() {
             <nav className="mt-2 flex flex-col gap-1" role="tablist" aria-label="Dashboard menu">
               {TABS.map((t) => (
                 <button key={t.id} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}
-                  className={`flex min-h-11 items-center gap-3 rounded-xl px-3 text-left text-sm font-semibold transition ${tab === t.id ? 'bg-lagoon/15 text-ink ring-1 ring-lagoon/50 shadow-[0_0_20px_-8px_#34E29B]' : 'text-ink/65 hover:bg-white/[0.04] hover:text-ink'}`}>
+                  className={`flex min-h-11 items-center gap-3 rounded-xl px-3 text-left text-sm font-semibold transition ${tab === t.id ? 'bg-lagoon/15 text-ink ring-1 ring-lagoon/50 shadow-[0_0_20px_-8px_#D9B77E]' : 'text-ink/65 hover:bg-white/[0.04] hover:text-ink'}`}>
                   <span aria-hidden="true" className={tab === t.id ? 'text-lagoon' : ''}>{t.icon}</span>{t.label}
                 </button>
               ))}
@@ -194,7 +194,7 @@ export default function AuditApp() {
             <h1 suppressHydrationWarning className="mt-1 text-3xl font-bold">{hello}{hasApps ? '. Here\'s where you stand.' : '. Let\'s begin.'}</h1>
             {cloudEnabled && (
               <button onClick={() => setSyncOpen((o) => !o)} className="mt-2 inline-flex min-h-9 items-center gap-2 rounded-full bg-white/[0.04] px-3 text-xs ring-1 ring-white/10 hover:ring-lagoon/50">
-                <span className={`size-1.5 rounded-full ${syncEmail ? 'bg-lagoon shadow-[0_0_8px_#34E29B]' : 'bg-ink/40'}`} />{syncEmail ? 'Synced across devices' : 'Use on more than one device?'}
+                <span className={`size-1.5 rounded-full ${syncEmail ? 'bg-lagoon shadow-[0_0_8px_#D9B77E]' : 'bg-ink/40'}`} />{syncEmail ? 'Synced across devices' : 'Use on more than one device?'}
               </button>
             )}
           </div>
@@ -264,7 +264,7 @@ export default function AuditApp() {
               <ul className="mt-3 space-y-2">
                 {milestones.map((m) => (
                   <li key={m.t} className={`flex items-center gap-3 text-sm ${m.ok ? '' : 'text-ink/40'}`}>
-                    <span className={`grid size-7 place-items-center rounded-full text-xs ${m.ok ? 'bg-lagoon text-night shadow-[0_0_14px_-3px_#34E29B]' : 'ring-1 ring-white/15'}`}>{m.ok ? '✓' : ''}</span>{m.t}
+                    <span className={`grid size-7 place-items-center rounded-full text-xs ${m.ok ? 'bg-lagoon text-night shadow-[0_0_14px_-3px_#D9B77E]' : 'ring-1 ring-white/15'}`}>{m.ok ? '✓' : ''}</span>{m.t}
                   </li>
                 ))}
               </ul>
@@ -288,7 +288,7 @@ export default function AuditApp() {
               {timeline.length === 0 ? <p className="mt-3 text-sm text-ink/55">Each step you finish is recorded here with its date.</p> : (
                 <ol className="mt-4 space-y-3 border-l border-lagoon/30 pl-5">
                   {timeline.slice(0, 8).map((x) => (
-                    <li key={x.step!.id} className="relative text-sm"><span className="absolute -left-[25px] top-1.5 size-2.5 rounded-full bg-lagoon shadow-[0_0_8px_#34E29B]" /><span className="text-ink/50">{fmt(x.at)}</span> · {x.step!.label}</li>
+                    <li key={x.step!.id} className="relative text-sm"><span className="absolute -left-[25px] top-1.5 size-2.5 rounded-full bg-lagoon shadow-[0_0_8px_#D9B77E]" /><span className="text-ink/50">{fmt(x.at)}</span> · {x.step!.label}</li>
                   ))}
                 </ol>
               )}
@@ -312,7 +312,7 @@ export default function AuditApp() {
                     <div className="mt-2 flex flex-wrap gap-2">
                       {items.map((p) => { const on = state.platformIds.includes(p.id); return (
                         <button key={p.id} onClick={() => toggle(p.id)} aria-pressed={on}
-                          className={`min-h-11 rounded-full px-4 text-sm font-medium ring-1 transition ${on ? 'bg-lagoon/15 text-ink ring-lagoon/70 shadow-[0_0_18px_-6px_#34E29B]' : 'bg-white/[0.03] text-ink/75 ring-white/10 hover:ring-lagoon/40'}`}>{on ? '✓ ' : ''}{p.name}</button>
+                          className={`min-h-11 rounded-full px-4 text-sm font-medium ring-1 transition ${on ? 'bg-lagoon/15 text-ink ring-lagoon/70 shadow-[0_0_18px_-6px_#D9B77E]' : 'bg-white/[0.03] text-ink/75 ring-white/10 hover:ring-lagoon/40'}`}>{on ? '✓ ' : ''}{p.name}</button>
                       ); })}
                     </div>
                   </div>
@@ -394,7 +394,7 @@ export default function AuditApp() {
           {TABS.map((t) => (
             <button key={t.id} role="tab" aria-selected={tab === t.id} onClick={() => { setTab(t.id); window.scrollTo({ top: 0 }); }}
               className={`flex min-h-14 flex-col items-center justify-center gap-0.5 text-[11px] ${tab === t.id ? 'text-lagoon' : 'text-ink/55'}`}>
-              <span className={`text-lg leading-none ${tab === t.id ? 'drop-shadow-[0_0_8px_#34E29B]' : ''}`} aria-hidden="true">{t.icon}</span>{t.label}
+              <span className={`text-lg leading-none ${tab === t.id ? 'drop-shadow-[0_0_8px_#D9B77E]' : ''}`} aria-hidden="true">{t.icon}</span>{t.label}
             </button>
           ))}
         </div>

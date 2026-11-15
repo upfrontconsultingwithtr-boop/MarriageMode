@@ -27,7 +27,7 @@ export default function WebSearch({ state, setState, addApps }: Props) {
       <h2 className="mt-1 text-lg font-semibold">Find old profiles under your usernames and emails</h2>
       <p className="mt-1 text-sm text-ink/65">Add the usernames and emails you&apos;ve used. We build the searches; they open in your own browser, and nothing is sent to us. Then mark what you found to build your findings.</p>
 
-      <label className="mt-4 flex items-start gap-3 text-sm"><input type="checkbox" checked={mine} onChange={() => setMine(!mine)} className="mt-0.5 size-5 accent-[#34E29B]" />
+      <label className="mt-4 flex items-start gap-3 text-sm"><input type="checkbox" checked={mine} onChange={() => setMine(!mine)} className="mt-0.5 size-5 accent-[#D9B77E]" />
         <span>These usernames and emails are <strong>mine</strong>. Marriage Mode is only for your own accounts; searching for someone else isn&apos;t allowed.</span></label>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2 [&>*]:min-w-0">

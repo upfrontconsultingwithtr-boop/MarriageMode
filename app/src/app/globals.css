@@ -1,48 +1,49 @@
 @import "tailwindcss";
 
-/* Dark, futurist theme. Couple colors: lagoon = green, mango = pink (token names kept). */
+/* Champagne theme (founder pick, 2026-11-15): deep plum, champagne gold, rose. Token names kept: lagoon = gold, mango = rose, teal = light gold. */
 @theme {
-  --color-night: #03080C;      /* page background */
-  --color-deep: #071820;       /* raised surface */
-  --color-ink: #E4F4F3;        /* main text (light on dark) */
-  --color-ocean: #0F7A50;
-  --color-lagoon: #34E29B;      /* green */
-  --color-teal: #8EF0C2;       /* links */
-  --color-mango: #FF6FAE;       /* pink */
-  --color-coral: #FF7A66;
-  --color-palm: #34D399;
-  --color-violet: #8B7CFF;
-  --color-mist: #0C1D25;
+  --color-night: #0C0709;      /* page background */
+  --color-deep: #1B1016;       /* raised surface */
+  --color-ink: #F5E9DA;        /* main text (light on dark) */
+  --color-ocean: #5A3A44;
+  --color-lagoon: #D9B77E;      /* champagne gold */
+  --color-teal: #E8C99A;       /* links */
+  --color-mango: #E8A4A9;       /* rose */
+  --color-coral: #F08A7E;
+  --color-palm: #A9C9A0;
+  --color-violet: #B58BB0;
+  --color-mist: #22151C;
   --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: "Space Grotesk Variable", "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fraunces Variable", "Iowan Old Style", Georgia, serif;
+  --font-mono: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
 }
 
 :root { color-scheme: dark; }
 html { background: var(--color-night); }
 body {
   background:
-    radial-gradient(1200px 600px at 80% -10%, rgb(52 226 155 / .10), transparent 60%),
-    radial-gradient(900px 500px at -10% 30%, rgb(139 124 255 / .08), transparent 60%),
+    radial-gradient(1200px 600px at 80% -10%, rgb(217 183 126 / .10), transparent 60%),
+    radial-gradient(900px 500px at -10% 30%, rgb(181 139 176 / .08), transparent 60%),
     var(--color-night);
   color: var(--color-ink);
 }
-h1, h2, h3, .font-display { font-family: var(--font-display); letter-spacing: -0.02em; }
+h1, h2, h3, .font-display { font-family: var(--font-display); letter-spacing: -0.015em; font-optical-sizing: auto; }
 :focus-visible { outline: 2px solid var(--color-mango); outline-offset: 3px; }
-::selection { background: rgb(52 226 155 / .35); }
+::selection { background: rgb(217 183 126 / .35); }
 
 /* Grid backdrop, fading out toward the edges */
 .grid-bg {
   background-image:
-    linear-gradient(rgb(142 240 194 / .07) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(142 240 194 / .07) 1px, transparent 1px);
+    linear-gradient(rgb(232 201 154 / .07) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(232 201 154 / .07) 1px, transparent 1px);
   background-size: 56px 56px;
   mask-image: radial-gradient(ellipse 70% 60% at 50% 35%, #000 25%, transparent 75%);
 }
 /* Perspective "floor" grid under the hero */
 .grid-floor {
   background-image:
-    linear-gradient(rgb(52 226 155 / .22) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(52 226 155 / .22) 1px, transparent 1px);
+    linear-gradient(rgb(217 183 126 / .22) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(217 183 126 / .22) 1px, transparent 1px);
   background-size: 64px 64px;
   transform: perspective(520px) rotateX(62deg);
   transform-origin: 50% 0;
@@ -73,8 +74,8 @@ h1, h2, h3, .font-display { font-family: var(--font-display); letter-spacing: -0
   background: linear-gradient(100deg, #fff 10%, var(--color-lagoon) 45%, var(--color-mango) 85%);
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
-.glow-lagoon { box-shadow: 0 0 0 1px rgb(52 226 155 / .4), 0 10px 40px -10px rgb(52 226 155 / .7); }
-.glow-mango  { box-shadow: 0 10px 40px -8px rgb(255 111 174 / .65); }
+.glow-lagoon { box-shadow: 0 0 0 1px rgb(217 183 126 / .4), 0 10px 40px -10px rgb(217 183 126 / .7); }
+.glow-mango  { box-shadow: 0 10px 40px -8px rgb(232 164 169 / .65); }
 
 .spin-slow { animation: spin 60s linear infinite; transform-origin: center; transform-box: fill-box; }
 .spin-rev  { animation: spin 90s linear infinite reverse; transform-origin: center; transform-box: fill-box; }
@@ -102,13 +103,13 @@ html[data-links="underline"] main a { text-decoration: underline; }
 html[data-contrast="high"] { --color-ink: #FFFFFF; }
 html[data-contrast="high"] .glass { border-color: rgb(255 255 255 / .35); }
 html[data-theme="light"] {
-  --color-night: #F6FBF9; --color-deep: #FFFFFF; --color-ink: #0B1A1F; --color-mist: #EAF3F0;
-  --color-teal: #0E7A55; --color-lagoon: #16A970; --color-mango: #E0478F;
+  --color-night: #FBF7F2; --color-deep: #FFFFFF; --color-ink: #2A1A20; --color-mist: #F3EBE3;
+  --color-teal: #8A6A3A; --color-lagoon: #A8823F; --color-mango: #C76B7A;
   color-scheme: light;
 }
-html[data-theme="light"] body { background: radial-gradient(1000px 500px at 80% -10%, rgb(22 169 112 / .10), transparent 60%), radial-gradient(800px 400px at -10% 30%, rgb(224 71 143 / .08), transparent 60%), var(--color-night); }
+html[data-theme="light"] body { background: radial-gradient(1000px 500px at 80% -10%, rgb(168 130 63 / .10), transparent 60%), radial-gradient(800px 400px at -10% 30%, rgb(199 107 122 / .08), transparent 60%), var(--color-night); }
 html[data-theme="light"] .glass { background: #fff; border-color: rgb(11 26 31 / .10); box-shadow: 0 1px 2px rgb(11 26 31 / .04); }
-html[data-theme="light"] .text-glow { background: linear-gradient(100deg, #0B1A1F 10%, var(--color-lagoon) 45%, var(--color-mango) 85%); -webkit-background-clip: text; background-clip: text; }
+html[data-theme="light"] .text-glow { background: linear-gradient(100deg, #2A1A20 10%, var(--color-lagoon) 45%, var(--color-mango) 85%); -webkit-background-clip: text; background-clip: text; }
 html[data-theme="light"][data-contrast="high"] { --color-ink: #000000; }
 html[data-theme="light"][data-contrast="high"] .glass { border-color: rgb(0 0 0 / .4); }
 
@@ -121,7 +122,7 @@ a.rounded-full:active, button.rounded-full:active { transform: scale(.97); }
 .rise { animation: rise .6s cubic-bezier(.2,.8,.2,1) both; }
 .rise-2 { animation-delay: .08s; } .rise-3 { animation-delay: .16s; } .rise-4 { animation-delay: .24s; }
 @keyframes sweep { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-.halo-sweep { position: absolute; inset: 0; border-radius: 9999px; background: conic-gradient(from 0deg, transparent 0 80%, rgb(52 226 155 / .35) 92%, transparent); animation: sweep 6s linear infinite; mask: radial-gradient(circle, transparent 46%, #000 47%, #000 50%, transparent 51%); }
+.halo-sweep { position: absolute; inset: 0; border-radius: 9999px; background: conic-gradient(from 0deg, transparent 0 80%, rgb(217 183 126 / .35) 92%, transparent); animation: sweep 6s linear infinite; mask: radial-gradient(circle, transparent 46%, #000 47%, #000 50%, transparent 51%); }
 .check-pop { animation: pop .35s cubic-bezier(.2,1.6,.4,1); }
 @keyframes pop { 0% { transform: scale(.6); } 100% { transform: scale(1); } }
 input[type=checkbox]:checked { animation: pop .3s cubic-bezier(.2,1.6,.4,1); }
@@ -139,7 +140,14 @@ input[type=checkbox]:checked { animation: pop .3s cubic-bezier(.2,1.6,.4,1); }
 .float { animation: float 6s ease-in-out infinite; } .float-2 { animation-delay: -2s; } .float-3 { animation-delay: -4s; }
 @keyframes shimmer { to { background-position: 200% center; } }
 .text-shimmer { background: linear-gradient(100deg, var(--color-lagoon), #fff 30%, var(--color-mango) 55%, var(--color-violet) 75%, var(--color-lagoon)); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 8s linear infinite; }
-html[data-theme="light"] .text-shimmer { background-image: linear-gradient(100deg, var(--color-lagoon), #0B1A1F 30%, var(--color-mango) 55%, var(--color-violet) 75%, var(--color-lagoon)); }
+html[data-theme="light"] .text-shimmer { background-image: linear-gradient(100deg, var(--color-lagoon), #2A1A20 30%, var(--color-mango) 55%, var(--color-violet) 75%, var(--color-lagoon)); }
 .noise { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E"); }
 @media (prefers-reduced-motion: reduce) { .marquee-row, .float, .text-shimmer { animation: none; } }
 html[data-motion="reduce"] .marquee-row, html[data-motion="reduce"] .float, html[data-motion="reduce"] .text-shimmer { animation: none; }
+
+/* ── Champagne type & finish ── */
+h1.font-bold, h2.font-bold, h1, h2 { font-weight: 500; }
+h3.font-bold, h3.font-semibold { font-weight: 600; }
+.text-glow, .text-shimmer { font-style: italic; }
+.text-shimmer { background-image: linear-gradient(100deg, #E8C99A, #FBF3E6 30%, #D9B77E 55%, #E8A4A9 75%, #E8C99A); }
+.grid-bg { opacity: .45; }

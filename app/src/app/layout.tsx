@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from 'next';
 import Link from 'next/link';
 import '@fontsource-variable/inter';
-import '@fontsource-variable/space-grotesk';
+import '@fontsource-variable/fraunces/full.css';
+import '@fontsource-variable/fraunces/full-italic.css';
 import './globals.css';
 import { BASE } from '@/lib/base';
 import { PREFS_BOOT } from '@/lib/prefs';
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
   manifest: `${BASE}/manifest.webmanifest`,
   openGraph: { images: [`${BASE}/og.png`], title: 'Marriage Mode', description: 'Close your dating chapter. Completely. Private, free, self-led.' },
 };
-export const viewport: Viewport = { themeColor: '#03080C', width: 'device-width', initialScale: 1, colorScheme: 'dark' };
+export const viewport: Viewport = { themeColor: '#0C0709', width: 'device-width', initialScale: 1, colorScheme: 'dark' };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

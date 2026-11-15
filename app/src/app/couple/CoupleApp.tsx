@@ -119,7 +119,7 @@ export default function CoupleApp() {
               {!hasAudit && <p className="mt-1 text-xs text-ink/50">No audit on this device yet. <Link href="/audit/" className="text-teal underline">Start yours</Link> to share progress.</p>}
               {([['progress', `Steps done (${s.progress}%)`], ['closed', `Accounts deleted (${s.accountsClosed} of ${s.accountsTotal})`], ['milestones', `Milestones (${milestones.length})`]] as const).map(([k, l]) => (
                 <label key={k} className={`mt-2 flex min-h-11 items-center gap-3 ${hasAudit ? '' : 'opacity-40'}`}>
-                  <input type="checkbox" disabled={!hasAudit} checked={share[k]} onChange={() => setShare((x) => ({ ...x, [k]: !x[k] }))} className="size-5 accent-[#34E29B]" />{l}
+                  <input type="checkbox" disabled={!hasAudit} checked={share[k]} onChange={() => setShare((x) => ({ ...x, [k]: !x[k] }))} className="size-5 accent-[#D9B77E]" />{l}
                 </label>
               ))}
               <label className="mt-3 block text-sm text-ink/70" htmlFor="cm-note">A note (optional)</label>
@@ -139,7 +139,7 @@ export default function CoupleApp() {
             <h2 className="text-lg font-semibold">Shared goals</h2>
             <ul className="mt-3 space-y-1">
               {space.goals.map((g, i) => (
-                <li key={g.t}><label className="flex min-h-11 items-center gap-3"><input type="checkbox" checked={g.done} onChange={() => toggleGoal(i)} className="size-5 accent-[#34E29B]" /><span className={g.done ? 'text-ink/45 line-through' : ''}>{g.t}</span></label></li>
+                <li key={g.t}><label className="flex min-h-11 items-center gap-3"><input type="checkbox" checked={g.done} onChange={() => toggleGoal(i)} className="size-5 accent-[#D9B77E]" /><span className={g.done ? 'text-ink/45 line-through' : ''}>{g.t}</span></label></li>
               ))}
             </ul>
             {space.goals.length === 0 && <p className="mt-2 text-sm text-ink/55">Add a goal you both want, or pick one:</p>}

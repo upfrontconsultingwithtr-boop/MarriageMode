@@ -32,7 +32,7 @@ export default function Home() {
         <div className="grid-bg absolute inset-0 -z-10 opacity-60" aria-hidden="true" />
         <div className="mx-auto max-w-6xl px-4 pb-10 pt-16 text-center md:pt-24">
           <span className="rise inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-3.5 py-1.5 text-xs font-medium text-ink/80 backdrop-blur">
-            <span className="size-1.5 rounded-full bg-lagoon shadow-[0_0_10px_#34E29B]" /> Free · private · made for couples
+            <span className="size-1.5 rounded-full bg-lagoon shadow-[0_0_10px_#D9B77E]" /> Free · private · made for couples
           </span>
           <h1 className="rise rise-2 mx-auto mt-7 max-w-5xl text-[clamp(2.8rem,9vw,7rem)] font-bold leading-[0.95] tracking-[-0.04em]">
             Close your dating chapter. <span className="text-shimmer">Completely.</span>
@@ -51,7 +51,7 @@ export default function Home() {
           <div className="pointer-events-none absolute inset-0 hidden md:block" aria-hidden="true">
             {[['left-[6%] top-[18%]', 'Tinder', 'Closed', 'float'], ['right-[5%] top-[28%]', 'Billing', 'Cancelled', 'float float-2'], ['left-[9%] bottom-[22%]', 'Emails', 'Stopped', 'float float-3'], ['right-[8%] bottom-[16%]', 'Partner', 'Linked 💞', 'float']].map(([pos, a, b, f]) => (
               <div key={a} className={`glass absolute ${pos} ${f} flex items-center gap-3 px-4 py-3 shadow-2xl`}>
-                <span className="grid size-8 place-items-center rounded-full bg-lagoon text-sm text-night shadow-[0_0_16px_#34E29B]">✓</span>
+                <span className="grid size-8 place-items-center rounded-full bg-lagoon text-sm text-night shadow-[0_0_16px_#D9B77E]">✓</span>
                 <div className="text-left leading-tight"><p className="text-sm font-semibold">{a}</p><p className="text-xs text-ink/60">{b}</p></div>
               </div>
             ))}

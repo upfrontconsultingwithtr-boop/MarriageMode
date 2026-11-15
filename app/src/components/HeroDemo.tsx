@@ -26,7 +26,7 @@ export default function HeroDemo() {
           const on = closed.includes(id);
           return (
             <button key={id} onClick={() => toggle(id)} aria-pressed={on}
-              className={`min-h-11 rounded-full px-4 text-sm font-medium ring-1 transition ${on ? 'bg-lagoon/15 text-ink ring-lagoon/70 shadow-[0_0_18px_-6px_#34E29B]' : 'bg-white/[0.03] text-ink/70 ring-white/10 hover:ring-lagoon/40'}`}>
+              className={`min-h-11 rounded-full px-4 text-sm font-medium ring-1 transition ${on ? 'bg-lagoon/15 text-ink ring-lagoon/70 shadow-[0_0_18px_-6px_#D9B77E]' : 'bg-white/[0.03] text-ink/70 ring-white/10 hover:ring-lagoon/40'}`}>
               {on ? '✓ ' : ''}{PLATFORMS.find((p) => p.id === id)!.name}
             </button>
           );
