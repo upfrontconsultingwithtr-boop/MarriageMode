@@ -54,3 +54,18 @@ test('flags likely the sex they date only with another warning sign', () => {
   assert.ok(!r.find((a) => a.handle === 'maria_lopez')!.reasons.some((x) => x.includes('likely')));
   assert.ok(!r.find((a) => a.handle === 'jake_m')!.reasons.some((x) => x.includes('likely')));
 });
+
+test('reads Snapchat, YouTube, LinkedIn, Reddit, X and Threads exports', () => {
+  const m = new Map<string, Account>();
+  extract('json/friends.json', JSON.stringify({ Friends: [{ Username: 'hotgirl_snap', 'Display Name': 'Hot Girl Snap', 'Creation Timestamp': '2026-03-01 10:00:00 UTC' }] }), m);
+  extract('Takeout/YouTube and YouTube Music/subscriptions/subscriptions.csv', 'Channel Id,Channel Url,Channel Title\nUC1,http://www.youtube.com/channel/UC1,Dating Advice Daily\n', m);
+  extract('Connections.csv', 'First Name,Last Name,URL,Email Address,Company,Position,Connected On\nJessica,Smith,https://www.linkedin.com/in/js,,Acme,VP,01 Feb 2026\n', m);
+  extract('subscribed_subreddits.csv', 'subreddit\nr4r\nrelationships\n', m);
+  extract('data/following.js', 'window.YTD.following.part0 = [{"following":{"accountId":"123","userLink":"https://twitter.com/intent/user?user_id=123"}}]', m);
+  extract('your_instagram_activity/threads/threads_following.json', JSON.stringify({ text_post_app_text_post_app_following: [{ title: 'flirty_threads', string_list_data: [{ href: 'https://www.threads.net/@flirty_threads', timestamp: 1 }] }] }), m);
+  const all = [...m.values()]; const by = (h: string) => all.find((a) => a.handle === h)!;
+  assert.equal(by('Hot Girl Snap').platform, 'snapchat'); assert.equal(by('Dating Advice Daily').platform, 'youtube');
+  assert.equal(by('Jessica Smith').platform, 'linkedin'); assert.equal(by('r4r').platform, 'reddit');
+  assert.equal(by('X user 123').platform, 'x'); assert.equal(by('flirty_threads').platform, 'threads');
+  const r = flag(all, []); assert.ok(r.find((a) => a.handle === 'Dating Advice Daily')!.reasons.length > 0);
+});

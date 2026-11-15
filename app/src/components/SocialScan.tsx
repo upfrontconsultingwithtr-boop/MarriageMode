@@ -9,7 +9,7 @@ import { track } from '@/lib/track';
 const KEY = 'marriage-mode:social-removed';
 const loadDone = (): Record<string, string> => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { return {}; } };
 const saveDone = (d: Record<string, string>) => { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch { /* full */ } };
-const NET: Record<string, string> = { instagram: 'Instagram', facebook: 'Facebook', tiktok: 'TikTok', other: '—' };
+const NET: Record<string, string> = { instagram: 'Instagram', threads: 'Threads', facebook: 'Facebook', tiktok: 'TikTok', snapchat: 'Snapchat', youtube: 'YouTube', x: 'X (Twitter)', linkedin: 'LinkedIn', reddit: 'Reddit', other: '—' };
 
 // Social follow review: your own follows/friends from your own data download, scanned on this device.
 export default function SocialScan() {
@@ -47,7 +47,7 @@ export default function SocialScan() {
     <div id="social-review" className="glass scroll-mt-24 p-6 md:col-span-2">
       <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-mango">{t('Social follow review · your accounts only', 'Revisión de seguidos · solo tus cuentas')}</p>
       <h2 className="mt-1 text-lg font-semibold">{t('Find follows and friends that could put your relationship at risk', 'Encuentra seguidos y amistades que podrían poner en riesgo tu relación')}</h2>
-      <p className="mt-1 text-sm text-ink/65">{t('Instagram, Facebook and TikTok let you download your own follow, friend and group lists. Marriage Mode scans that download on this device (nothing is uploaded) and flags exes you name, dating, hookup and adult accounts, influencers and groups that promote sex or dating, and anyone followed after your relationship began. It also sorts your connections by strength (mutual vs one-way), then walks you through unfollowing or leaving the ones you choose, one tap each.', 'Instagram, Facebook y TikTok te dejan descargar tus listas de seguidos, amistades y grupos. Marriage Mode revisa esa descarga en este dispositivo (nada se sube) y marca exparejas que nombres, cuentas de citas, encuentros o para adultos, influencers y grupos que promueven sexo o citas, y a quien seguiste después de que empezó su relación. También ordena tus conexiones por fuerza (mutuas o de un solo lado) y te guía para dejar de seguir o salir de las que elijas, un toque cada una.')}</p>
+      <p className="mt-1 text-sm text-ink/65">{t('Instagram, Threads, Facebook, TikTok, Snapchat, YouTube, X, LinkedIn and Reddit all let you download your own follow, friend and group lists. Marriage Mode scans that download on this device (nothing is uploaded) and flags exes you name, dating, hookup and adult accounts, influencers and groups that promote sex or dating, and anyone followed after your relationship began. It also sorts your connections by strength (mutual vs one-way), then walks you through unfollowing or leaving the ones you choose, one tap each.', 'Instagram, Threads, Facebook, TikTok, Snapchat, YouTube, X, LinkedIn y Reddit te dejan descargar tus listas de seguidos, amistades y grupos. Marriage Mode revisa esa descarga en este dispositivo (nada se sube) y marca exparejas que nombres, cuentas de citas, encuentros o para adultos, influencers y grupos que promueven sexo o citas, y a quien seguiste después de que empezó su relación. También ordena tus conexiones por fuerza (mutuas o de un solo lado) y te guía para dejar de seguir o salir de las que elijas, un toque cada una.')}</p>
 
       {!allowed ? (
         <div className="mt-4 rounded-xl bg-night/50 p-4 ring-1 ring-white/[0.07]">
@@ -59,7 +59,13 @@ export default function SocialScan() {
           <div className="mt-4 grid gap-3 sm:grid-cols-3 [&>*]:min-w-0">
             {[['Instagram', t('Profile → ☰ → Accounts Center → Your information and permissions → Download your information → choose “Followers and following”, “Likes”, “Comments”, “Story interactions” and “Messages”, format JSON.', 'Perfil → ☰ → Centro de cuentas → Tu información y permisos → Descargar tu información → elige “Seguidores y seguidos”, “Me gusta”, “Comentarios”, “Interacciones con historias” y “Mensajes”, formato JSON.')],
               ['Facebook', t('Menu → Settings → Accounts Center → Your information and permissions → Download your information → choose “Friends and followers” and “Groups”, format JSON.', 'Menú → Configuración → Centro de cuentas → Tu información y permisos → Descargar tu información → elige “Amigos y seguidores” y “Grupos”, formato JSON.')],
-              ['TikTok', t('Profile → ☰ → Settings and privacy → Account → Download your data → JSON → Request data, then Download.', 'Perfil → ☰ → Ajustes y privacidad → Cuenta → Descargar tus datos → JSON → Solicitar datos, luego Descargar.')]].map(([n, s]) => (
+              ['TikTok', t('Profile → ☰ → Settings and privacy → Account → Download your data → JSON → Request data, then Download.', 'Perfil → ☰ → Ajustes y privacidad → Cuenta → Descargar tus datos → JSON → Solicitar datos, luego Descargar.')],
+              ['Threads', t('Threads is included in your Instagram download: choose “Threads” too in Instagram’s Download your information.', 'Threads viene en tu descarga de Instagram: elige también “Threads” en Descargar tu información de Instagram.')],
+              ['Snapchat', t('Go to accounts.snapchat.com → My Data → select “Friends” (and “Chat History” for messages) → Export JSON → Submit. Download from the email.', 'Ve a accounts.snapchat.com → Mis datos → elige “Amigos” (y “Historial de chats”) → Exportar JSON → Enviar. Descarga desde el correo.')],
+              ['YouTube', t('Go to takeout.google.com → Deselect all → tick “YouTube and YouTube Music” → choose “subscriptions” → Create export.', 'Ve a takeout.google.com → Anular selección → marca “YouTube y YouTube Music” → elige “suscripciones” → Crear exportación.')],
+              ['X (Twitter)', t('Settings → Your account → Download an archive of your data → verify → Request archive. Download when it’s ready.', 'Configuración → Tu cuenta → Descargar un archivo de tus datos → verifica → Solicitar archivo. Descárgalo cuando esté listo.')],
+              ['LinkedIn', t('Me → Settings & Privacy → Data privacy → Get a copy of your data → “Connections” → Request archive.', 'Yo → Configuración y privacidad → Privacidad de datos → Obtener una copia de tus datos → “Contactos” → Solicitar archivo.')],
+              ['Reddit', t('reddit.com/settings/data-request → request your data. The download lists the communities you joined.', 'reddit.com/settings/data-request → solicita tus datos. La descarga muestra las comunidades a las que te uniste.')]].map(([n, s]) => (
               <details key={n} className="rounded-xl bg-white/[0.03] p-3 text-sm ring-1 ring-white/[0.07]"><summary className="cursor-pointer font-semibold">{t(`Get your ${n} download`, `Obtén tu descarga de ${n}`)}</summary><p className="mt-2 text-ink/70">{s}</p></details>
             ))}
           </div>
@@ -82,7 +88,7 @@ export default function SocialScan() {
           <p className="mt-1 text-xs text-ink/50">{t('We use the earlier date, so nothing is missed. It flags follows, likes, comments, story likes and messages after that date.', 'Usamos la fecha más temprana para no pasar nada por alto. Marca seguidos, “me gusta”, comentarios, reacciones a historias y mensajes después de esa fecha.')}</p>
           <label className="glow-lagoon mt-3 inline-flex min-h-11 cursor-pointer items-center rounded-full bg-lagoon px-5 font-semibold text-night">
             {t('Choose my download file(s)', 'Elegir mi(s) archivo(s) de descarga')}
-            <input type="file" multiple accept=".zip,.json,.html,.htm" className="sr-only" onChange={(e) => onFiles(e.target.files)} />
+            <input type="file" multiple accept=".zip,.json,.html,.htm,.csv,.js" className="sr-only" onChange={(e) => onFiles(e.target.files)} />
           </label>
           {busy && <p role="status" className="mt-2 text-sm text-ink/70">{busy}</p>}
           {err && <p role="alert" className="mt-2 text-sm text-coral">{err}</p>}

@@ -2,18 +2,24 @@
 // or TikTok on their device (nothing uploaded), lists who they follow / are friends with,
 // and flags accounts that may put the relationship at risk: people they name (like exes)
 // and dating, hookup or adult accounts. The customer decides; we only suggest.
-export type Platform = 'instagram' | 'facebook' | 'tiktok' | 'other';
+export type Platform = 'instagram' | 'threads' | 'facebook' | 'tiktok' | 'snapchat' | 'youtube' | 'x' | 'linkedin' | 'reddit' | 'other';
 export type Account = { key: string; platform: Platform; handle: string; url: string; kind: string; reasons: string[]; likely?: boolean; youFollow?: boolean; followsYou?: boolean; closeFriend?: boolean; friend?: boolean; since?: number };
 
-const FILES = /(follow|friend|close_friend|connections|following|fans|group)/i;
+const FILES = /(follow|friend|close_friend|connections|following|fans|group|subscriptions|subscribed|threads)/i;
 // Accounts, influencers and groups that promote dating, hookups or sexual content.
-const RISKY = ['datingcoach', 'datingadvice', 'pickupartist', 'seduction', 'rizz', 'thirsttrap', 'thirst', 'lingerie', 'bikinimodel', 'hotgirls', 'hotguys', 'hookups', 'meetsingles', 'singlesgroup', 'swipe', 'onenight', 'adult', 'erotic', 'sexy', 'playboy', 'playmate', 'stripper', 'strip_club', 'cougar', 'milf', 'dilf', 'fwb', 'dating', 'singles', 'hookup', 'hook_up', 'onlyfans', 'fansly', 'sugarbaby', 'sugar_baby', 'sugardaddy', 'sugar_daddy', 'sugarmomma', 'nsfw', 'xxx', 'escort', 'camgirl', 'fling', 'tinder', 'bumble', 'hinge', 'feeld', 'grindr', 'swinger', 'swingers', 'flirt', 'affair', 'ashleymadison', 'seeking', '18plus', 'spicy'];
+const RISKY = ['r4r', 'gonewild', 'datingapps', 'datingcoach', 'datingadvice', 'pickupartist', 'seduction', 'rizz', 'thirsttrap', 'thirst', 'lingerie', 'bikinimodel', 'hotgirls', 'hotguys', 'hookups', 'meetsingles', 'singlesgroup', 'swipe', 'onenight', 'adult', 'erotic', 'sexy', 'playboy', 'playmate', 'stripper', 'strip_club', 'cougar', 'milf', 'dilf', 'fwb', 'dating', 'singles', 'hookup', 'hook_up', 'onlyfans', 'fansly', 'sugarbaby', 'sugar_baby', 'sugardaddy', 'sugar_daddy', 'sugarmomma', 'nsfw', 'xxx', 'escort', 'camgirl', 'fling', 'tinder', 'bumble', 'hinge', 'feeld', 'grindr', 'swinger', 'swingers', 'flirt', 'affair', 'ashleymadison', 'seeking', '18plus', 'spicy'];
 
 const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9_. ]/g, ' ').replace(/\s+/g, ' ').trim();
 
 function platformOf(path: string, href = ''): Platform {
   const s = (path + ' ' + href).toLowerCase();
+  if (s.includes('threads.net') || /(^|\/)threads?[\/_]/.test(path.toLowerCase())) return 'threads';
   if (s.includes('instagram')) return 'instagram';
+  if (s.includes('snapchat') || s.includes('snap')) return 'snapchat';
+  if (s.includes('youtube')) return 'youtube';
+  if (s.includes('twitter') || s.includes('x.com') || /following\.js$/.test(path)) return 'x';
+  if (s.includes('linkedin') || /connections\.csv$/i.test(path)) return 'linkedin';
+  if (s.includes('reddit') || s.includes('subreddit')) return 'reddit';
   if (s.includes('tiktok')) return 'tiktok';
   if (s.includes('facebook') || s.includes('friends_v2') || s.includes('your_friends')) return 'facebook';
   return 'other';
@@ -30,6 +36,12 @@ export function profileUrl(platform: Platform, handle: string, href?: string): s
   if (href && /^https?:\/\//.test(href)) return href;
   if (platform === 'instagram') return `https://www.instagram.com/${encodeURIComponent(handle)}/`;
   if (platform === 'tiktok') return `https://www.tiktok.com/@${encodeURIComponent(handle)}`;
+  if (platform === 'threads') return `https://www.threads.net/@${encodeURIComponent(handle)}`;
+  if (platform === 'snapchat') return `https://www.snapchat.com/add/${encodeURIComponent(handle)}`;
+  if (platform === 'youtube') return `https://www.youtube.com/results?search_query=${encodeURIComponent(handle)}`;
+  if (platform === 'x') return `https://x.com/${encodeURIComponent(handle)}`;
+  if (platform === 'linkedin') return `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(handle)}`;
+  if (platform === 'reddit') return `https://www.reddit.com/r/${encodeURIComponent(handle.replace(/^r\//, ''))}/`;
   return `https://www.facebook.com/search/top?q=${encodeURIComponent(handle)}`;
 }
 
@@ -48,6 +60,22 @@ export function extract(path: string, text: string, out: Map<string, Account>) {
     if (kind !== 'group') a.kind = a.closeFriend ? 'close friend' : a.friend ? 'friend' : a.youFollow && a.followsYou ? 'mutual follow' : a.youFollow ? 'you follow' : 'follows you';
     out.set(key, a);
   };
+  if (/\.csv$/i.test(path)) {
+    const rows = text.split(/\r?\n/).filter(Boolean); const head = (rows.shift() ?? '').split(',').map((h) => h.trim().toLowerCase());
+    const col = (n: string) => head.findIndex((h) => h.includes(n));
+    for (const r of rows) {
+      const c = r.match(/("([^"]|"")*"|[^,]*)(,|$)/g)?.map((x) => x.replace(/,$/, '').replace(/^"|"$/g, '').replace(/""/g, '"').trim()) ?? [];
+      if (col('channel title') >= 0) add(c[col('channel title')], c[col('channel url')]);
+      else if (col('first name') >= 0) add(`${c[col('first name')] ?? ''} ${c[col('last name')] ?? ''}`, c[col('url')], c[col('connected on')] ? Date.parse(c[col('connected on')]) : undefined);
+      else if (col('subreddit') >= 0) add(c[col('subreddit')]);
+    }
+    return;
+  }
+  if (/\.js$/i.test(path)) {
+    let arr: { following?: { accountId?: string; userLink?: string } }[] = []; try { arr = JSON.parse(text.replace(/^[^=]*=\s*/, '')); } catch { return; }
+    for (const e of arr) if (e.following?.accountId) add(`X user ${e.following.accountId}`, e.following.userLink);
+    return;
+  }
   if (/\.json$/i.test(path)) {
     let data: unknown; try { data = JSON.parse(text); } catch { return; }
     const walk = (v: unknown) => {
@@ -58,6 +86,7 @@ export function extract(path: string, text: string, out: Map<string, Account>) {
       if (sld?.length) { const s = sld[0]; const h = (s.value as string) || (o.title as string) || ((s.href as string) || '').split('/').filter(Boolean).pop() || ''; add(h, s.href as string, s.timestamp as number); return; }
       if (/group/i.test(path) && typeof o.name === 'string' && typeof o.timestamp === 'number') { add(o.name, undefined, o.timestamp as number); return; }
       if (/group/i.test(path) && typeof o.title === 'string' && typeof o.timestamp === 'number') { add(o.title, undefined, o.timestamp as number); return; }
+      if (typeof o.Username === 'string' || typeof o['Display Name'] === 'string') { add((o['Display Name'] as string) || (o.Username as string), typeof o.Username === 'string' ? `https://www.snapchat.com/add/${o.Username}` : undefined, typeof o['Creation Timestamp'] === 'string' ? Date.parse(o['Creation Timestamp'] as string) : undefined); return; }
       if (typeof o.UserName === 'string') { add(o.UserName, undefined, typeof o.Date === 'string' ? Date.parse(o.Date) : undefined); return; }
       if (typeof o.name === 'string' && (typeof o.timestamp === 'number' || 'contact_info' in o)) { add(o.name, undefined, o.timestamp as number); return; }
       Object.values(o).forEach(walk);
@@ -95,9 +124,9 @@ export async function readExport(f: File, onProgress: (m: string) => void, raw?:
   if (/\.zip$/i.test(f.name)) {
     const { unzip } = await import('fflate');
     const buf = new Uint8Array(await f.arrayBuffer()); onProgress('Opening the download…');
-    const files: Record<string, Uint8Array> = await new Promise((res, rej) => unzip(buf, { filter: (e) => (FILES.test(e.name) || (!!raw && INTER.test(e.name))) && /\.(json|html?)$/i.test(e.name) && e.originalSize <= 30e6 }, (err, o) => (err ? rej(err) : res(o))));
+    const files: Record<string, Uint8Array> = await new Promise((res, rej) => unzip(buf, { filter: (e) => (FILES.test(e.name) || (!!raw && INTER.test(e.name))) && /\.(json|html?|csv|js)$/i.test(e.name) && e.originalSize <= 30e6 }, (err, o) => (err ? rej(err) : res(o))));
     const dec = new TextDecoder(); for (const [n, b] of Object.entries(files)) { const txt = dec.decode(b); extract(n, txt, out); if (raw && INTER.test(n)) raw.push({ path: n, text: txt }); }
-  } else if (/\.(json|html?)$/i.test(f.name)) { extract(`following/${f.name}`, await f.text(), out); }
+  } else if (/\.(json|html?|csv|js)$/i.test(f.name)) { extract(/(follow|friend|subscri|connection)/i.test(f.name) ? f.name : `following/${f.name}`, await f.text(), out); }
   else throw new Error('unsupported');
   return [...out.values()];
 }
