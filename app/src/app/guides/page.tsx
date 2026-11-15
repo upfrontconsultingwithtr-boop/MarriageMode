@@ -13,6 +13,7 @@ export default function Guides() {
         {PLATFORMS.map((p) => (
           <Link key={p.id} href={`/guides/${p.id}/`} className="glass p-4 hover:ring-1 hover:ring-lagoon/50">
             <span className="font-semibold">How to delete {p.name}</span> <span className="text-teal">→</span>
+            {p.billing.length > 0 && <span className="mt-1 block text-sm text-ink/60">and cancel the subscription</span>}
           </Link>
         ))}
       </div>

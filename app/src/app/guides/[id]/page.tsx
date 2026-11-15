@@ -46,6 +46,7 @@ export default async function Guide({ params }: Props) {
                 <p className="mt-1 text-ink/70">{s.d}</p>
                 {s.t.startsWith('Cancel') && (
                   <p className="mt-2 flex flex-wrap gap-3 text-sm">
+                    <Link href={`/cancel/${p.id}/`} className="text-teal underline">Full cancel steps →</Link>
                     {p.billing.map((b) => BILLING_LINKS[b].url
                       ? <a key={b} href={BILLING_LINKS[b].url} target="_blank" rel="noopener noreferrer" className="text-teal underline">{BILLING_LINKS[b].label} ↗</a>
                       : <span key={b} className="text-ink/60">{BILLING_LINKS[b].how}</span>)}
