@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import Link from 'next/link';
+import '@fontsource-variable/inter';
+import '@fontsource-variable/space-grotesk';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -7,29 +9,30 @@ export const metadata: Metadata = {
   description: 'A free, private checklist to close old dating accounts, stop the emails and cancel the billing, so nothing old surprises your relationship. By Upfront Consulting with Tiff & Reco LLC.',
   icons: { icon: '/icon.svg' },
   manifest: '/manifest.webmanifest',
+  openGraph: { images: ['/og.png'], title: 'Marriage Mode', description: 'Close your dating chapter. Completely. Private, free, self-led.' },
 };
-export const viewport: Viewport = { themeColor: '#06424D', width: 'device-width', initialScale: 1 };
+export const viewport: Viewport = { themeColor: '#03080C', width: 'device-width', initialScale: 1, colorScheme: 'dark' };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="min-h-screen antialiased">
-        <header className="bg-ocean text-white">
-          <nav className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-            <Link href="/" className="flex items-center gap-2 text-lg font-extrabold tracking-tight">
-              <img src="/icon.svg" alt="" width={28} height={28} /> Marriage Mode
+      <body className="min-h-screen overflow-x-hidden antialiased">
+        <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-night/70 backdrop-blur-xl">
+          <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+            <Link href="/" className="flex items-center gap-2.5 font-display text-lg font-bold tracking-tight">
+              <img src="/icon.svg" alt="" width={30} height={30} /> Marriage Mode
             </Link>
-            <div className="flex gap-4 text-sm">
-              <Link href="/audit/" className="rounded-full bg-mango px-4 py-1.5 font-semibold text-ink hover:brightness-95">Start free audit</Link>
-            </div>
+            <Link href="/audit/" className="glow-mango rounded-full bg-mango px-4 py-1.5 text-sm font-semibold text-night hover:brightness-110">
+              Start free audit
+            </Link>
           </nav>
         </header>
         <main>{children}</main>
-        <footer className="mt-16 border-t border-ink/10 py-8 text-center text-sm text-ink/70">
-          <p>Marriage Mode by <strong>Upfront Consulting with Tiff &amp; Reco LLC</strong></p>
-          <p className="mt-2 space-x-4">
-            <Link href="/privacy/" className="underline">Privacy</Link>
-            <Link href="/safety/" className="underline">Safety &amp; consent</Link>
+        <footer className="relative mt-24 border-t border-white/[0.06] py-10 text-center text-sm text-ink/60">
+          <p>Marriage Mode by <strong className="text-ink/85">Upfront Consulting with Tiff &amp; Reco LLC</strong></p>
+          <p className="mt-3 space-x-5">
+            <Link href="/privacy/" className="hover:text-teal">Privacy</Link>
+            <Link href="/safety/" className="hover:text-teal">Safety &amp; consent</Link>
           </p>
         </footer>
       </body>

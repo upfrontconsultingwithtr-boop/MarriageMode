@@ -1,16 +1,86 @@
 @import "tailwindcss";
 
+/* Dark, futurist theme. Brand glow colors: lagoon (turquoise) + mango. */
 @theme {
-  --color-ocean: #06424D;
-  --color-ink: #0A2F37;
-  --color-lagoon: #2CC5BD;
-  --color-teal: #0A7F7E;
+  --color-night: #03080C;      /* page background */
+  --color-deep: #071820;       /* raised surface */
+  --color-ink: #E4F4F3;        /* main text (light on dark) */
+  --color-ocean: #0B5563;
+  --color-lagoon: #2CE0D4;
+  --color-teal: #5EE6DC;       /* links */
   --color-mango: #FFB627;
-  --color-coral: #FF6F59;
-  --color-palm: #2BB673;
-  --color-mist: #F4FBFA;
-  --font-sans: "Public Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --color-coral: #FF7A66;
+  --color-palm: #34D399;
+  --color-violet: #8B7CFF;
+  --color-mist: #0C1D25;
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Space Grotesk Variable", "Inter Variable", ui-sans-serif, system-ui, sans-serif;
 }
 
-body { background: var(--color-mist); color: var(--color-ink); }
-:focus-visible { outline: 3px solid var(--color-mango); outline-offset: 2px; }
+:root { color-scheme: dark; }
+html { background: var(--color-night); }
+body {
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgb(44 224 212 / .10), transparent 60%),
+    radial-gradient(900px 500px at -10% 30%, rgb(139 124 255 / .08), transparent 60%),
+    var(--color-night);
+  color: var(--color-ink);
+}
+h1, h2, h3, .font-display { font-family: var(--font-display); letter-spacing: -0.02em; }
+:focus-visible { outline: 2px solid var(--color-mango); outline-offset: 3px; }
+::selection { background: rgb(44 224 212 / .35); }
+
+/* Grid backdrop, fading out toward the edges */
+.grid-bg {
+  background-image:
+    linear-gradient(rgb(94 230 220 / .07) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(94 230 220 / .07) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 35%, #000 25%, transparent 75%);
+}
+/* Perspective "floor" grid under the hero */
+.grid-floor {
+  background-image:
+    linear-gradient(rgb(44 224 212 / .22) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(44 224 212 / .22) 1px, transparent 1px);
+  background-size: 64px 64px;
+  transform: perspective(520px) rotateX(62deg);
+  transform-origin: 50% 0;
+  mask-image: linear-gradient(to bottom, #000, transparent 85%);
+}
+
+/* Glass panels */
+.glass {
+  background: linear-gradient(180deg, rgb(255 255 255 / .06), rgb(255 255 255 / .02));
+  border: 1px solid rgb(255 255 255 / .09);
+  backdrop-filter: blur(14px);
+  border-radius: 1.25rem;
+}
+/* Glowing gradient border (halo edge) */
+.halo-border { position: relative; border-radius: 1.75rem; }
+.halo-border::before {
+  content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1px;
+  background: conic-gradient(from var(--a, 0deg), var(--color-lagoon), var(--color-violet), var(--color-mango), var(--color-lagoon));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: halo-turn 8s linear infinite;
+}
+@property --a { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@keyframes halo-turn { to { --a: 360deg; } }
+
+.text-glow {
+  background: linear-gradient(100deg, #fff 10%, var(--color-lagoon) 45%, var(--color-mango) 85%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.glow-lagoon { box-shadow: 0 0 0 1px rgb(44 224 212 / .4), 0 10px 40px -10px rgb(44 224 212 / .7); }
+.glow-mango  { box-shadow: 0 10px 40px -8px rgb(255 182 39 / .65); }
+
+.spin-slow { animation: spin 60s linear infinite; transform-origin: center; transform-box: fill-box; }
+.spin-rev  { animation: spin 90s linear infinite reverse; transform-origin: center; transform-box: fill-box; }
+.pulse-soft { animation: pulse 5s ease-in-out infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse { 50% { opacity: .55; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .spin-slow, .spin-rev, .pulse-soft, .halo-border::before { animation: none; }
+}

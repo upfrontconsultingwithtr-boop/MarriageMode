@@ -18,8 +18,8 @@ function Ring({ value, label }: { value: number; label: string }) {
     <div className="flex items-center gap-3">
       <svg width="84" height="84" viewBox="0 0 84 84" role="img" aria-label={`${label}: ${value} out of 100`}>
         <circle cx="42" cy="42" r={r} fill="none" stroke="currentColor" strokeOpacity=".12" strokeWidth="9" />
-        <circle cx="42" cy="42" r={r} fill="none" stroke={value === 100 ? '#2BB673' : '#2CC5BD'} strokeWidth="9" strokeLinecap="round"
-          strokeDasharray={c} strokeDashoffset={c * (1 - value / 100)} transform="rotate(-90 42 42)" style={{ transition: 'stroke-dashoffset .4s' }} />
+        <circle cx="42" cy="42" r={r} fill="none" stroke={value === 100 ? '#34D399' : '#2CE0D4'} style={{ transition: 'stroke-dashoffset .4s', filter: 'drop-shadow(0 0 6px #2CE0D4)' }} strokeWidth="9" strokeLinecap="round"
+          strokeDasharray={c} strokeDashoffset={c * (1 - value / 100)} transform="rotate(-90 42 42)" />
         <text x="42" y="48" textAnchor="middle" fontSize="20" fontWeight="800" fill="currentColor">{value}</text>
       </svg>
       <span className="text-sm font-semibold leading-tight">{label}</span>
@@ -58,10 +58,13 @@ export default function AuditApp() {
   const summary = shareSummary(s);
 
   return (
+    <div className="relative isolate">
+    <div className="grid-bg absolute inset-x-0 top-0 -z-10 h-[520px]" aria-hidden="true" />
     <div className="mx-auto max-w-5xl px-4 py-8">
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-white p-5 ring-1 ring-ink/5">
+      <div className="flex flex-wrap items-center justify-between gap-4 glass rounded-3xl p-5">
         <div>
-          <h1 className="text-2xl font-extrabold">Your private audit</h1>
+          <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-teal">Private · on this device</p>
+          <h1 className="mt-1 text-2xl font-bold">Your audit</h1>
           <p className="text-sm text-ink/70">Saved only on this device. {s.doneCount} of {s.total} steps done.</p>
         </div>
         <div className="flex flex-wrap gap-6 text-ink">
@@ -73,7 +76,7 @@ export default function AuditApp() {
       <div role="tablist" className="mt-6 flex gap-2 overflow-x-auto pb-1">
         {TABS.map((t, i) => (
           <button key={t} role="tab" aria-selected={tab === i} onClick={() => setTab(i)}
-            className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold ${tab === i ? 'bg-ocean text-white' : 'bg-white text-ink ring-1 ring-ink/10'}`}>
+            className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold ${tab === i ? 'bg-lagoon text-night glow-lagoon' : 'bg-white/5 text-ink/80 ring-1 ring-white/10'}`}>
             {i + 1}. {t}
           </button>
         ))}
@@ -83,7 +86,7 @@ export default function AuditApp() {
         <section className="mt-6">
           <p className="text-ink/80">Tick every dating app or site you have <em>ever</em> used, even once. Not sure? Use the email check (step 3) to find out.</p>
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search apps…" aria-label="Search apps"
-            className="mt-4 w-full rounded-full border border-ink/20 bg-white px-5 py-3 sm:w-80" />
+            className="mt-4 w-full rounded-full border border-white/15 bg-white/5 px-5 py-3 sm:w-80" />
           {cats.map((c) => {
             const items = filtered.filter((p) => p.category === c);
             if (!items.length) return null;
@@ -95,7 +98,7 @@ export default function AuditApp() {
                     const on = state.platformIds.includes(p.id);
                     return (
                       <button key={p.id} onClick={() => toggle(p.id)} aria-pressed={on}
-                        className={`rounded-full px-4 py-2 text-sm font-medium ring-1 ${on ? 'bg-lagoon/20 ring-teal text-ink' : 'bg-white ring-ink/15'}`}>
+                        className={`rounded-full px-4 py-2 text-sm font-medium ring-1 ${on ? 'bg-lagoon/15 ring-lagoon/70 text-ink shadow-[0_0_18px_-6px_#2CE0D4]' : 'bg-white/5 ring-white/10 text-ink/80 hover:ring-lagoon/40'}`}>
                         {on ? '✓ ' : ''}{p.name}
                       </button>
                     );
@@ -106,11 +109,11 @@ export default function AuditApp() {
           })}
           <div className="mt-6 flex gap-2">
             <input value={custom} onChange={(e) => setCustom(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addCustom()}
-              placeholder="Another app or site" aria-label="Add another app" className="min-w-0 flex-1 rounded-full border border-ink/20 bg-white px-5 py-2.5 sm:max-w-xs" />
-            <button onClick={addCustom} className="rounded-full bg-white px-5 py-2.5 font-semibold ring-1 ring-ink/20">Add</button>
+              placeholder="Another app or site" aria-label="Add another app" className="min-w-0 flex-1 rounded-full border border-white/15 bg-white/5 px-5 py-2.5 sm:max-w-xs" />
+            <button onClick={addCustom} className="rounded-full bg-white/5 px-5 py-2.5 font-semibold ring-1 ring-white/15">Add</button>
           </div>
           {state.custom.length > 0 && <p className="mt-2 text-sm text-ink/70">Added: {state.custom.join(', ')}</p>}
-          <button onClick={() => setTab(1)} className="mt-8 rounded-full bg-mango px-6 py-3 font-semibold text-ink">Next: my checklist →</button>
+          <button onClick={() => setTab(1)} className="glow-mango mt-8 rounded-full bg-mango px-6 py-3 font-semibold text-night">Next: my checklist →</button>
         </section>
       )}
 
@@ -122,7 +125,7 @@ export default function AuditApp() {
           {groups.map((g) => {
             const p = PLATFORMS.find((x) => x.name === g.title);
             return (
-              <div key={g.title} className="rounded-2xl bg-white p-5 ring-1 ring-ink/5">
+              <div key={g.title} className="glass p-5">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <h2 className="text-lg font-bold">{g.title}</h2>
                   {g.title !== 'Everywhere else' && (
@@ -133,7 +136,7 @@ export default function AuditApp() {
                   {g.items.map((st) => (
                     <li key={st.id}>
                       <label className="flex cursor-pointer gap-3">
-                        <input type="checkbox" checked={!!state.done[st.id]} onChange={() => tick(st.id)} className="mt-1 size-5 accent-[#0A7F7E]" />
+                        <input type="checkbox" checked={!!state.done[st.id]} onChange={() => tick(st.id)} className="mt-1 size-5 accent-[#2CE0D4]" />
                         <span>
                           <span className={`font-medium ${state.done[st.id] ? 'text-ink/50 line-through' : ''}`}>{st.label}</span>
                           {st.detail && <span className="block text-sm text-ink/70">{st.detail}</span>}
@@ -158,42 +161,42 @@ export default function AuditApp() {
 
       {tab === 2 && (
         <section className="mt-6 space-y-5">
-          <div className="rounded-2xl bg-white p-6 ring-1 ring-ink/5">
+          <div className="glass p-6">
             <h2 className="text-lg font-bold">Search your own inbox for dating emails</h2>
             <p className="mt-1 text-ink/75">
               This opens Gmail in a new tab and runs a search there. Marriage Mode never connects to your email or sees the results.
               {state.platformIds.length ? ' The search covers the apps you picked.' : ' Pick no apps and it searches for all of them, which helps you find accounts you forgot.'}
             </p>
-            <a href={gmailSearchUrl(domains)} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block rounded-full bg-ocean px-6 py-3 font-semibold text-white">Search my Gmail ↗</a>
+            <a href={gmailSearchUrl(domains)} target="_blank" rel="noopener noreferrer" className="glow-lagoon mt-4 inline-block rounded-full bg-lagoon px-6 py-3 font-semibold text-night">Search my Gmail ↗</a>
             <h3 className="mt-6 font-semibold">Outlook, Yahoo, iCloud or other email</h3>
             <p className="text-sm text-ink/70">Copy this into your email search box:</p>
             <div className="mt-2 flex gap-2">
-              <code className="block min-w-0 flex-1 overflow-x-auto whitespace-nowrap rounded-lg bg-mist p-3 text-sm">{gmailQuery(domains)}</code>
-              <button onClick={() => copy(gmailQuery(domains), 'q')} className="rounded-lg bg-white px-4 text-sm font-semibold ring-1 ring-ink/20">{copied === 'q' ? 'Copied' : 'Copy'}</button>
+              <code className="block min-w-0 flex-1 overflow-x-auto whitespace-nowrap rounded-lg bg-night/70 p-3 text-sm">{gmailQuery(domains)}</code>
+              <button onClick={() => copy(gmailQuery(domains), 'q')} className="rounded-lg bg-white/5 px-4 text-sm font-semibold ring-1 ring-white/15">{copied === 'q' ? 'Copied' : 'Copy'}</button>
             </div>
             <p className="mt-2 text-xs text-ink/60">Some email apps don&apos;t understand &ldquo;OR&rdquo;. If so, search for one name at a time.</p>
           </div>
-          <div className="rounded-2xl bg-white p-6 ring-1 ring-ink/5">
+          <div className="glass p-6">
             <h3 className="font-semibold">Found an app you forgot?</h3>
             <p className="text-ink/75">Go back to step 1 and tick it. Its steps appear in your checklist.</p>
-            <button onClick={() => setTab(0)} className="mt-3 rounded-full bg-white px-5 py-2.5 font-semibold ring-1 ring-ink/20">← Back to my apps</button>
+            <button onClick={() => setTab(0)} className="mt-3 rounded-full bg-white/5 px-5 py-2.5 font-semibold ring-1 ring-white/15">← Back to my apps</button>
           </div>
         </section>
       )}
 
       {tab === 3 && (
         <section className="mt-6 grid gap-5 md:grid-cols-2">
-          <div className="rounded-2xl bg-white p-6 ring-1 ring-ink/5">
+          <div className="glass p-6">
             <h2 className="text-lg font-bold">Share your progress, if you want to</h2>
             <p className="mt-1 text-sm text-ink/70">It never names any app. Edit it any way you like before sending.</p>
-            <pre className="mt-4 whitespace-pre-wrap rounded-xl bg-mist p-4 font-sans text-sm">{summary}</pre>
+            <pre className="mt-4 whitespace-pre-wrap rounded-xl bg-night/70 p-4 font-sans text-sm">{summary}</pre>
             <div className="mt-4 flex flex-wrap gap-2">
-              <button onClick={() => copy(summary, 's')} className="rounded-full bg-ocean px-5 py-2.5 font-semibold text-white">{copied === 's' ? 'Copied' : 'Copy message'}</button>
+              <button onClick={() => copy(summary, 's')} className="glow-lagoon rounded-full bg-lagoon px-5 py-2.5 font-semibold text-night">{copied === 's' ? 'Copied' : 'Copy message'}</button>
               <button onClick={() => { if (navigator.share) navigator.share({ text: summary }).catch(() => {}); else copy(summary, 's'); }}
-                className="rounded-full bg-white px-5 py-2.5 font-semibold ring-1 ring-ink/20">Share…</button>
+                className="rounded-full bg-white/5 px-5 py-2.5 font-semibold ring-1 ring-white/15">Share…</button>
             </div>
           </div>
-          <div className="rounded-2xl bg-white p-6 ring-1 ring-ink/5">
+          <div className="glass p-6">
             <h2 className="text-lg font-bold">Talking about it</h2>
             <ul className="mt-3 list-disc space-y-2 pl-5 text-ink/80">
               <li>Lead with why: &ldquo;I wanted nothing from before to get in our way.&rdquo;</li>
@@ -209,6 +212,7 @@ export default function AuditApp() {
       <div className="mt-10 flex justify-end">
         <button onClick={reset} className="text-sm text-ink/60 underline">Clear my audit from this device</button>
       </div>
+    </div>
     </div>
   );
 }

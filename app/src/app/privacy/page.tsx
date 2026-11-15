@@ -3,9 +3,9 @@ export const metadata: Metadata = { title: 'Privacy · Marriage Mode' };
 
 export default function Privacy() {
   return (
-    <article className="mx-auto max-w-3xl space-y-4 px-4 py-10 leading-relaxed">
-      <h1 className="text-3xl font-extrabold">Privacy</h1>
-      <p className="text-sm text-ink/60">Draft, effective November 15, 2026. Marriage Mode is a product of Upfront Consulting with Tiff &amp; Reco LLC.</p>
+    <article className="mx-auto max-w-3xl space-y-4 px-4 py-14 leading-relaxed text-ink/80">
+      <h1 className="text-4xl font-bold text-glow">Privacy</h1>
+      <p className="text-sm text-ink/50">Draft, effective November 15, 2026. Marriage Mode is a product of Upfront Consulting with Tiff &amp; Reco LLC.</p>
       <h2 className="pt-2 text-xl font-bold">The free audit stays on your device</h2>
       <p>The apps you pick and the steps you tick are saved only in your own browser&apos;s storage. We do not receive them. Clearing your browser data, or the &ldquo;Clear my audit&rdquo; button, deletes them.</p>
       <h2 className="pt-2 text-xl font-bold">The email check</h2>
