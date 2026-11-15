@@ -78,3 +78,4 @@ Why: counselors and pastors who work with engaged couples are the fastest free w
 - 2026-11-15: Investor pitch deck as 12 real slides: https://claude.ai/artifact/BwbsC8cNoTZWzJZiwit7PP (source in docs/deck/).
 - 2026-11-15: Value and benefits shown on the home page, Spanish page and dashboard (Your toolkit panel).
 - 2026-11-15: Home page speed: phone score 68 → 72–81 (no background dashboard loading, lazy sections). Hub: post previews + tappable links.
+- 2026-11-15: Partner program live (/partners/) with lead capture to app.leads (migration 0004, RLS tested). Lead-gen plan: docs/marketing/LEAD-GEN-PLAN.md.
