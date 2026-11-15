@@ -151,3 +151,6 @@ h3.font-bold, h3.font-semibold { font-weight: 600; }
 .text-glow, .text-shimmer { font-style: italic; }
 .text-shimmer { background-image: linear-gradient(100deg, #E8C99A, #FBF3E6 30%, #D9B77E 55%, #E8A4A9 75%, #E8C99A); }
 .grid-bg { opacity: .45; }
+
+/* Speed: skip styling/layout of below-the-fold home sections until they near the screen. */
+main > section:nth-child(n+3) { content-visibility: auto; contain-intrinsic-size: auto 900px; }

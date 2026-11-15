@@ -45,8 +45,8 @@ export default function Home() {
             Marriage Mode finds every dating account you ever opened and walks you through closing it for good: profile, billing, app and emails. Then share the clean slate with your partner.
           </p>
           <div className="rise rise-4 mt-9 flex flex-wrap justify-center gap-3">
-            <Link href="/audit/" className="glow-mango min-h-12 rounded-full bg-mango px-8 py-4 text-lg font-semibold text-night hover:brightness-110">Start my free audit →</Link>
-            <Link href="#how" className="min-h-12 rounded-full border border-white/15 bg-white/5 px-8 py-4 text-lg font-semibold backdrop-blur hover:border-lagoon/60">See how it works</Link>
+            <Link prefetch={false} href="/audit/" className="glow-mango min-h-12 rounded-full bg-mango px-8 py-4 text-lg font-semibold text-night hover:brightness-110">Start my free audit →</Link>
+            <Link prefetch={false} href="#how" className="min-h-12 rounded-full border border-white/15 bg-white/5 px-8 py-4 text-lg font-semibold backdrop-blur hover:border-lagoon/60">See how it works</Link>
           </div>
         </div>
         <div className="relative mx-auto max-w-5xl px-4 pb-24 pt-6">
@@ -124,7 +124,7 @@ export default function Home() {
             </div>
           ))}
         </div>
-        <Link href="/audit/" className="glow-mango mt-8 inline-block rounded-full bg-mango px-8 py-4 text-lg font-semibold text-night hover:brightness-110">Start my free audit →</Link>
+        <Link prefetch={false} href="/audit/" className="glow-mango mt-8 inline-block rounded-full bg-mango px-8 py-4 text-lg font-semibold text-night hover:brightness-110">Start my free audit →</Link>
       </section>
 
       {/* HOW IT WORKS: sticky phone story */}
@@ -155,7 +155,7 @@ export default function Home() {
             <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-teal">Free</p>
             <p className="mt-2 font-display text-4xl font-bold">$0</p>
             <ul className="mt-4 space-y-2 text-sm text-ink/75">{['Full private audit for 29 apps', 'Inbox and web self-search', 'Dashboard, milestones, report', 'Couple Mode and partner space', 'Sync across your devices', 'Guides and couples worksheet'].map((t) => <li key={t} className="flex gap-2"><span className="text-lagoon">✓</span>{t}</li>)}</ul>
-            <Link href="/audit/" className="glow-mango mt-6 inline-block rounded-full bg-mango px-6 py-3 text-sm font-semibold text-night">Start free</Link>
+            <Link prefetch={false} href="/audit/" className="glow-mango mt-6 inline-block rounded-full bg-mango px-6 py-3 text-sm font-semibold text-night">Start free</Link>
           </div></div>
           <div className="glass p-6">
             <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-mango">Clean Slate Kit</p>
@@ -211,7 +211,7 @@ export default function Home() {
                 <Eyebrow>New · Couple Mode</Eyebrow>
                 <h2 className="mt-3 text-3xl font-bold">A private space for the two of you</h2>
                 <p className="mt-2 text-ink/70">Shared goals and the progress each of you chooses to share. It lives inside a private link you send each other: no accounts, nothing stored on our servers, and either of you can stop anytime.</p>
-                <Link href="/couple/" className="glow-mango mt-6 inline-block rounded-full bg-mango px-7 py-3.5 font-semibold text-night hover:brightness-110">Open Couple Mode →</Link>
+                <Link prefetch={false} href="/couple/" className="glow-mango mt-6 inline-block rounded-full bg-mango px-7 py-3.5 font-semibold text-night hover:brightness-110">Open Couple Mode →</Link>
               </div>
               <div className="hidden justify-center md:flex" aria-hidden="true"><Halo className="h-auto w-56" /></div>
             </div>
@@ -223,7 +223,7 @@ export default function Home() {
       <section className="relative isolate mx-auto mt-28 max-w-6xl overflow-hidden rounded-[2.5rem] px-4 py-24 text-center">
         <Aurora className="absolute inset-0 -z-10 h-full w-full" />
         <h2 className="text-4xl font-bold sm:text-6xl">Twenty minutes. <span className="text-shimmer">Nothing left behind.</span></h2>
-        <Link href="/audit/" className="glow-mango mt-9 inline-block rounded-full bg-mango px-9 py-4 text-lg font-semibold text-night hover:brightness-110">Start my free audit →</Link>
+        <Link prefetch={false} href="/audit/" className="glow-mango mt-9 inline-block rounded-full bg-mango px-9 py-4 text-lg font-semibold text-night hover:brightness-110">Start my free audit →</Link>
       </section>
     </>
   );

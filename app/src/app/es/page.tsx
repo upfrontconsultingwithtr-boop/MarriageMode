@@ -60,10 +60,10 @@ export default function Espanol() {
             Marriage Mode te ayuda a encontrar cada cuenta de citas que abriste y a cerrarla para siempre: perfil, cobros, app y correos. Luego, si quieres, comparte la página limpia con tu pareja.
           </p>
           <div className="rise rise-4 mt-9 flex flex-wrap justify-center gap-3">
-            <Link href="/audit/?lang=es" className="glow-mango min-h-12 rounded-full bg-mango px-8 py-4 text-lg font-semibold text-night hover:brightness-110">Empezar mi revisión gratis →</Link>
-            <Link href="#como" className="min-h-12 rounded-full border border-white/15 bg-white/5 px-8 py-4 text-lg font-semibold backdrop-blur hover:border-lagoon/60">Cómo funciona</Link>
+            <Link prefetch={false} href="/audit/?lang=es" className="glow-mango min-h-12 rounded-full bg-mango px-8 py-4 text-lg font-semibold text-night hover:brightness-110">Empezar mi revisión gratis →</Link>
+            <Link prefetch={false} href="#como" className="min-h-12 rounded-full border border-white/15 bg-white/5 px-8 py-4 text-lg font-semibold backdrop-blur hover:border-lagoon/60">Cómo funciona</Link>
           </div>
-          <p className="mt-5 text-sm text-ink/55"><Link href="/" className="underline hover:text-ink" hrefLang="en">English</Link></p>
+          <p className="mt-5 text-sm text-ink/55"><Link prefetch={false} href="/" className="underline hover:text-ink" hrefLang="en">English</Link></p>
         </div>
       </section>
 
@@ -114,7 +114,7 @@ export default function Espanol() {
             </div>
           ))}
         </div>
-        <Link href="/audit/?lang=es" className="glow-mango mt-8 inline-block rounded-full bg-mango px-8 py-4 text-lg font-semibold text-night hover:brightness-110">Empezar mi revisión gratis →</Link>
+        <Link prefetch={false} href="/audit/?lang=es" className="glow-mango mt-8 inline-block rounded-full bg-mango px-8 py-4 text-lg font-semibold text-night hover:brightness-110">Empezar mi revisión gratis →</Link>
       </section>
 
       <section className="mx-auto max-w-6xl px-4 pt-24">
@@ -174,7 +174,7 @@ export default function Espanol() {
       <section className="relative isolate mx-auto mt-28 max-w-6xl overflow-hidden rounded-[2.5rem] px-4 py-24 text-center">
         <Aurora className="absolute inset-0 -z-10 h-full w-full" />
         <h2 className="text-4xl font-bold sm:text-6xl">Veinte minutos. <span className="text-shimmer">Nada pendiente.</span></h2>
-        <Link href="/audit/?lang=es" className="glow-mango mt-9 inline-block rounded-full bg-mango px-9 py-4 text-lg font-semibold text-night hover:brightness-110">Empezar mi revisión gratis →</Link>
+        <Link prefetch={false} href="/audit/?lang=es" className="glow-mango mt-9 inline-block rounded-full bg-mango px-9 py-4 text-lg font-semibold text-night hover:brightness-110">Empezar mi revisión gratis →</Link>
         <p className="mt-6 text-sm text-ink/55">Marriage Mode de Upfront Consulting with Tiff &amp; Reco LLC</p>
       </section>
     </div>
