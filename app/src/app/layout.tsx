@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from 'next';
 import Link from 'next/link';
 import '@fontsource-variable/inter';
-import '@fontsource-variable/fraunces/full.css';
-import '@fontsource-variable/fraunces/full-italic.css';
+import '@fontsource-variable/fraunces/opsz.css';
+import '@fontsource-variable/fraunces/opsz-italic.css';
 import './globals.css';
 import { BASE } from '@/lib/base';
 import { PREFS_BOOT } from '@/lib/prefs';

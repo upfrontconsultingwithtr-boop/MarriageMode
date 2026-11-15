@@ -139,7 +139,7 @@ export default function CoupleApp() {
             <h2 className="text-lg font-semibold">Shared goals</h2>
             <ul className="mt-3 space-y-1">
               {space.goals.map((g, i) => (
-                <li key={g.t}><label className="flex min-h-11 items-center gap-3"><input type="checkbox" checked={g.done} onChange={() => toggleGoal(i)} className="size-5 accent-[#D9B77E]" /><span className={g.done ? 'text-ink/45 line-through' : ''}>{g.t}</span></label></li>
+                <li key={g.t}><label className="flex min-h-11 items-center gap-3"><input type="checkbox" checked={g.done} onChange={() => toggleGoal(i)} className="size-5 accent-[#D9B77E]" /><span className={g.done ? 'text-ink/60 line-through' : ''}>{g.t}</span></label></li>
               ))}
             </ul>
             {space.goals.length === 0 && <p className="mt-2 text-sm text-ink/55">Add a goal you both want, or pick one:</p>}

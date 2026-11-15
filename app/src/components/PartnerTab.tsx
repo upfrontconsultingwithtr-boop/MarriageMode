@@ -156,7 +156,7 @@ export default function PartnerTab({ signedIn, openSignIn, stats, summary }: Pro
             <div className="glass p-5">
               <h3 className="font-semibold">Shared goals</h3>
               <ul className="mt-2 space-y-1">{goals.map((g) => (
-                <li key={g.id}><label className="flex min-h-11 items-center gap-3"><input type="checkbox" checked={g.done} onChange={async () => { await P.setGoal(g.id, !g.done); setGoals(await P.goals(couple.id)); }} className="size-5 accent-[#D9B77E]" /><span className={g.done ? 'text-ink/45 line-through' : ''}>{g.title}</span></label></li>))}</ul>
+                <li key={g.id}><label className="flex min-h-11 items-center gap-3"><input type="checkbox" checked={g.done} onChange={async () => { await P.setGoal(g.id, !g.done); setGoals(await P.goals(couple.id)); }} className="size-5 accent-[#D9B77E]" /><span className={g.done ? 'text-ink/60 line-through' : ''}>{g.title}</span></label></li>))}</ul>
               {!goals.length && <p className="text-sm text-ink/55">Add something you both want, like &ldquo;Agree on follows and DMs&rdquo;.</p>}
               <form onSubmit={async (e) => { e.preventDefault(); if (!goal.trim()) return; await P.addGoal(couple.id, couple.me, goal.trim()); setGoal(''); setGoals(await P.goals(couple.id)); }} className="mt-3 flex gap-2">
                 <label htmlFor="new-goal" className="sr-only">New goal</label>
@@ -170,7 +170,7 @@ export default function PartnerTab({ signedIn, openSignIn, stats, summary }: Pro
                 {msgs.length === 0 && <p className="text-sm text-ink/55">Say something kind to start. Only the two of you can read this.</p>}
                 {msgs.map((m) => { const mineMsg = m.author_id === couple.me; return (
                   <div key={m.id} className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm [overflow-wrap:anywhere] ${mineMsg ? 'self-end bg-mango/15 ring-1 ring-mango/30' : 'self-start bg-lagoon/10 ring-1 ring-lagoon/30'}`}>
-                    <p>{m.body}</p><p className="mt-0.5 text-[10px] text-ink/45">{new Date(m.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</p>
+                    <p>{m.body}</p><p className="mt-0.5 text-[10px] text-ink/60">{new Date(m.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</p>
                   </div>); })}
               </div>
               <form onSubmit={send} className="mt-3 flex gap-2">

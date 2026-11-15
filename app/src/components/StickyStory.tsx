@@ -21,7 +21,7 @@ function Screen({ i }: { i: number }) {
     <div className="space-y-3">
       <div className="flex justify-center"><Ring value={76} size={120} /></div>
       {[['Delete your Tinder account', true], ['Cancel any Tinder subscription', true], ['Remove the app', true], ['Stop the emails', false]].map(([t, d]) => (
-        <div key={t as string} className="flex items-center gap-2.5 rounded-xl bg-white/[0.04] p-2.5 text-xs ring-1 ring-white/10"><span className={`grid size-5 place-items-center rounded-md text-[10px] ${d ? 'bg-lagoon text-night' : 'ring-1 ring-white/25'}`}>{d ? '✓' : ''}</span><span className={d ? 'text-ink/45 line-through' : ''}>{t as string}</span></div>))}
+        <div key={t as string} className="flex items-center gap-2.5 rounded-xl bg-white/[0.04] p-2.5 text-xs ring-1 ring-white/10"><span className={`grid size-5 place-items-center rounded-md text-[10px] ${d ? 'bg-lagoon text-night' : 'ring-1 ring-white/25'}`}>{d ? '✓' : ''}</span><span className={d ? 'text-ink/60 line-through' : ''}>{t as string}</span></div>))}
     </div>);
   return (
     <div className="space-y-3">

@@ -130,7 +130,7 @@ export default function AuditApp() {
         <label className="flex min-h-11 cursor-pointer gap-3 rounded-xl p-2 hover:bg-white/[0.03]">
           <input type="checkbox" checked={!!state.done[st.id]} onChange={() => tick(st.id)} className="mt-1 size-5 shrink-0 accent-[#D9B77E]" />
           <span>
-            <span className={`font-medium ${state.done[st.id] ? 'text-ink/45 line-through' : ''}`}>{st.label}</span>
+            <span className={`font-medium ${state.done[st.id] ? 'text-ink/60 line-through' : ''}`}>{st.label}</span>
             {st.detail && <span className="block text-sm text-ink/60">{st.detail}</span>}
             {st.kind === 'cancel_billing' && (
               <span className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm">
