@@ -46,5 +46,5 @@ moves, update each task's `status` (todo, doing, blocked, done with `doneAt`),
 add new tasks, and put anything Tiffany must do in as `owner: "you"` with
 `steps` written as dummy instructions. Reply to Tiffany in the hub by adding a `messages` doc with `from: "builder"`
 and mark her message `handled: true`. Her hub messages also arrive as comments
-sent to Claude (two-way sync); answer those the same way. Keep HUB.md in step as the backup.
+sent to Claude (two-way sync); answer those the same way. Finished items leave the to-do lists automatically and appear in the hub History with their date; also append each to the HUB.md Done log (the history file). Keep HUB.md in step as the backup.
 Tiffany and her partner always get every product free (docs/14-MONETIZATION.md).

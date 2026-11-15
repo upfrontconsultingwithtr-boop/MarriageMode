@@ -47,6 +47,8 @@ a{color:var(--green)} button,input,textarea{font:inherit;color:inherit}
 .btn.ghost{background:transparent;box-shadow:inset 0 0 0 1px var(--line)}
 .btn:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid var(--pink);outline-offset:2px}
 .done li{display:flex;gap:10px;color:var(--muted);font-size:14px}.done li::before{content:"✓";color:var(--green)}
+.hdate{flex:none;width:88px;font-variant-numeric:tabular-nums;color:var(--fg);opacity:.7}
+.history summary{list-style:none;cursor:pointer}.history summary::-webkit-details-marker{display:none}
 .empty{color:var(--muted);font-size:14px;margin-top:10px}
 .chat{display:flex;flex-direction:column;min-height:520px}
 .msgs{flex:1;display:flex;flex-direction:column;gap:10px;margin-top:12px;max-height:56vh;overflow:auto;padding-right:4px}
@@ -111,8 +113,8 @@ a{color:var(--green)} button,input,textarea{font:inherit;color:inherit}
         <p class="empty" id="claude-empty" hidden>The queue is empty. Ask Claude for something in the chat.</p>
       </section>
       <section class="panel">
-        <h2>Done <span class="count" id="d-count"></span></h2>
-        <ul class="list done" id="done"></ul>
+        <details class="history"><summary><h2>History <span class="count" id="d-count"></span></h2><span class="count">finished items move here automatically · tap to open</span></summary>
+        <ul class="list done" id="done"></ul></details>
       </section>
     </div>
 
@@ -176,14 +178,15 @@ function renderTasks() {
       const th = el('div', 'thread'); thread.slice(-4).forEach(m => { const p = el('p', 'tmsg ' + (m.from === 'you' ? 'you' : 'claude')); p.append(el('b', null, m.from === 'you' ? 'You: ' : 'Claude: ')); p.append(document.createTextNode(m.text)); th.append(p); });
       const f = el('form', 'reply'); const inp = el('input'); inp.placeholder = t.owner === 'you' ? 'Type here: done, a question, or "help"…' : 'Type here to tell Claude anything about this…'; inp.setAttribute('aria-label', 'Reply to Claude about: ' + t.title);
       const sb = el('button', 'btn ghost', 'Send'); sb.type = 'submit'; f.append(inp, sb);
-      f.addEventListener('submit', async (e) => { e.preventDefault(); const v = inp.value.trim(); if (!v) return; sb.disabled = true; const ok = await sendMessage(v, t); if (ok) inp.value = ''; sb.disabled = false; });
+      f.addEventListener('submit', async (e) => { e.preventDefault(); const v = inp.value.trim(); if (!v) return; sb.disabled = true; const ok = await sendMessage(v, t); if (ok) { inp.value = ''; if (t.owner === 'you' && /^(done|did it|finished|complete[d]?)[.!]*$/i.test(v)) await markDone(t.id, sb); } sb.disabled = false; });
       if (bar.childElementCount) d.append(bar);
       const card = el('div', 'card'); card.append(d); if (thread.length) card.append(th); card.append(f);
       li.append(card); ul.append(li); return;
       li.append(d); ul.append(li);
     });
   }
-  const dl = $('done'); dl.replaceChildren(); done.slice(0, 25).forEach(t => dl.append(el('li', null, t.title)));
+  const dl = $('done'); dl.replaceChildren();
+  done.forEach(t => { const li = el('li'); const when = t.doneAt ? new Date(t.doneAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''; li.append(el('span', 'hdate', when)); li.append(el('span', null, t.title + (t.owner === 'you' ? ' · you' : ' · Claude'))); dl.append(li); });
 }
 
 function renderMsgs() {
