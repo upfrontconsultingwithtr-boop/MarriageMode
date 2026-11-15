@@ -31,7 +31,7 @@ export default function Worksheet() {
       ))}
       <section className="mt-8 text-sm text-ink/65 print:text-black">
         <p><strong>For counselors, pastors and coaches:</strong> use this as homework between sessions. Couples can close their old accounts with the free, private checklist at <strong>Marriage Mode</strong> (search &ldquo;Marriage Mode audit&rdquo;); nothing they enter leaves their device.</p>
-        <p className="mt-3">If anyone feels pressured to give up passwords or be tracked, that is not trust. National Domestic Violence Hotline: 1-800-799-7233.</p>
+        <p className="mt-3">If anyone feels pressured to give up passwords or be monitored, that is not trust. National Domestic Violence Hotline: 1-800-799-7233.</p>
         <p className="mt-3">Marriage Mode by Upfront Consulting with Tiff &amp; Reco LLC.</p>
       </section>
     </article>

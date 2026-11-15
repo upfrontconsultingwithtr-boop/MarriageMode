@@ -190,7 +190,7 @@ export default function PartnerTab({ signedIn, openSignIn, stats, summary }: Pro
           <p>{t('Either of you can leave at any time. Leaving ends sharing and messages for both of you right away.', 'Cualquiera de los dos puede salir cuando quiera. Al salir se terminan lo compartido y los mensajes para ambos de inmediato.')}</p>
           {!confirmLeave ? <button onClick={() => setConfirmLeave(true)} className="mt-2 text-ink/60 underline">{t('Leave the partner space', 'Salir del espacio de pareja')}</button>
             : <div className="mt-2 flex flex-wrap items-center gap-2"><span>{t('Leave now?', '¿Salir ahora?')}</span><button onClick={leave} className="min-h-11 rounded-full bg-coral/20 px-4 font-semibold text-coral">{t('Yes, leave', 'Sí, salir')}</button><button onClick={() => setConfirmLeave(false)} className="min-h-11 rounded-full px-4 ring-1 ring-white/15">{t('Cancel', 'Cancelar')}</button></div>}
-          <p className="mt-3">{t('If anyone pressures you to share, hand over passwords or be tracked, that isn\'t trust. Free, confidential help: 1-800-799-7233 or text START to 88788.', 'Si alguien te presiona para compartir, dar contraseñas o ser vigilado, eso no es confianza. Ayuda gratis y confidencial (hay atención en español): 1-800-799-7233 o envía START al 88788.')}</p>
+          <p className="mt-3">{t('If anyone pressures you to share, hand over passwords or be monitored, that isn\'t trust. Free, confidential help: 1-800-799-7233 or text START to 88788.', 'Si alguien te presiona para compartir, dar contraseñas o ser vigilado, eso no es confianza. Ayuda gratis y confidencial (hay atención en español): 1-800-799-7233 o envía START al 88788.')}</p>
         </div>
       )}
     </section>

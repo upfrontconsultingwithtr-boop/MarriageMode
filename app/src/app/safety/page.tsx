@@ -14,7 +14,7 @@ export default function Safety() {
       </ul>
       <div className="rounded-2xl bg-coral/10 p-5 ring-1 ring-coral/30">
         <h2 className="text-lg font-bold">If someone is pressuring you</h2>
-        <p className="mt-1">Demanding your passwords, tracking your phone or forcing you to prove things are warning signs. You deserve support.</p>
+        <p className="mt-1">Demanding your passwords, monitoring your phone or forcing you to prove things are warning signs. You deserve support.</p>
         <p className="mt-2"><strong>National Domestic Violence Hotline</strong>: call 1-800-799-7233, text START to 88788, or chat at <a className="text-teal underline" href="https://www.thehotline.org" rel="noopener noreferrer" target="_blank">thehotline.org</a>. Free, confidential, 24/7. In an emergency, call 911.</p>
       </div>
     </article>
