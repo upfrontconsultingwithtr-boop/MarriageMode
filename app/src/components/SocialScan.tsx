@@ -18,7 +18,9 @@ export default function SocialScan() {
   const [list, setList] = useState<Account[]>([]); const [busy, setBusy] = useState(''); const [err, setErr] = useState('');
   const [pick, setPick] = useState<Record<string, boolean>>({}); const [done, setDone] = useState<Record<string, string>>({});
   const [queue, setQueue] = useState<Account[] | null>(null); const [qi, setQi] = useState(0); const [showAll, setShowAll] = useState(false);
-  const [since, setSince] = useState(''); const [since2, setSince2] = useState(''); const [raw, setRaw] = useState<RawFile[]>([]); const [dates, setDates] = useState<Dates>(''); const [filter, setFilter] = useState<'flagged' | 'likely' | 'oneway' | 'fans' | 'mutual' | 'close' | 'groups' | 'all'>('flagged');
+  const [since, setSince] = useState(''); const [since2, setSince2] = useState(''); const [raw, setRaw] = useState<RawFile[]>([]); const [dates1, setDates1] = useState<Dates>(''); const [dates2, setDates2] = useState<Dates>('');
+  // Combine both answers, so if they differ nothing is missed.
+  const dates: Dates = !dates1 ? dates2 : !dates2 ? dates1 : dates1 === dates2 ? dates1 : 'both'; const [filter, setFilter] = useState<'flagged' | 'likely' | 'oneway' | 'fans' | 'mutual' | 'close' | 'groups' | 'all'>('flagged');
   useEffect(() => { setDone(loadDone()); }, []);
     const start = useMemo(() => [since, since2].filter(Boolean).sort()[0] ?? '', [since, since2]); // the earlier of the two dates
   const flagged = useMemo(() => flag(list, names.split(','), start || undefined, dates), [list, names, start, dates]);
@@ -70,10 +72,13 @@ export default function SocialScan() {
             <label className="block text-sm text-ink/75">{t('Your partner’s date, if they remember it differently', 'La fecha de tu pareja, si la recuerda distinta')}
               <input type="date" value={since2} onChange={(e) => setSince2(e.target.value)} className="mt-1 min-h-11 w-full rounded-full border border-white/15 bg-night/60 px-4" /></label>
           </div>
-          <fieldset className="mt-3"><legend className="text-sm text-ink/75">{t('Who do you date? (optional: helps flag people of that sex you followed after your relationship began, or follow one-way)', '¿Con quién sales? (opcional: ayuda a marcar a personas de ese sexo que seguiste después de empezar la relación o que sigues sin que te sigan)')}</legend>
-            <div className="mt-1 flex flex-wrap gap-1.5">{([['', t('Skip', 'Omitir')], ['women', t('Women', 'Mujeres')], ['men', t('Men', 'Hombres')], ['both', t('Both', 'Ambos')]] as const).map(([v, l]) => <button key={v} type="button" aria-pressed={dates === v} onClick={() => setDates(v)} className={`min-h-9 rounded-full px-3 text-xs ring-1 ${dates === v ? 'bg-lagoon/20 ring-lagoon/60' : 'ring-white/15'}`}>{l}</button>)}</div>
-            {dates && <p className="mt-1 text-[11px] text-ink/50">{t('This is a guess from first names only. It can be wrong, and many accounts don’t use real names. You always decide.', 'Es una suposición basada solo en nombres. Puede equivocarse y muchas cuentas no usan nombres reales. Tú siempre decides.')}</p>}
-          </fieldset>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2 [&>*]:min-w-0">
+            {([[t('Who do you date? (your answer)', '¿Con quién sales? (tu respuesta)'), dates1, setDates1], [t('Who does your partner say you date?', '¿Con quién dice tu pareja que sales?'), dates2, setDates2]] as const).map(([lg, val, setV], i) => (
+              <fieldset key={i}><legend className="text-sm text-ink/75">{lg}</legend>
+                <div className="mt-1 flex flex-wrap gap-1.5">{([['', t('Skip', 'Omitir')], ['women', t('Women', 'Mujeres')], ['men', t('Men', 'Hombres')], ['both', t('Both', 'Ambos')]] as const).map(([v, l]) => <button key={v} type="button" aria-pressed={val === v} aria-label={`${l} (${i ? t('partner', 'pareja') : t('you', 'tú')})`} onClick={() => setV(v)} className={`min-h-9 rounded-full px-3 text-xs ring-1 ${val === v ? 'bg-lagoon/20 ring-lagoon/60' : 'ring-white/15'}`}>{l}</button>)}</div>
+              </fieldset>))}
+          </div>
+          <p className="mt-1 text-[11px] text-ink/50">{t('Used to flag people of that sex you followed after your relationship began or follow one-way. If your answers differ, both are used. It’s a guess from first names only and can be wrong; you always decide.', 'Se usa para marcar a personas de ese sexo que seguiste después de empezar la relación o que sigues sin que te sigan. Si sus respuestas son distintas, se usan ambas. Es una suposición basada solo en nombres y puede equivocarse; tú siempre decides.')}</p>
           <p className="mt-1 text-xs text-ink/50">{t('We use the earlier date, so nothing is missed. It flags follows, likes, comments, story likes and messages after that date.', 'Usamos la fecha más temprana para no pasar nada por alto. Marca seguidos, “me gusta”, comentarios, reacciones a historias y mensajes después de esa fecha.')}</p>
           <label className="glow-lagoon mt-3 inline-flex min-h-11 cursor-pointer items-center rounded-full bg-lagoon px-5 font-semibold text-night">
             {t('Choose my download file(s)', 'Elegir mi(s) archivo(s) de descarga')}
