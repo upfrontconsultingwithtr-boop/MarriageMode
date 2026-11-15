@@ -7,7 +7,10 @@ import Phone from '@/components/Phone';
 import Marquee from '@/components/Marquee';
 import StickyStory from '@/components/StickyStory';
 import { PLATFORMS } from '@/lib/catalog';
-import { KIT_URL } from '@/lib/base';
+import type { Metadata } from 'next';
+import { KIT_URL, SITE } from '@/lib/base';
+
+export const metadata: Metadata = { alternates: { canonical: `${SITE}/`, languages: { en: `${SITE}/`, es: `${SITE}/es/` } } };
 
 const faqs = [
   { q: 'Is it really free?', a: 'Yes. The full audit, the guides and the worksheet are free, with no account and no card.' },
