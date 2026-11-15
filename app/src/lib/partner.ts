@@ -159,3 +159,16 @@ export async function deleteMyAccount(): Promise<boolean> {
   if (!error) await c.auth.signOut();
   return !error;
 }
+
+// Daily couple question (app.couple_answers; only the two partners can read).
+export type Answer = { id: string; author_id: string; day: string; question: number; answer: string };
+export async function answers(coupleId: string, sinceDay: string): Promise<Answer[]> {
+  const c = cloud(); if (!c) return [];
+  const { data } = await c.from('couple_answers').select('id,author_id,day,question,answer').eq('couple_id', coupleId).gte('day', sinceDay).order('day').limit(400);
+  return (data ?? []) as Answer[];
+}
+export async function answerToday(coupleId: string, day: string, question: number, text: string): Promise<boolean> {
+  const c = cloud(); if (!c) return false;
+  const { error } = await c.from('couple_answers').insert({ couple_id: coupleId, day, question, answer: text.slice(0, 500) });
+  return !error;
+}

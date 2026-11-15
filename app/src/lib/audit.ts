@@ -19,6 +19,8 @@ export interface AuditState {
   doneAt?: Record<string, string>;   // ISO time each step was ticked (for the timeline)
   requests?: Record<string, string>;  // platform/app name -> ISO date the deletion request was sent
   web?: { usernames: string[]; emails: string[]; results: Record<string, 'found' | 'none'> };  // own identifiers for the web self-search
+  proof?: Record<string, { note?: string; photo?: string; at: string }>;  // per app: what the user kept as proof (on their device)
+  recheckedAt?: string[];   // ISO dates the user ran a monthly re-check
   startedAt?: string;
 }
 

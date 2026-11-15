@@ -76,3 +76,25 @@ export const BILLING_LINKS = {
 export function helpSearchUrl(p: { name: string }): string {
   return 'https://www.google.com/search?q=' + encodeURIComponent(`${p.name} delete account official help`);
 }
+
+// Effort rating, worked out from our own steps for each app (not a promise
+// about the company): how many separate places you must visit, and whether
+// you must ask for a full deletion instead of a simple button.
+export type Effort = { level: 1 | 2 | 3; label: 'Easy' | 'Medium' | 'Harder'; es: 'Fácil' | 'Media' | 'Más difícil'; why: string[]; whyEs: string[] };
+export function effort(p: Platform): Effort {
+  const why: string[] = [], whyEs: string[] = [];
+  let n = 1;
+  if (/website/i.test(p.deletePath)) { n++; why.push('Deleting is done on the website, not in the app'); whyEs.push('Se elimina en el sitio web, no en la app'); }
+  if (/full deletion/i.test(p.deletePath)) { n++; why.push('Ask for full deletion, not just hiding the profile'); whyEs.push('Pide la eliminación completa, no solo ocultar el perfil'); }
+  if (p.billing.length === 1 && p.billing[0] === 'web') { n++; why.push('Billing must be cancelled on the website'); whyEs.push('El cobro se cancela en el sitio web'); }
+  if (p.billing.length > 1) { why.push('Check Apple, Google and website billing'); whyEs.push('Revisa los cobros de Apple, Google y el sitio web'); }
+  const level = (n >= 3 ? 3 : n) as 1 | 2 | 3;
+  return { level, label: (['Easy', 'Medium', 'Harder'] as const)[level - 1], es: (['Fácil', 'Media', 'Más difícil'] as const)[level - 1], why, whyEs };
+}
+
+// Parent companies, for spotting charges on a card statement (public facts).
+export const PARENT: Record<string, string> = {
+  tinder: 'Match Group', hinge: 'Match Group', match: 'Match Group', okcupid: 'Match Group', pof: 'Match Group', ourtime: 'Match Group',
+  bumble: 'Bumble Inc.', badoo: 'Bumble Inc.',
+  elitesingles: 'Spark Networks', christianmingle: 'Spark Networks', jdate: 'Spark Networks', zoosk: 'Spark Networks', silversingles: 'Spark Networks',
+};

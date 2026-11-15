@@ -7,6 +7,7 @@ const here = () => `${window.location.origin}${BASE}`;
 import { track } from '@/lib/track';
 import { useT, useLang, LOCALE } from '@/lib/i18n';
 import * as P from '@/lib/partner';
+import DailyQuestion from './DailyQuestion';
 
 type Props = {
   signedIn: boolean;
@@ -153,6 +154,8 @@ export default function PartnerTab({ signedIn, openSignIn, stats, summary }: Pro
               </div>
             </div>
           </div>
+
+          <DailyQuestion coupleId={couple.id} me={couple.me} partnerName={partner?.display_name || t('Your partner', 'Tu pareja')} />
 
           <div className="grid gap-4 lg:grid-cols-[1fr_1.3fr] [&>*]:min-w-0">
             <div className="glass p-5">

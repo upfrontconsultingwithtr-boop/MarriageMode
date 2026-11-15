@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
-import { PLATFORMS, CATEGORY_LABEL, CATEGORY_LABEL_ES, BILLING_LINKS, BILLING_LINKS_ES, helpSearchUrl, CATALOG_VERIFIED, type Category } from '@/lib/catalog';
+import { effort, PLATFORMS, CATEGORY_LABEL, CATEGORY_LABEL_ES, BILLING_LINKS, BILLING_LINKS_ES, helpSearchUrl, CATALOG_VERIFIED, type Category } from '@/lib/catalog';
 import { buildSteps, score, emailDomainsFor, gmailQuery, gmailSearchUrl, shareSummary, EMPTY_STATE, type AuditState, type Step } from '@/lib/audit';
 import { track } from '@/lib/track';
 import Ring from '@/components/Ring';
@@ -10,6 +10,9 @@ import SettingsTab from '@/components/SettingsTab';
 import WebSearch from '@/components/WebSearch';
 import DataScan from '@/components/DataScan';
 import DeletionRequests from '@/components/DeletionRequests';
+import Recheck from '@/components/Recheck';
+import ProofBox from '@/components/ProofBox';
+import InstallApp from '@/components/InstallApp';
 import { cloud, cloudEnabled, sendLink, pull, push, merge, signOut } from '@/lib/cloud';
 import { BASE, KIT_URL } from '@/lib/base';
 import { LangCtx, LOCALE, type Lang } from '@/lib/i18n';
@@ -285,6 +288,8 @@ export default function AuditApp() {
               </ul>
             </div>
 
+            {hasApps && <Recheck state={state} setState={setState} goApps={() => { setTab('apps'); window.scrollTo({ top: 0 }); }} />}
+
             <div className="glass p-6 lg:col-span-3">
               <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-teal">{t('Your toolkit · all free', 'Tus herramientas · todas gratis')}</p>
               <h2 className="mt-1 text-lg font-semibold">{t('Everything Marriage Mode does for you', 'Todo lo que Marriage Mode hace por ti')}</h2>
@@ -370,10 +375,11 @@ export default function AuditApp() {
               <details key={g.title} open={g.status !== 'Closed'} className="glass group p-5 [&_summary::-webkit-details-marker]:hidden">
                 <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-3">
                   <span className="flex items-center gap-3"><span className="text-lg font-semibold">{g.title === EVERYWHERE ? t(EVERYWHERE, 'En todos lados') : g.title}</span><span className={`rounded-full px-2 py-0.5 text-[11px] ${badge[g.status]}`}>{es ? STATUS_ES[g.status] : g.status}</span></span>
-                  <span className="text-sm text-ink/55">{g.n}/{g.items.length}</span>
+                  <span className="flex items-center gap-2 text-sm text-ink/55">{(() => { const pl = PLATFORMS.find((x) => x.name === g.title); if (!pl) return null; const ef = effort(pl); return <span title={(es ? ef.whyEs : ef.why).join(' · ')} className={`rounded-full px-2 py-0.5 text-[11px] ring-1 ${ef.level === 1 ? 'text-palm ring-palm/40' : ef.level === 2 ? 'text-mango ring-mango/40' : 'text-coral ring-coral/40'}`}>{t('Effort', 'Esfuerzo')}: {es ? ef.es : ef.label}</span>; })()}{g.n}/{g.items.length}</span>
                   <div className="h-1.5 w-full rounded-full bg-white/[0.06]"><div className="h-full rounded-full bg-gradient-to-r from-lagoon to-mango transition-all" style={{ width: `${g.pct}%` }} /></div>
                 </summary>
                 <ul className="mt-3 space-y-1">{g.items.map(stepRow)}</ul>
+                {g.title !== EVERYWHERE && <ProofBox app={g.title} state={state} setState={setState} />}
                 {g.title !== EVERYWHERE && <a className="mt-2 inline-block text-sm text-teal underline" href={helpSearchUrl({ name: g.title })} target="_blank" rel="noopener noreferrer">{t('Official help page ↗', 'Página oficial de ayuda ↗')}</a>}
               </details>
             ))}
@@ -402,7 +408,7 @@ export default function AuditApp() {
               <ul className="mt-3 list-disc space-y-2 pl-5 text-ink/70">
                 <li>{t('Your password manager or saved passwords: search “dating” or app names.', 'Tu gestor de contraseñas o contraseñas guardadas: busca “dating” o nombres de apps.')}</li>
                 <li>{t('App store purchase history: subscriptions you forgot.', 'Historial de compras de la tienda de apps: suscripciones olvidadas.')}</li>
-                <li>{t('Card statements from the last 3 months.', 'Estados de cuenta de los últimos 3 meses.')}</li>
+                <li>{t('Card statements from the last 3 months.', 'Estados de cuenta de los últimos 3 meses.')} <a href="../charges/" className="text-teal underline">{t('How to spot dating charges →', 'Cómo encontrar cobros de citas →')}</a></li>
                 <li>{t('Old or second email addresses.', 'Correos antiguos o secundarios.')}</li>
               </ul>
               <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="mt-4 min-h-11 rounded-full px-5 font-semibold ring-1 ring-white/15">{t('Found one? Add it above ↑', '¿Encontraste una? Agrégala arriba ↑')}</button>
@@ -417,6 +423,7 @@ export default function AuditApp() {
         )}
 
         {/* SETTINGS */}
+        {tab === 'settings' && <div className="glass mt-6 p-6"><h2 className="text-lg font-semibold">{t('Get the app', 'Obtén la app')}</h2><div className="mt-2"><InstallApp /></div></div>}
         {tab === 'settings' && <SettingsTab signedInEmail={syncEmail} openSignIn={() => { setSyncOpen(true); window.scrollTo({ top: 0 }); }} clearDevice={reset} />}
 
         <div className="mt-10 flex justify-end"><button onClick={reset} className="text-sm text-ink/50 underline">{t('Clear my audit from this device', 'Borrar mi revisión de este dispositivo')}</button></div>

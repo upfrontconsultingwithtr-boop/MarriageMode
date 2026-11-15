@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { PLATFORMS, BILLING_LINKS, helpSearchUrl, CATALOG_VERIFIED } from '@/lib/catalog';
+import { PLATFORMS, BILLING_LINKS, helpSearchUrl, CATALOG_VERIFIED, effort } from '@/lib/catalog';
 import { gmailQuery } from '@/lib/audit';
 
 export const dynamicParams = false;
@@ -36,6 +36,7 @@ export default async function Guide({ params }: Props) {
       <div className="mx-auto max-w-3xl px-4 py-14">
         <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-teal">Guide · checked {CATALOG_VERIFIED}</p>
         <h1 className="mt-3 text-4xl font-bold leading-tight">How to delete your <span className="text-glow">{p.name}</span> account for good</h1>
+        {(() => { const ef = effort(p); return <p className="mt-4 flex flex-wrap items-center gap-2 text-sm"><span className={`rounded-full px-3 py-1 font-semibold ring-1 ${ef.level === 1 ? 'text-palm ring-palm/40' : ef.level === 2 ? 'text-mango ring-mango/40' : 'text-coral ring-coral/40'}`}>Effort: {ef.label}</span><span className="text-ink/60">{ef.why.join(' · ') || 'Everything is done inside the app'}</span></p>; })()}
         <p className="mt-4 text-lg text-ink/75">Closing a dating account takes more than deleting the app. Here is the full list, in order, so nothing keeps billing or emailing you.</p>
         <ol className="mt-8 space-y-4">
           {steps.map((s, i) => (

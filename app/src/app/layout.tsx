@@ -10,7 +10,8 @@ import { PREFS_BOOT } from '@/lib/prefs';
 export const metadata: Metadata = {
   title: 'Marriage Mode: close your dating chapter, privately',
   description: 'A free, private checklist to close old dating accounts, stop the emails and cancel the billing, so nothing old surprises your relationship. By Upfront Consulting with Tiff & Reco LLC.',
-  icons: { icon: `${BASE}/icon.svg` },
+  icons: { icon: `${BASE}/icon.svg`, apple: `${BASE}/icon-192.png` },
+  appleWebApp: { capable: true, title: 'Marriage Mode', statusBarStyle: 'black-translucent' },
   manifest: `${BASE}/manifest.webmanifest`,
   openGraph: { images: [`${BASE}/og.png`], title: 'Marriage Mode', description: 'Close your dating chapter. Completely. Private, free, self-led.' },
 };
@@ -49,6 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </nav>
         </header>
         <main>{children}</main>
+        <script dangerouslySetInnerHTML={{ __html: `if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('${BASE}/sw.js',{scope:'${BASE}/'}).catch(function(){})})}` }} />
         <script data-goatcounter-settings={JSON.stringify({ allow_local: false })} data-goatcounter="https://upfront-with-tr.goatcounter.com/count" async src="https://gc.zgo.at/count.js" />
         <footer className="print:hidden relative mt-24 border-t border-white/[0.06] py-10 text-center text-sm text-ink/60">
           <p>Marriage Mode by <strong className="text-ink/85">Upfront Consulting with Tiff &amp; Reco LLC</strong></p>
