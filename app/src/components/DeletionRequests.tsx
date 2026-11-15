@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import type { AuditState } from '@/lib/audit';
 import { track } from '@/lib/track';
+import { useT, useLang, LOCALE } from '@/lib/i18n';
 
 // Official request pages confirmed from the company's own help center.
 const OFFICIAL: Record<string, string> = {
@@ -32,6 +33,7 @@ type Props = { apps: string[]; state: AuditState; setState: (f: (s: AuditState) 
 export default function DeletionRequests({ apps, state, setState }: Props) {
   const [name, setName] = useState(''); const [email, setEmail] = useState(''); const [user, setUser] = useState('');
   const [open, setOpen] = useState<string | null>(null); const [copied, setCopied] = useState('');
+  const t = useT(); const { lang } = useLang();
   const sent = state.requests ?? {};
   if (!apps.length) return null;
   const copy = async (app: string) => { try { await navigator.clipboard.writeText(letter(app, name, email, user)); setCopied(app); setTimeout(() => setCopied(''), 2000); track('deletion-request-copied'); } catch { /* ignore */ } };
@@ -40,29 +42,29 @@ export default function DeletionRequests({ apps, state, setState }: Props) {
 
   return (
     <div className="halo-border"><div className="rounded-[1.75rem] bg-deep/95 p-6">
-      <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-mango">We write it for you</p>
-      <h2 className="mt-1 text-xl font-semibold">Deletion requests, ready to send</h2>
-      <p className="mt-1 text-sm text-ink/65">Deleting a profile doesn&apos;t always erase your data. For each app, we write a formal request asking the company to delete your account and data. You send it from your own email or their privacy form; we never need your password. {done > 0 && <strong className="text-ink">{done} of {apps.length} sent.</strong>}</p>
+      <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-mango">{t('We write it for you', 'Lo escribimos por ti')}</p>
+      <h2 className="mt-1 text-xl font-semibold">{t('Deletion requests, ready to send', 'Solicitudes de eliminación, listas para enviar')}</h2>
+      <p className="mt-1 text-sm text-ink/65">{t('Deleting a profile doesn\'t always erase your data. For each app, we write a formal request asking the company to delete your account and data. You send it from your own email or their privacy form; we never need your password.', 'Eliminar un perfil no siempre borra tus datos. Para cada app escribimos una solicitud formal pidiendo a la empresa que elimine tu cuenta y tus datos. Tú la envías desde tu correo o su formulario de privacidad; nunca necesitamos tu contraseña. La carta va en inglés porque estas empresas responden en inglés.')} {done > 0 && <strong className="text-ink">{t(`${done} of ${apps.length} sent.`, `${done} de ${apps.length} enviadas.`)}</strong>}</p>
       <div className="mt-4 grid gap-2 sm:grid-cols-3 [&>*]:min-w-0">
-        <label className="text-sm text-ink/70">Your name<input value={name} onChange={(e) => setName(e.target.value)} className="mt-1 min-h-11 w-full rounded-full border border-white/15 bg-night/60 px-4" /></label>
-        <label className="text-sm text-ink/70">Email you used<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 min-h-11 w-full rounded-full border border-white/15 bg-night/60 px-4" /></label>
-        <label className="text-sm text-ink/70">Username or phone (optional)<input value={user} onChange={(e) => setUser(e.target.value)} className="mt-1 min-h-11 w-full rounded-full border border-white/15 bg-night/60 px-4" /></label>
+        <label className="text-sm text-ink/70">{t('Your name', 'Tu nombre')}<input value={name} onChange={(e) => setName(e.target.value)} className="mt-1 min-h-11 w-full rounded-full border border-white/15 bg-night/60 px-4" /></label>
+        <label className="text-sm text-ink/70">{t('Email you used', 'Correo que usaste')}<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 min-h-11 w-full rounded-full border border-white/15 bg-night/60 px-4" /></label>
+        <label className="text-sm text-ink/70">{t('Username or phone (optional)', 'Usuario o teléfono (opcional)')}<input value={user} onChange={(e) => setUser(e.target.value)} className="mt-1 min-h-11 w-full rounded-full border border-white/15 bg-night/60 px-4" /></label>
       </div>
-      <p className="mt-2 text-xs text-ink/50">These stay on your device and only fill in the letters.</p>
+      <p className="mt-2 text-xs text-ink/50">{t('These stay on your device and only fill in the letters.', 'Esto se queda en tu dispositivo y solo llena las cartas.')}</p>
       <ul className="mt-4 space-y-2">{apps.map((a) => (
         <li key={a} className="rounded-xl bg-white/[0.03] p-3 ring-1 ring-white/[0.07]">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="font-medium">{a} {sent[a] && <span className="ml-1 rounded-full bg-palm/15 px-2 py-0.5 text-[11px] text-palm">Sent {new Date(sent[a]).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}</span>
+            <span className="font-medium">{a} {sent[a] && <span className="ml-1 rounded-full bg-palm/15 px-2 py-0.5 text-[11px] text-palm">{t('Sent', 'Enviada')} {new Date(sent[a]).toLocaleDateString(LOCALE[lang], { month: 'short', day: 'numeric' })}</span>}</span>
             <span className="flex flex-wrap gap-1.5">
-              <button onClick={() => setOpen(open === a ? null : a)} className="min-h-9 rounded-full px-3 text-xs ring-1 ring-white/15">{open === a ? 'Hide letter' : 'See letter'}</button>
-              <button onClick={() => copy(a)} className="min-h-9 rounded-full bg-lagoon/15 px-3 text-xs ring-1 ring-lagoon/50">{copied === a ? 'Copied ✓' : 'Copy letter'}</button>
-              <a href={OFFICIAL[a] ?? 'https://www.google.com/search?q=' + encodeURIComponent(`${a} official privacy request delete my personal data`)} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-9 items-center rounded-full px-3 text-xs ring-1 ring-white/15">Open {a}&apos;s privacy page ↗</a>
-              <button onClick={() => markSent(a)} aria-pressed={!!sent[a]} className={`min-h-9 rounded-full px-3 text-xs ring-1 ${sent[a] ? 'bg-palm/15 text-palm ring-palm/40' : 'ring-white/15'}`}>{sent[a] ? 'Sent ✓' : 'I sent it'}</button>
+              <button onClick={() => setOpen(open === a ? null : a)} className="min-h-9 rounded-full px-3 text-xs ring-1 ring-white/15">{open === a ? t('Hide letter', 'Ocultar carta') : t('See letter', 'Ver carta')}</button>
+              <button onClick={() => copy(a)} className="min-h-9 rounded-full bg-lagoon/15 px-3 text-xs ring-1 ring-lagoon/50">{copied === a ? t('Copied ✓', 'Copiada ✓') : t('Copy letter', 'Copiar carta')}</button>
+              <a href={OFFICIAL[a] ?? 'https://www.google.com/search?q=' + encodeURIComponent(`${a} official privacy request delete my personal data`)} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-9 items-center rounded-full px-3 text-xs ring-1 ring-white/15">{t(`Open ${a}'s privacy page ↗`, `Abrir la página de privacidad de ${a} ↗`)}</a>
+              <button onClick={() => markSent(a)} aria-pressed={!!sent[a]} className={`min-h-9 rounded-full px-3 text-xs ring-1 ${sent[a] ? 'bg-palm/15 text-palm ring-palm/40' : 'ring-white/15'}`}>{sent[a] ? t('Sent ✓', 'Enviada ✓') : t('I sent it', 'La envié')}</button>
             </span>
           </div>
           {open === a && <pre className="mt-3 whitespace-pre-wrap rounded-lg bg-night/70 p-3 font-sans text-xs text-ink/80">{letter(a, name, email, user)}</pre>}
         </li>))}</ul>
-      <p className="mt-3 text-xs text-ink/50">Companies usually answer within 30–45 days. Keep their reply. Coming later: a &ldquo;done for you&rdquo; option where Marriage Mode sends and follows up for you.</p>
+      <p className="mt-3 text-xs text-ink/50">{t('Companies usually answer within 30–45 days. Keep their reply. Coming later: a “done for you” option where Marriage Mode sends and follows up for you.', 'Las empresas suelen responder en 30 a 45 días. Guarda su respuesta. Más adelante: una opción “lo hacemos por ti” donde Marriage Mode envía y da seguimiento.')}</p>
     </div></div>
   );
 }

@@ -82,3 +82,13 @@ test('data scan finds platforms by web address and safe names, ignores common wo
   assert.deepEqual(ids, ['hinge', 'tinder']);
   assert.ok(MATCHERS.length > 20);
 });
+
+test('Spanish steps: every catalog delete path and general step is translated', async () => {
+  const { PLATFORMS } = await import('./catalog.ts');
+  const steps = buildSteps({ platformIds: PLATFORMS.map((p) => p.id), custom: ['Lovoo'] }, 'es');
+  for (const st of steps) {
+    assert.ok(!/^(Delete|Cancel|Remove|Unsubscribe|Review|Archive|Search|Check)\b/.test(st.label), st.label);
+    if (st.kind === 'delete_profile' && st.detail) assert.ok(/^En /.test(st.detail), st.detail);
+  }
+  assert.equal(steps.length, buildSteps({ platformIds: PLATFORMS.map((p) => p.id), custom: ['Lovoo'] }).length);
+});

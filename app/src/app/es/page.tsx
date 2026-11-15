@@ -19,7 +19,7 @@ const faqs = [
   { q: '¿Ustedes ven mis respuestas?', a: 'No. La revisión funciona en tu navegador y se guarda solo en tu dispositivo. Solo contamos visitas anónimas, nunca qué apps eliges.' },
   { q: '¿Puedo usarla para revisar a mi pareja?', a: 'No, y es a propósito. Marriage Mode solo funciona con tus propias cuentas, hecho por ti. La confianza se construye eligiendo compartir, no revisando.' },
   { q: '¿Borrar la app cierra mi cuenta?', a: 'Normalmente no. Debes eliminar el perfil dentro de la app o en el sitio web, y cancelar el cobro donde pagaste. La lista cubre cada paso.' },
-  { q: '¿La herramienta está en español?', a: 'Esta página y estos pasos están en español. El panel de la revisión todavía está en inglés; la versión completa en español viene pronto. Los botones son simples: marca cada paso cuando lo termines.' },
+  { q: '¿La herramienta está en español?', a: 'Sí. El panel completo está en español: tus apps, la limpieza, la pareja y los ajustes. Puedes cambiar el idioma cuando quieras con el botón English / Español.' },
   { q: '¿Cómo funciona el Modo Pareja?', a: 'Cada uno agrega lo que decide compartir, más metas en común. Vive dentro de un enlace privado que se envían. Cualquiera de los dos puede parar cuando quiera.' },
 ];
 
@@ -59,10 +59,10 @@ export default function Espanol() {
             Marriage Mode te ayuda a encontrar cada cuenta de citas que abriste y a cerrarla para siempre: perfil, cobros, app y correos. Luego, si quieres, comparte la página limpia con tu pareja.
           </p>
           <div className="rise rise-4 mt-9 flex flex-wrap justify-center gap-3">
-            <Link href="/audit/" className="glow-mango min-h-12 rounded-full bg-mango px-8 py-4 text-lg font-semibold text-night hover:brightness-110">Empezar mi revisión gratis →</Link>
+            <Link href="/audit/?lang=es" className="glow-mango min-h-12 rounded-full bg-mango px-8 py-4 text-lg font-semibold text-night hover:brightness-110">Empezar mi revisión gratis →</Link>
             <Link href="#como" className="min-h-12 rounded-full border border-white/15 bg-white/5 px-8 py-4 text-lg font-semibold backdrop-blur hover:border-lagoon/60">Cómo funciona</Link>
           </div>
-          <p className="mt-5 text-sm text-ink/55">El panel de la revisión está en inglés por ahora. <Link href="/" className="underline hover:text-ink" hrefLang="en">English</Link></p>
+          <p className="mt-5 text-sm text-ink/55"><Link href="/" className="underline hover:text-ink" hrefLang="en">English</Link></p>
         </div>
       </section>
 
@@ -142,7 +142,7 @@ export default function Espanol() {
       <section className="relative isolate mx-auto mt-28 max-w-6xl overflow-hidden rounded-[2.5rem] px-4 py-24 text-center">
         <Aurora className="absolute inset-0 -z-10 h-full w-full" />
         <h2 className="text-4xl font-bold sm:text-6xl">Veinte minutos. <span className="text-shimmer">Nada pendiente.</span></h2>
-        <Link href="/audit/" className="glow-mango mt-9 inline-block rounded-full bg-mango px-9 py-4 text-lg font-semibold text-night hover:brightness-110">Empezar mi revisión gratis →</Link>
+        <Link href="/audit/?lang=es" className="glow-mango mt-9 inline-block rounded-full bg-mango px-9 py-4 text-lg font-semibold text-night hover:brightness-110">Empezar mi revisión gratis →</Link>
         <p className="mt-6 text-sm text-ink/55">Marriage Mode de Upfront Consulting with Tiff &amp; Reco LLC</p>
       </section>
     </div>

@@ -57,6 +57,16 @@ export const CATEGORY_LABEL: Record<Category, string> = {
   mainstream: 'Popular apps', niche: 'Niche & invite-only', faith: 'Faith-based', lgbtq: 'LGBTQ+', mature: '50+', other: 'Other sites',
 };
 
+export const CATEGORY_LABEL_ES: Record<Category, string> = {
+  mainstream: 'Apps populares', niche: 'De nicho y por invitación', faith: 'Basadas en la fe', lgbtq: 'LGBTQ+', mature: '50+', other: 'Otros sitios',
+};
+
+export const BILLING_LINKS_ES = {
+  apple: { label: 'Suscripciones de Apple', how: 'iPhone: Ajustes → tu nombre → Suscripciones.' },
+  google: { label: 'Suscripciones de Google Play', how: 'Android: Play Store → tu foto de perfil → Pagos y suscripciones → Suscripciones.' },
+  web: { label: 'Cobro en el sitio web', how: 'Si pagaste en el sitio web, cancela en la configuración de cuenta o facturación del sitio, y revisa tu estado de cuenta el próximo mes.' },
+} as const;
+
 export const BILLING_LINKS = {
   apple: { label: 'Apple subscriptions', url: 'https://apps.apple.com/account/subscriptions', how: 'iPhone: Settings → your name → Subscriptions.' },
   google: { label: 'Google Play subscriptions', url: 'https://play.google.com/store/account/subscriptions', how: 'Android: Play Store → your profile icon → Payments & subscriptions → Subscriptions.' },

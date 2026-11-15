@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
-import { PLATFORMS, CATEGORY_LABEL, BILLING_LINKS, helpSearchUrl, CATALOG_VERIFIED, type Category } from '@/lib/catalog';
+import { PLATFORMS, CATEGORY_LABEL, CATEGORY_LABEL_ES, BILLING_LINKS, BILLING_LINKS_ES, helpSearchUrl, CATALOG_VERIFIED, type Category } from '@/lib/catalog';
 import { buildSteps, score, emailDomainsFor, gmailQuery, gmailSearchUrl, shareSummary, EMPTY_STATE, type AuditState, type Step } from '@/lib/audit';
 import { track } from '@/lib/track';
 import Ring from '@/components/Ring';
@@ -12,15 +12,19 @@ import DataScan from '@/components/DataScan';
 import DeletionRequests from '@/components/DeletionRequests';
 import { cloud, cloudEnabled, sendLink, pull, push, merge, signOut } from '@/lib/cloud';
 import { BASE, KIT_URL } from '@/lib/base';
+import { LangCtx, LOCALE, type Lang } from '@/lib/i18n';
+import { loadPrefs, savePrefs } from '@/lib/prefs';
 
 const KEY = 'marriage-mode:audit:v1';
 const TABS = [
-  { id: 'overview', label: 'Overview', icon: '◎' },
-  { id: 'apps', label: 'My apps', icon: '＋' },
-  { id: 'clean', label: 'Clean up', icon: '✓' },
-  { id: 'partner', label: 'Partner', icon: '♡' },
-  { id: 'settings', label: 'Settings', icon: '⚙' },
+  { id: 'overview', label: 'Overview', es: 'Resumen', icon: '◎' },
+  { id: 'apps', label: 'My apps', es: 'Mis apps', icon: '＋' },
+  { id: 'clean', label: 'Clean up', es: 'Limpieza', icon: '✓' },
+  { id: 'partner', label: 'Partner', es: 'Pareja', icon: '♡' },
+  { id: 'settings', label: 'Settings', es: 'Ajustes', icon: '⚙' },
 ] as const;
+const STATUS_ES: Record<string, string> = { 'Not started': 'Sin empezar', 'In progress': 'En curso', Closed: 'Cerrada' };
+const EVERYWHERE = 'Everywhere else';
 type Tab = (typeof TABS)[number]['id'];
 const KIND_ORDER: Step['kind'][] = ['delete_profile', 'cancel_billing', 'delete_app', 'stop_emails', 'contacts', 'social'];
 
@@ -44,6 +48,11 @@ export default function AuditApp() {
   const [syncOpen, setSyncOpen] = useState(false);
   const [syncMsg, setSyncMsg] = useState('');
   const [emailInput, setEmailInput] = useState('');
+  const [lang, setLangState] = useState<Lang>('en');
+  const setLang = (l: Lang) => { setLangState(l); const p = { ...loadPrefs(), lang: l }; savePrefs(p); document.documentElement.lang = l; };
+  useEffect(() => { const q = new URLSearchParams(window.location.search).get('lang'); if (q === 'es' || q === 'en') setLang(q); else setLangState(loadPrefs().lang); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const es = lang === 'es';
+  const t = (en: string, sp: string) => (es ? sp : en);
 
   // Optional sync: on sign-in, merge this device with the saved copy, then keep it saved.
   useEffect(() => {
@@ -70,7 +79,7 @@ export default function AuditApp() {
   useEffect(() => { if (ready) save(state); }, [state, ready]);
   useEffect(() => { if (ready && state.platformIds.length + state.custom.length > 0) track('audit-started'); }, [ready, state.platformIds.length, state.custom.length]);
 
-  const steps = useMemo(() => buildSteps(state), [state.platformIds, state.custom]); // eslint-disable-line react-hooks/exhaustive-deps
+  const steps = useMemo(() => buildSteps(state, lang), [state.platformIds, state.custom, lang]); // eslint-disable-line react-hooks/exhaustive-deps
   const s = useMemo(() => score(steps, state.done), [steps, state.done]);
   const domains = useMemo(() => emailDomainsFor(state.platformIds), [state.platformIds]);
   const hasApps = state.platformIds.length + state.custom.length > 0;
@@ -82,7 +91,7 @@ export default function AuditApp() {
 
   const groups = useMemo(() => {
     const g: { title: string; items: Step[] }[] = [];
-    for (const st of steps) { const t = st.group ?? 'Everywhere else'; const x = g.find((y) => y.title === t); if (x) x.items.push(st); else g.push({ title: t, items: [st] }); }
+    for (const st of steps) { const k = st.group ?? EVERYWHERE; const x = g.find((y) => y.title === k); if (x) x.items.push(st); else g.push({ title: k, items: [st] }); }
     return g.map((x) => {
       const n = x.items.filter((i) => state.done[i.id]).length;
       const status: Status = n === 0 ? 'Not started' : n === x.items.length ? 'Closed' : 'In progress';
@@ -100,11 +109,11 @@ export default function AuditApp() {
     .filter((x) => x.step).sort((a, b) => b.at.localeCompare(a.at)), [state.doneAt, state.done, steps]);
 
   const milestones = [
-    { t: 'First step', ok: s.doneCount >= 1 },
-    { t: 'First app closed', ok: groups.some((g) => g.title !== 'Everywhere else' && g.status === 'Closed') },
-    { t: 'Halfway', ok: s.progress >= 50 },
-    { t: 'All accounts deleted', ok: s.accountsTotal > 0 && s.accountsClosed === s.accountsTotal },
-    { t: 'Clean slate', ok: hasApps && s.progress === 100 },
+    { t: t('First step', 'Primer paso'), ok: s.doneCount >= 1 },
+    { t: t('First app closed', 'Primera app cerrada'), ok: groups.some((g) => g.title !== EVERYWHERE && g.status === 'Closed') },
+    { t: t('Halfway', 'A mitad de camino'), ok: s.progress >= 50 },
+    { t: t('All accounts deleted', 'Todas las cuentas eliminadas'), ok: s.accountsTotal > 0 && s.accountsClosed === s.accountsTotal },
+    { t: t('Clean slate', 'Página limpia'), ok: hasApps && s.progress === 100 },
   ];
 
   const toggle = (id: string) => setState((st) => ({ ...st, platformIds: st.platformIds.includes(id) ? st.platformIds.filter((x) => x !== id) : [...st.platformIds, id], startedAt: st.startedAt ?? new Date().toISOString() }));
@@ -115,11 +124,11 @@ export default function AuditApp() {
   });
   const addCustom = () => { const n = custom.trim(); if (n && !state.custom.includes(n)) setState((st) => ({ ...st, custom: [...st.custom, n] })); setCustom(''); };
   const copy = async (text: string, what: string) => { try { await navigator.clipboard.writeText(text); setCopied(what); setTimeout(() => setCopied(''), 2000); } catch { /* ignore */ } };
-  const reset = () => { if (confirm('Clear your audit from this device?')) { setState(EMPTY_STATE); setTab('apps'); } };
+  const reset = () => { if (confirm(t('Clear your audit from this device?', '¿Borrar tu revisión de este dispositivo?'))) { setState(EMPTY_STATE); setTab('apps'); } };
   const hour = new Date().getHours();
-  const hello = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
-  const summary = shareSummary(s);
-  const fmt = (iso: string) => new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const hello = hour < 12 ? t('Good morning', 'Buenos días') : hour < 18 ? t('Good afternoon', 'Buenas tardes') : t('Good evening', 'Buenas noches');
+  const summary = shareSummary(s, new Date(), lang);
+  const fmt = (iso: string) => new Date(iso).toLocaleDateString(LOCALE[lang], { month: 'short', day: 'numeric' });
   const cats = Object.keys(CATEGORY_LABEL) as Category[];
   const filtered = PLATFORMS.filter((p) => p.name.toLowerCase().includes(q.toLowerCase()));
 
@@ -135,8 +144,8 @@ export default function AuditApp() {
             {st.kind === 'cancel_billing' && (
               <span className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm">
                 {(p ? p.billing : (['apple', 'google', 'web'] as const)).map((b) => BILLING_LINKS[b].url
-                  ? <a key={b} href={BILLING_LINKS[b].url} target="_blank" rel="noopener noreferrer" className="text-teal underline">{BILLING_LINKS[b].label} ↗</a>
-                  : <span key={b} className="text-ink/50">{BILLING_LINKS[b].how}</span>)}
+                  ? <a key={b} href={BILLING_LINKS[b].url} target="_blank" rel="noopener noreferrer" className="text-teal underline">{(es ? BILLING_LINKS_ES : BILLING_LINKS)[b].label} ↗</a>
+                  : <span key={b} className="text-ink/50">{(es ? BILLING_LINKS_ES : BILLING_LINKS)[b].how}</span>)}
               </span>
             )}
           </span>
@@ -146,21 +155,22 @@ export default function AuditApp() {
   };
 
   return (
-    <div className="relative isolate z-10 pb-28 md:pb-10">
+    <LangCtx.Provider value={{ lang, setLang }}>
+    <div lang={lang} className="relative isolate z-10 pb-28 md:pb-10">
       <Aurora className="absolute inset-x-0 top-0 -z-10 h-[560px] w-full opacity-70 print:hidden [mask-image:linear-gradient(#000,transparent)]" />
       <div className="grid-bg absolute inset-x-0 top-0 -z-10 h-[520px] print:hidden" aria-hidden="true" />
 
       {/* Celebration */}
       {celebrate && (
-        <div role="dialog" aria-label="Clean slate" className="fixed inset-0 z-[60] grid place-items-center bg-night/80 p-4 backdrop-blur print:hidden" onClick={() => setCelebrate(false)}>
+        <div role="dialog" aria-label={t('Clean slate', 'Página limpia')} className="fixed inset-0 z-[60] grid place-items-center bg-night/80 p-4 backdrop-blur print:hidden" onClick={() => setCelebrate(false)}>
           <div className="halo-border max-w-sm text-center" onClick={(e) => e.stopPropagation()}>
             <div className="rounded-[1.75rem] bg-deep p-8">
               <div className="pulse-soft mx-auto"><Ring value={100} size={120} /></div>
-              <h2 className="mt-4 text-2xl font-bold"><span className="text-glow">Clean slate.</span></h2>
-              <p className="mt-2 text-ink/70">Every step is done. That took real care. Want to share it?</p>
+              <h2 className="mt-4 text-2xl font-bold"><span className="text-glow">{t('Clean slate.', 'Página limpia.')}</span></h2>
+              <p className="mt-2 text-ink/70">{t('Every step is done. That took real care. Want to share it?', 'Terminaste cada paso. Eso tomó dedicación. ¿Quieres compartirlo?')}</p>
               <div className="mt-6 flex justify-center gap-2">
-                <button onClick={() => { setCelebrate(false); setTab('partner'); }} className="glow-mango rounded-full bg-mango px-5 py-3 font-semibold text-night">Share my progress</button>
-                <button onClick={() => setCelebrate(false)} className="rounded-full px-5 py-3 ring-1 ring-white/15">Close</button>
+                <button onClick={() => { setCelebrate(false); setTab('partner'); }} className="glow-mango rounded-full bg-mango px-5 py-3 font-semibold text-night">{t('Share my progress', 'Compartir mi avance')}</button>
+                <button onClick={() => setCelebrate(false)} className="rounded-full px-5 py-3 ring-1 ring-white/15">{t('Close', 'Cerrar')}</button>
               </div>
             </div>
           </div>
@@ -171,17 +181,17 @@ export default function AuditApp() {
         {/* Desktop sidebar */}
         <aside className="hidden md:block">
           <div className="glass sticky top-24 p-3">
-            <p className="px-3 pt-2 font-mono text-[10px] uppercase tracking-[0.25em] text-teal">Dashboard</p>
-            <nav className="mt-2 flex flex-col gap-1" role="tablist" aria-label="Dashboard menu">
-              {TABS.map((t) => (
-                <button key={t.id} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}
-                  className={`flex min-h-11 items-center gap-3 rounded-xl px-3 text-left text-sm font-semibold transition ${tab === t.id ? 'bg-lagoon/15 text-ink ring-1 ring-lagoon/50 shadow-[0_0_20px_-8px_#D9B77E]' : 'text-ink/65 hover:bg-white/[0.04] hover:text-ink'}`}>
-                  <span aria-hidden="true" className={tab === t.id ? 'text-lagoon' : ''}>{t.icon}</span>{t.label}
+            <p className="px-3 pt-2 font-mono text-[10px] uppercase tracking-[0.25em] text-teal">{t('Dashboard', 'Panel')}</p>
+            <nav className="mt-2 flex flex-col gap-1" role="tablist" aria-label={t('Dashboard menu', 'Menú del panel')}>
+              {TABS.map((tb) => (
+                <button key={tb.id} role="tab" aria-selected={tab === tb.id} onClick={() => setTab(tb.id)}
+                  className={`flex min-h-11 items-center gap-3 rounded-xl px-3 text-left text-sm font-semibold transition ${tab === tb.id ? 'bg-lagoon/15 text-ink ring-1 ring-lagoon/50 shadow-[0_0_20px_-8px_#D9B77E]' : 'text-ink/65 hover:bg-white/[0.04] hover:text-ink'}`}>
+                  <span aria-hidden="true" className={tab === tb.id ? 'text-lagoon' : ''}>{tb.icon}</span>{es ? tb.es : tb.label}
                 </button>
               ))}
             </nav>
             <div className="mt-3 border-t border-white/[0.07] px-3 pb-2 pt-3">
-              <p className="text-xs text-ink/50">Clean-slate score</p>
+              <p className="text-xs text-ink/50">{t('Clean-slate score', 'Puntaje de página limpia')}</p>
               <div className="mt-1.5 h-1.5 rounded-full bg-white/[0.06]"><div className="h-full rounded-full bg-gradient-to-r from-lagoon to-mango transition-all" style={{ width: `${s.organization}%` }} /></div>
               <p className="mt-1 text-xs text-ink/60">{s.organization} / 100</p>
             </div>
@@ -191,13 +201,16 @@ export default function AuditApp() {
         {/* Header */}
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-teal">Private · saved on this device only</p>
-            <h1 suppressHydrationWarning className="mt-1 text-3xl font-bold">{hello}{hasApps ? '. Here\'s where you stand.' : '. Let\'s begin.'}</h1>
+            <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-teal">{t('Private · saved on this device only', 'Privado · guardado solo en este dispositivo')}</p>
+            <h1 suppressHydrationWarning className="mt-1 text-3xl font-bold">{hello}{hasApps ? t('. Here\'s where you stand.', '. Así vas.') : t('. Let\'s begin.', '. Empecemos.')}</h1>
             {cloudEnabled && (
               <button onClick={() => setSyncOpen((o) => !o)} className="mt-2 inline-flex min-h-9 items-center gap-2 rounded-full bg-white/[0.04] px-3 text-xs ring-1 ring-white/10 hover:ring-lagoon/50">
-                <span className={`size-1.5 rounded-full ${syncEmail ? 'bg-lagoon shadow-[0_0_8px_#D9B77E]' : 'bg-ink/40'}`} />{syncEmail ? 'Synced across devices' : 'Use on more than one device?'}
+                <span className={`size-1.5 rounded-full ${syncEmail ? 'bg-lagoon shadow-[0_0_8px_#D9B77E]' : 'bg-ink/40'}`} />{syncEmail ? t('Synced across devices', 'Sincronizado entre dispositivos') : t('Use on more than one device?', '¿Lo usas en más de un dispositivo?')}
               </button>
             )}
+          </div>
+          <div role="group" aria-label={t('Language', 'Idioma')} className="flex rounded-full bg-white/[0.04] p-1 text-xs ring-1 ring-white/10">
+            {(['en', 'es'] as const).map((l) => <button key={l} aria-pressed={lang === l} onClick={() => setLang(l)} className={`min-h-9 rounded-full px-3 font-semibold ${lang === l ? 'bg-lagoon/20 text-ink' : 'text-ink/60'}`}>{l === 'en' ? 'English' : 'Español'}</button>)}
           </div>
         </div>
 
@@ -205,18 +218,18 @@ export default function AuditApp() {
           <div className="glass mt-4 max-w-xl p-5">
             {syncEmail ? (
               <>
-                <p className="font-semibold">Synced as {syncEmail}</p>
-                <p className="mt-1 text-sm text-ink/60">Your checklist is saved to your private account and stays the same on every device you sign in on. Only you can see it.</p>
-                <button onClick={() => { void signOut(); setSyncOpen(false); }} className="mt-3 min-h-11 rounded-full px-4 text-sm ring-1 ring-white/15">Sign out</button>
+                <p className="font-semibold">{t('Synced as', 'Sincronizado como')} {syncEmail}</p>
+                <p className="mt-1 text-sm text-ink/60">{t('Your checklist is saved to your private account and stays the same on every device you sign in on. Only you can see it.', 'Tu lista se guarda en tu cuenta privada y es la misma en cada dispositivo donde entres. Solo tú puedes verla.')}</p>
+                <button onClick={() => { void signOut(); setSyncOpen(false); }} className="mt-3 min-h-11 rounded-full px-4 text-sm ring-1 ring-white/15">{t('Sign out', 'Cerrar sesión')}</button>
               </>
             ) : (
-              <form onSubmit={async (e) => { e.preventDefault(); setSyncMsg('Sending…'); const err = await sendLink(emailInput.trim(), `${window.location.origin}${BASE}/audit/`); setSyncMsg(err ? `That didn't work: ${err}` : 'Check your email and tap the link to finish. You can close this.'); }}>
-                <p className="font-semibold">Sync across your devices (optional)</p>
-                <p className="mt-1 text-sm text-ink/60">Without signing in, your audit stays only on this device. Sign in with an email link (no password) to keep it on every device. Only you can see it, and you can sign out anytime.</p>
+              <form onSubmit={async (e) => { e.preventDefault(); setSyncMsg(t('Sending…', 'Enviando…')); const err = await sendLink(emailInput.trim(), `${window.location.origin}${BASE}/audit/`); setSyncMsg(err ? `${t('That didn\'t work', 'No funcionó')}: ${err}` : t('Check your email and tap the link to finish. You can close this.', 'Revisa tu correo y toca el enlace para terminar. Puedes cerrar esto.')); }}>
+                <p className="font-semibold">{t('Sync across your devices (optional)', 'Sincroniza tus dispositivos (opcional)')}</p>
+                <p className="mt-1 text-sm text-ink/60">{t('Without signing in, your audit stays only on this device. Sign in with an email link (no password) to keep it on every device. Only you can see it, and you can sign out anytime.', 'Sin entrar, tu revisión se queda solo en este dispositivo. Entra con un enlace por correo (sin contraseña) para tenerla en todos. Solo tú puedes verla y puedes salir cuando quieras.')}</p>
                 <div className="mt-3 flex gap-2">
-                  <label htmlFor="sync-email" className="sr-only">Email</label>
-                  <input id="sync-email" type="email" required value={emailInput} onChange={(e) => setEmailInput(e.target.value)} placeholder="you@email.com" className="min-h-11 min-w-0 flex-1 rounded-full border border-white/15 bg-night/60 px-4" />
-                  <button className="glow-lagoon min-h-11 rounded-full bg-lagoon px-4 text-sm font-semibold text-night">Email me a link</button>
+                  <label htmlFor="sync-email" className="sr-only">{t('Email', 'Correo')}</label>
+                  <input id="sync-email" type="email" required value={emailInput} onChange={(e) => setEmailInput(e.target.value)} placeholder={t('you@email.com', 'tu@correo.com')} className="min-h-11 min-w-0 flex-1 rounded-full border border-white/15 bg-night/60 px-4" />
+                  <button className="glow-lagoon min-h-11 rounded-full bg-lagoon px-4 text-sm font-semibold text-night">{t('Email me a link', 'Envíame un enlace')}</button>
                 </div>
                 {syncMsg && <p className="mt-2 text-sm text-ink/70" role="status">{syncMsg}</p>}
               </form>
@@ -228,32 +241,32 @@ export default function AuditApp() {
         {tab === 'overview' && (
           <div className="mt-6 grid gap-4 lg:grid-cols-3">
             <div className="glass flex flex-wrap items-center gap-6 p-6 lg:col-span-2">
-              <Ring value={s.organization} size={112} label="Clean-slate score" sub={`${s.accountsClosed} of ${s.accountsTotal} accounts deleted`} />
-              <Ring value={s.progress} size={88} label="Steps done" sub={`${s.doneCount} of ${s.total}`} />
+              <Ring value={s.organization} size={112} label={t('Clean-slate score', 'Puntaje de página limpia')} sub={t(`${s.accountsClosed} of ${s.accountsTotal} accounts deleted`, `${s.accountsClosed} de ${s.accountsTotal} cuentas eliminadas`)} />
+              <Ring value={s.progress} size={88} label={t('Steps done', 'Pasos hechos')} sub={t(`${s.doneCount} of ${s.total}`, `${s.doneCount} de ${s.total}`)} />
             </div>
             <div className="halo-border">
               <div className="h-full rounded-[1.75rem] bg-deep/95 p-6">
-                <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-mango">Next best step</p>
+                <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-mango">{t('Next best step', 'Siguiente mejor paso')}</p>
                 {next ? (
                   <>
                     <p className="mt-2 text-lg font-semibold">{next.label}</p>
                     {next.detail && <p className="mt-1 text-sm text-ink/60">{next.detail}</p>}
                     <div className="mt-4 flex gap-2">
-                      <button onClick={() => tick(next.id)} className="glow-mango min-h-11 rounded-full bg-mango px-5 text-sm font-semibold text-night">Mark done</button>
-                      <button onClick={() => setTab('clean')} className="min-h-11 rounded-full px-4 text-sm ring-1 ring-white/15">See how</button>
+                      <button onClick={() => tick(next.id)} className="glow-mango min-h-11 rounded-full bg-mango px-5 text-sm font-semibold text-night">{t('Mark done', 'Marcar hecho')}</button>
+                      <button onClick={() => setTab('clean')} className="min-h-11 rounded-full px-4 text-sm ring-1 ring-white/15">{t('See how', 'Ver cómo')}</button>
                     </div>
                   </>
-                ) : <p className="mt-2 text-lg font-semibold">{hasApps ? 'All done. Nothing left behind.' : 'Add the apps you used to begin.'}</p>}
+                ) : <p className="mt-2 text-lg font-semibold">{hasApps ? t('All done. Nothing left behind.', 'Todo listo. Nada pendiente.') : t('Add the apps you used to begin.', 'Agrega las apps que usaste para empezar.')}</p>}
               </div>
             </div>
 
             <div className="glass p-6 lg:col-span-2">
-              <div className="flex items-center justify-between"><h2 className="font-semibold">Apps</h2><button onClick={() => setTab('apps')} className="text-sm text-teal">+ Add apps</button></div>
-              {!hasApps && <p className="mt-3 text-ink/60">No apps yet. <button onClick={() => setTab('apps')} className="text-teal underline">Pick the ones you used</button>.</p>}
+              <div className="flex items-center justify-between"><h2 className="font-semibold">{t('Apps', 'Apps')}</h2><button onClick={() => setTab('apps')} className="text-sm text-teal">{t('+ Add apps', '+ Agregar apps')}</button></div>
+              {!hasApps && <p className="mt-3 text-ink/60">{t('No apps yet.', 'Aún no hay apps.')} <button onClick={() => setTab('apps')} className="text-teal underline">{t('Pick the ones you used', 'Elige las que usaste')}</button>.</p>}
               <div className="mt-4 grid gap-2.5 sm:grid-cols-2">
-                {groups.filter((g) => g.title !== 'Everywhere else').map((g) => (
+                {groups.filter((g) => g.title !== EVERYWHERE).map((g) => (
                   <button key={g.title} onClick={() => setTab('clean')} className="rounded-xl bg-white/[0.03] p-3.5 text-left ring-1 ring-white/[0.07] hover:ring-lagoon/40">
-                    <div className="flex items-center justify-between gap-2 text-sm"><span className="font-medium">{g.title}</span><span className={`rounded-full px-2 py-0.5 text-[11px] ${badge[g.status]}`}>{g.status}</span></div>
+                    <div className="flex items-center justify-between gap-2 text-sm"><span className="font-medium">{g.title}</span><span className={`rounded-full px-2 py-0.5 text-[11px] ${badge[g.status]}`}>{es ? STATUS_ES[g.status] : g.status}</span></div>
                     <div className="mt-2.5 h-1.5 rounded-full bg-white/[0.06]"><div className="h-full rounded-full bg-gradient-to-r from-lagoon to-mango transition-all" style={{ width: `${g.pct}%` }} /></div>
                   </button>
                 ))}
@@ -261,7 +274,7 @@ export default function AuditApp() {
             </div>
 
             <div className="glass p-6">
-              <h2 className="font-semibold">Milestones</h2>
+              <h2 className="font-semibold">{t('Milestones', 'Logros')}</h2>
               <ul className="mt-3 space-y-2">
                 {milestones.map((m) => (
                   <li key={m.t} className={`flex items-center gap-3 text-sm ${m.ok ? '' : 'text-ink/40'}`}>
@@ -274,19 +287,19 @@ export default function AuditApp() {
             {KIT_URL && (
               <div className="glass flex flex-wrap items-center justify-between gap-4 p-6 lg:col-span-3">
                 <div>
-                  <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-mango">Optional · $19 one time</p>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-mango">{t('Optional · $19 one time', 'Opcional · $19 un solo pago')}</p>
                   <h2 className="mt-1 text-lg font-semibold">Clean Slate Kit</h2>
-                  <p className="text-sm text-ink/65">A printable companion: cleanup report, 30-day boundaries plan and 12 conversation cards. The audit stays free.</p>
+                  <p className="text-sm text-ink/65">{t('A printable companion: cleanup report, 30-day boundaries plan and 12 conversation cards. The audit stays free.', 'Un complemento para imprimir: reporte de limpieza, plan de límites de 30 días y 12 tarjetas de conversación. La revisión sigue gratis.')}</p>
                 </div>
-                <a href={KIT_URL} target="_blank" rel="noopener noreferrer" className="glow-mango min-h-11 shrink-0 rounded-full bg-mango px-5 py-3 text-sm font-semibold text-night">Get the kit ↗</a>
+                <a href={KIT_URL} target="_blank" rel="noopener noreferrer" className="glow-mango min-h-11 shrink-0 rounded-full bg-mango px-5 py-3 text-sm font-semibold text-night">{t('Get the kit ↗', 'Obtener el kit ↗')}</a>
               </div>
             )}
             <div className="glass p-6 lg:col-span-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <h2 className="font-semibold">Timeline</h2>
-                <button onClick={() => window.print()} className="min-h-11 rounded-full px-4 text-sm ring-1 ring-white/15 hover:ring-lagoon/50">Print or save my report</button>
+                <h2 className="font-semibold">{t('Timeline', 'Historial')}</h2>
+                <button onClick={() => window.print()} className="min-h-11 rounded-full px-4 text-sm ring-1 ring-white/15 hover:ring-lagoon/50">{t('Print or save my report', 'Imprimir o guardar mi reporte')}</button>
               </div>
-              {timeline.length === 0 ? <p className="mt-3 text-sm text-ink/55">Each step you finish is recorded here with its date.</p> : (
+              {timeline.length === 0 ? <p className="mt-3 text-sm text-ink/55">{t('Each step you finish is recorded here with its date.', 'Cada paso que termines queda aquí con su fecha.')}</p> : (
                 <ol className="mt-4 space-y-3 border-l border-lagoon/30 pl-5">
                   {timeline.slice(0, 8).map((x) => (
                     <li key={x.step!.id} className="relative text-sm"><span className="absolute -left-[25px] top-1.5 size-2.5 rounded-full bg-lagoon shadow-[0_0_8px_#D9B77E]" /><span className="text-ink/50">{fmt(x.at)}</span> · {x.step!.label}</li>
@@ -301,15 +314,15 @@ export default function AuditApp() {
         {tab === 'apps' && (
           <section className="mt-6">
             <div className="glass p-6">
-              <h2 className="text-lg font-semibold">Which apps have you ever used?</h2>
-              <p className="mt-1 text-ink/65">Tick every one, even if you only opened it once. Not sure? Use the inbox search below.</p>
-              <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search apps…" aria-label="Search apps" className="mt-4 min-h-11 w-full rounded-full border border-white/15 bg-night/60 px-5 sm:w-80" />
+              <h2 className="text-lg font-semibold">{t('Which apps have you ever used?', '¿Qué apps has usado alguna vez?')}</h2>
+              <p className="mt-1 text-ink/65">{t('Tick every one, even if you only opened it once. Not sure? Use the inbox search below.', 'Marca cada una, aunque solo la hayas abierto una vez. ¿No estás seguro? Usa la búsqueda de correo abajo.')}</p>
+              <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('Search apps…', 'Buscar apps…')} aria-label={t('Search apps', 'Buscar apps')} className="mt-4 min-h-11 w-full rounded-full border border-white/15 bg-night/60 px-5 sm:w-80" />
               {cats.map((c) => {
                 const items = filtered.filter((p) => p.category === c);
                 if (!items.length) return null;
                 return (
                   <div key={c} className="mt-6">
-                    <h3 className="font-mono text-[11px] uppercase tracking-widest text-teal">{CATEGORY_LABEL[c]}</h3>
+                    <h3 className="font-mono text-[11px] uppercase tracking-widest text-teal">{(es ? CATEGORY_LABEL_ES : CATEGORY_LABEL)[c]}</h3>
                     <div className="mt-2 flex flex-wrap gap-2">
                       {items.map((p) => { const on = state.platformIds.includes(p.id); return (
                         <button key={p.id} onClick={() => toggle(p.id)} aria-pressed={on}
@@ -320,31 +333,31 @@ export default function AuditApp() {
                 );
               })}
               <div className="mt-6 flex gap-2">
-                <input value={custom} onChange={(e) => setCustom(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addCustom()} placeholder="Another app or site" aria-label="Add another app" className="min-h-11 min-w-0 flex-1 rounded-full border border-white/15 bg-night/60 px-5 sm:max-w-xs" />
-                <button onClick={addCustom} className="min-h-11 rounded-full px-5 font-semibold ring-1 ring-white/15">Add</button>
+                <input value={custom} onChange={(e) => setCustom(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addCustom()} placeholder={t('Another app or site', 'Otra app o sitio')} aria-label={t('Add another app', 'Agregar otra app')} className="min-h-11 min-w-0 flex-1 rounded-full border border-white/15 bg-night/60 px-5 sm:max-w-xs" />
+                <button onClick={addCustom} className="min-h-11 rounded-full px-5 font-semibold ring-1 ring-white/15">{t('Add', 'Agregar')}</button>
               </div>
-              {state.custom.length > 0 && <p className="mt-2 text-sm text-ink/60">Added: {state.custom.join(', ')}</p>}
+              {state.custom.length > 0 && <p className="mt-2 text-sm text-ink/60">{t('Added', 'Agregadas')}: {state.custom.join(', ')}</p>}
             </div>
-            <button onClick={() => setTab('clean')} disabled={!hasApps} className="glow-mango mt-6 min-h-12 rounded-full bg-mango px-7 font-semibold text-night disabled:opacity-40">Next: clean up →</button>
+            <button onClick={() => setTab('clean')} disabled={!hasApps} className="glow-mango mt-6 min-h-12 rounded-full bg-mango px-7 font-semibold text-night disabled:opacity-40">{t('Next: clean up →', 'Siguiente: limpieza →')}</button>
           </section>
         )}
 
         {/* CLEAN UP */}
         {tab === 'clean' && (
           <section className="mt-6 space-y-4">
-            <DeletionRequests apps={groups.filter((g) => g.title !== 'Everywhere else').map((g) => g.title)} state={state} setState={setState} />
+            <DeletionRequests apps={groups.filter((g) => g.title !== EVERYWHERE).map((g) => g.title)} state={state} setState={setState} />
             {groups.map((g) => (
               <details key={g.title} open={g.status !== 'Closed'} className="glass group p-5 [&_summary::-webkit-details-marker]:hidden">
                 <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-3">
-                  <span className="flex items-center gap-3"><span className="text-lg font-semibold">{g.title}</span><span className={`rounded-full px-2 py-0.5 text-[11px] ${badge[g.status]}`}>{g.status}</span></span>
+                  <span className="flex items-center gap-3"><span className="text-lg font-semibold">{g.title === EVERYWHERE ? t(EVERYWHERE, 'En todos lados') : g.title}</span><span className={`rounded-full px-2 py-0.5 text-[11px] ${badge[g.status]}`}>{es ? STATUS_ES[g.status] : g.status}</span></span>
                   <span className="text-sm text-ink/55">{g.n}/{g.items.length}</span>
                   <div className="h-1.5 w-full rounded-full bg-white/[0.06]"><div className="h-full rounded-full bg-gradient-to-r from-lagoon to-mango transition-all" style={{ width: `${g.pct}%` }} /></div>
                 </summary>
                 <ul className="mt-3 space-y-1">{g.items.map(stepRow)}</ul>
-                {g.title !== 'Everywhere else' && <a className="mt-2 inline-block text-sm text-teal underline" href={helpSearchUrl({ name: g.title })} target="_blank" rel="noopener noreferrer">Official help page ↗</a>}
+                {g.title !== EVERYWHERE && <a className="mt-2 inline-block text-sm text-teal underline" href={helpSearchUrl({ name: g.title })} target="_blank" rel="noopener noreferrer">{t('Official help page ↗', 'Página oficial de ayuda ↗')}</a>}
               </details>
             ))}
-            <p className="text-xs text-ink/50">Steps checked {CATALOG_VERIFIED}. Apps change their menus; if a step looks different, use the official help page.</p>
+            <p className="text-xs text-ink/50">{t(`Steps checked ${CATALOG_VERIFIED}. Apps change their menus; if a step looks different, use the official help page.`, `Pasos revisados ${CATALOG_VERIFIED}. Las apps cambian sus menús; si algo se ve distinto, usa la página oficial de ayuda.`)}</p>
           </section>
         )}
 
@@ -352,27 +365,27 @@ export default function AuditApp() {
         {tab === 'apps' && (
           <section className="mt-6 grid gap-4 md:grid-cols-2 [&>*]:min-w-0">
             <div className="glass p-6">
-              <h2 className="text-lg font-semibold">Search your own inbox</h2>
-              <p className="mt-1 text-ink/65">Opens a search in your Gmail. We never connect to your email or see results.{state.platformIds.length ? ' Covers the apps you picked.' : ' With no apps picked it looks for all of them, to find ones you forgot.'}</p>
-              <a onClick={() => track('gmail-search')} href={gmailSearchUrl(domains)} target="_blank" rel="noopener noreferrer" className="glow-lagoon mt-4 inline-flex min-h-11 items-center rounded-full bg-lagoon px-6 font-semibold text-night">Search my Gmail ↗</a>
-              <h3 className="mt-6 font-semibold">Outlook, Yahoo, iCloud or other email</h3>
-              <p className="text-sm text-ink/60">Copy this into your email search box:</p>
+              <h2 className="text-lg font-semibold">{t('Search your own inbox', 'Busca en tu propio correo')}</h2>
+              <p className="mt-1 text-ink/65">{t('Opens a search in your Gmail. We never connect to your email or see results.', 'Abre una búsqueda en tu Gmail. Nunca nos conectamos a tu correo ni vemos resultados.')}{state.platformIds.length ? t(' Covers the apps you picked.', ' Cubre las apps que elegiste.') : t(' With no apps picked it looks for all of them, to find ones you forgot.', ' Sin apps elegidas busca todas, para encontrar las que olvidaste.')}</p>
+              <a onClick={() => track('gmail-search')} href={gmailSearchUrl(domains)} target="_blank" rel="noopener noreferrer" className="glow-lagoon mt-4 inline-flex min-h-11 items-center rounded-full bg-lagoon px-6 font-semibold text-night">{t('Search my Gmail ↗', 'Buscar en mi Gmail ↗')}</a>
+              <h3 className="mt-6 font-semibold">{t('Outlook, Yahoo, iCloud or other email', 'Outlook, Yahoo, iCloud u otro correo')}</h3>
+              <p className="text-sm text-ink/60">{t('Copy this into your email search box:', 'Copia esto en el buscador de tu correo:')}</p>
               <div className="mt-2 flex gap-2">
                 <code className="block min-w-0 flex-1 overflow-x-auto whitespace-nowrap rounded-lg bg-night/70 p-3 text-sm text-teal">{gmailQuery(domains)}</code>
-                <button onClick={() => copy(gmailQuery(domains), 'q')} className="min-h-11 rounded-lg px-4 text-sm font-semibold ring-1 ring-white/15">{copied === 'q' ? 'Copied' : 'Copy'}</button>
+                <button onClick={() => copy(gmailQuery(domains), 'q')} className="min-h-11 rounded-lg px-4 text-sm font-semibold ring-1 ring-white/15">{copied === 'q' ? t('Copied', 'Copiado') : t('Copy', 'Copiar')}</button>
               </div>
             </div>
             <DataScan selected={state.platformIds} toggle={toggle} />
             <WebSearch state={state} setState={setState} addApps={() => window.scrollTo({ top: 0, behavior: 'smooth' })} />
             <div className="glass p-6">
-              <h2 className="text-lg font-semibold">Other places to look</h2>
+              <h2 className="text-lg font-semibold">{t('Other places to look', 'Otros lugares para revisar')}</h2>
               <ul className="mt-3 list-disc space-y-2 pl-5 text-ink/70">
-                <li>Your password manager or saved passwords: search &ldquo;dating&rdquo; or app names.</li>
-                <li>App store purchase history: subscriptions you forgot.</li>
-                <li>Card statements from the last 3 months.</li>
-                <li>Old or second email addresses.</li>
+                <li>{t('Your password manager or saved passwords: search “dating” or app names.', 'Tu gestor de contraseñas o contraseñas guardadas: busca “dating” o nombres de apps.')}</li>
+                <li>{t('App store purchase history: subscriptions you forgot.', 'Historial de compras de la tienda de apps: suscripciones olvidadas.')}</li>
+                <li>{t('Card statements from the last 3 months.', 'Estados de cuenta de los últimos 3 meses.')}</li>
+                <li>{t('Old or second email addresses.', 'Correos antiguos o secundarios.')}</li>
               </ul>
-              <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="mt-4 min-h-11 rounded-full px-5 font-semibold ring-1 ring-white/15">Found one? Add it above ↑</button>
+              <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="mt-4 min-h-11 rounded-full px-5 font-semibold ring-1 ring-white/15">{t('Found one? Add it above ↑', '¿Encontraste una? Agrégala arriba ↑')}</button>
             </div>
           </section>
         )}
@@ -386,17 +399,17 @@ export default function AuditApp() {
         {/* SETTINGS */}
         {tab === 'settings' && <SettingsTab signedInEmail={syncEmail} openSignIn={() => { setSyncOpen(true); window.scrollTo({ top: 0 }); }} clearDevice={reset} />}
 
-        <div className="mt-10 flex justify-end"><button onClick={reset} className="text-sm text-ink/50 underline">Clear my audit from this device</button></div>
+        <div className="mt-10 flex justify-end"><button onClick={reset} className="text-sm text-ink/50 underline">{t('Clear my audit from this device', 'Borrar mi revisión de este dispositivo')}</button></div>
         </div>
       </div>
 
       {/* Mobile bottom tab bar */}
-      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-night/85 backdrop-blur-xl md:hidden print:hidden" role="tablist" aria-label="Dashboard sections">
+      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-night/85 backdrop-blur-xl md:hidden print:hidden" role="tablist" aria-label={t('Dashboard sections', 'Secciones del panel')}>
         <div className="mx-auto grid max-w-md grid-cols-5">
-          {TABS.map((t) => (
-            <button key={t.id} role="tab" aria-selected={tab === t.id} onClick={() => { setTab(t.id); window.scrollTo({ top: 0 }); }}
-              className={`flex min-h-14 flex-col items-center justify-center gap-0.5 text-[11px] ${tab === t.id ? 'text-lagoon' : 'text-ink/55'}`}>
-              <span className={`text-lg leading-none ${tab === t.id ? 'drop-shadow-[0_0_8px_#D9B77E]' : ''}`} aria-hidden="true">{t.icon}</span>{t.label}
+          {TABS.map((tb) => (
+            <button key={tb.id} role="tab" aria-selected={tab === tb.id} onClick={() => { setTab(tb.id); window.scrollTo({ top: 0 }); }}
+              className={`flex min-h-14 flex-col items-center justify-center gap-0.5 text-[11px] ${tab === tb.id ? 'text-lagoon' : 'text-ink/55'}`}>
+              <span className={`text-lg leading-none ${tab === tb.id ? 'drop-shadow-[0_0_8px_#D9B77E]' : ''}`} aria-hidden="true">{tb.icon}</span>{es ? tb.es : tb.label}
             </button>
           ))}
         </div>
@@ -404,15 +417,16 @@ export default function AuditApp() {
 
       {/* Printable report (print only) */}
       <section className="hidden p-8 text-black print:block">
-        <h1 className="text-2xl font-bold">My Marriage Mode cleanup report</h1>
-        <p className="mt-1 text-sm">Printed {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} · {s.accountsClosed} of {s.accountsTotal} accounts deleted · {s.doneCount} of {s.total} steps done</p>
+        <h1 className="text-2xl font-bold">{t('My Marriage Mode cleanup report', 'Mi reporte de limpieza de Marriage Mode')}</h1>
+        <p className="mt-1 text-sm">{t('Printed', 'Impreso')} {new Date().toLocaleDateString(LOCALE[lang], { month: 'long', day: 'numeric', year: 'numeric' })} · {t(`${s.accountsClosed} of ${s.accountsTotal} accounts deleted · ${s.doneCount} of ${s.total} steps done`, `${s.accountsClosed} de ${s.accountsTotal} cuentas eliminadas · ${s.doneCount} de ${s.total} pasos hechos`)}</p>
         {groups.map((g) => (
-          <div key={g.title} className="mt-5"><h2 className="font-bold">{g.title}: {g.status}</h2>
+          <div key={g.title} className="mt-5"><h2 className="font-bold">{g.title === EVERYWHERE ? t(EVERYWHERE, 'En todos lados') : g.title}: {es ? STATUS_ES[g.status] : g.status}</h2>
             <ul className="mt-1 text-sm">{g.items.map((st) => <li key={st.id}>{state.done[st.id] ? '☑' : '☐'} {st.label}{state.doneAt?.[st.id] ? ` (${fmt(state.doneAt[st.id])})` : ''}</li>)}</ul>
           </div>
         ))}
-        <p className="mt-6 text-xs">Marriage Mode by Upfront Consulting with Tiff &amp; Reco LLC. This report was made on your device and is yours to keep or share.</p>
+        <p className="mt-6 text-xs">{t('Marriage Mode by Upfront Consulting with Tiff & Reco LLC. This report was made on your device and is yours to keep or share.', 'Marriage Mode de Upfront Consulting with Tiff & Reco LLC. Este reporte se hizo en tu dispositivo y es tuyo para guardar o compartir.')}</p>
       </section>
     </div>
+    </LangCtx.Provider>
   );
 }
