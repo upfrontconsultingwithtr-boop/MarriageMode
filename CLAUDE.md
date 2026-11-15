@@ -30,3 +30,9 @@ block. For those, give her the shortest one-tap steps.
 "dummy" instructions: one action per line, the exact link, the exact button
 words, which account to use, and what to tell Claude when done. Remove a step
 once it's done and add a line to the Done log. Send her the HUB link, not long chat steps.
+
+## Standing rule: the product stands on its own (Tiffany, 2026-11-15)
+Customers must never need Claude, an AI account, a paid app or any special
+tool for Marriage Mode to work. Everything runs in a normal phone or computer
+browser, free, with no sign-up for the core audit. Any future AI feature runs
+on our side (capped, approved spend) and the product still works if it's off.

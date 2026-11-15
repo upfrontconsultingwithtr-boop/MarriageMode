@@ -38,6 +38,7 @@ use without the account owner's own participation. See `TRUST-AND-SAFETY.md`.
 4. **Honest about limits.** We guide steps we can't automate and never claim a
    deletion we can't confirm.
 5. **Kind tone.** No shame, no "cheater" language.
+6. **Stands on its own.** Customers never need Claude, an AI account, an app install or any paid tool. The core audit works in any browser with no sign-up; AI features are optional extras run on our side.
 
 ## 4. Features and requirements
 
