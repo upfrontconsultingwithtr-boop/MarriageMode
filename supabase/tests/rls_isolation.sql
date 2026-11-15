@@ -1,0 +1,82 @@
+-- Row-level security isolation test. Run after migrations:
+--   psql -v ON_ERROR_STOP=1 -f supabase/tests/rls_isolation.sql
+-- Any failed check raises an exception and fails the run (CI gate).
+begin;
+insert into auth.users (id, email) values
+  ('00000000-0000-0000-0000-00000000000a','a@test'), ('00000000-0000-0000-0000-00000000000b','b@test'),
+  ('00000000-0000-0000-0000-00000000000c','c@test');
+
+-- two ops tenants
+insert into ops.organizations (id,name,slug) values
+  ('10000000-0000-0000-0000-000000000001','Org One','one'), ('10000000-0000-0000-0000-000000000002','Org Two','two');
+insert into ops.roles (id,org_id,key,name) values
+  ('20000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001','founder','Founder'),
+  ('20000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000002','founder','Founder'),
+  ('20000000-0000-0000-0000-000000000003','10000000-0000-0000-0000-000000000001','investor','Investor');
+insert into ops.role_permissions values ('20000000-0000-0000-0000-000000000001','*'),
+  ('20000000-0000-0000-0000-000000000002','*'), ('20000000-0000-0000-0000-000000000003','kpi.read');
+insert into ops.members (org_id,user_id,role_id) values
+  ('10000000-0000-0000-0000-000000000001','00000000-0000-0000-0000-00000000000a','20000000-0000-0000-0000-000000000001'),
+  ('10000000-0000-0000-0000-000000000002','00000000-0000-0000-0000-00000000000b','20000000-0000-0000-0000-000000000002'),
+  ('10000000-0000-0000-0000-000000000001','00000000-0000-0000-0000-00000000000c','20000000-0000-0000-0000-000000000003');
+insert into ops.tasks (org_id,title) values ('10000000-0000-0000-0000-000000000002','Org Two secret task');
+insert into ops.documents (org_id,title,kind,visibility) values ('10000000-0000-0000-0000-000000000001','Cap table','contract','founder');
+insert into app.audits (user_id) values ('00000000-0000-0000-0000-00000000000b');
+
+create function pg_temp.as_user(u text) returns void language plpgsql as $$
+begin perform set_config('request.jwt.claim.sub', u, true); execute 'set local role authenticated'; end $$;
+create function pg_temp.check(ok boolean, msg text) returns void language plpgsql as $$
+begin if not ok then raise exception 'RLS FAIL: %', msg; end if; raise notice 'pass: %', msg; end $$;
+
+-- user A (Org One founder)
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
+select pg_temp.check((select count(*) from ops.tasks) = 0, 'A cannot read Org Two tasks');
+select pg_temp.check((select count(*) from app.audits) = 0, 'A cannot read B''s audit');
+select pg_temp.check((select count(*) from ops.organizations) = 1, 'A sees only own org');
+select pg_temp.check((select count(*) from ops.documents) = 1, 'founder reads founder-only doc');
+do $$ begin
+  insert into ops.tasks (org_id,title) values ('10000000-0000-0000-0000-000000000002','injected');
+  raise exception 'RLS FAIL: A wrote into Org Two';
+exception when insufficient_privilege then raise notice 'pass: A cannot write into Org Two'; end $$;
+do $$ declare n int; begin update ops.tasks set title='x'; get diagnostics n = row_count;
+  perform pg_temp.check(n = 0, 'A cannot update Org Two tasks'); end $$;
+reset role;
+
+-- user C (Org One investor)
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000c');
+select pg_temp.check((select count(*) from ops.documents) = 0, 'investor cannot read founder-only doc');
+do $$ begin
+  insert into ops.tasks (org_id,title) values ('10000000-0000-0000-0000-000000000001','investor task');
+  raise exception 'RLS FAIL: investor wrote a task';
+exception when insufficient_privilege then raise notice 'pass: investor cannot write tasks'; end $$;
+reset role;
+
+-- couple mode: A invites B; sharing is opt-in; ending stops access
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
+create temp table tok as select app.create_couple_invite() as t;
+grant select on tok to authenticated;
+do $$ begin perform app.accept_couple_invite((select t from tok));
+  raise exception 'RLS FAIL: inviter accepted own invite';
+exception when raise_exception then
+  if sqlerrm like 'RLS FAIL%' then raise; end if; raise notice 'pass: cannot accept own invite'; end $$;
+reset role;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000b');
+select pg_temp.check(app.accept_couple_invite((select t from tok)) is not null, 'B accepts invite on own session');
+select pg_temp.check((select count(*) from app.couple_shares) = 0, 'nothing shared by default');
+select pg_temp.check((select count(*) from app.audits) = 1, 'B still sees only own audit');
+reset role;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
+insert into app.couple_shares (couple_id, owner_id, share_kind, summary_text)
+  select couple_id, '00000000-0000-0000-0000-00000000000a', 'summary', 'Closed 5 of 5 dating accounts' from app.couple_members limit 1;
+select pg_temp.check((select count(*) from app.audits) = 0, 'A cannot read partner B''s audit even when linked');
+reset role;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000b');
+select pg_temp.check((select count(*) from app.couple_shares) = 1, 'B reads the summary A chose to share');
+update app.couples set status = 'ended', ended_at = now();  -- B unlinks
+select pg_temp.check((select count(*) from app.couple_shares) = 0, 'after unlink, B loses access instantly');
+reset role;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000c');
+select pg_temp.check((select count(*) from app.couple_shares) = 0, 'outsider sees no couple data');
+reset role;
+rollback;
+\echo RLS_ISOLATION_ALL_PASSED

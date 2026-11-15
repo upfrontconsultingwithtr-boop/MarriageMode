@@ -1,0 +1,26 @@
+{
+  "name": "marriage-mode",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Marriage Mode by Upfront Consulting with Tiff & Reco LLC",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test --experimental-strip-types src/lib/*.test.ts"
+  },
+  "dependencies": {
+    "next": "^15.5.29",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.5",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "tailwindcss": "^4.3.5",
+    "typescript": "5.9"
+  }
+}

@@ -1,0 +1,2 @@
+{ "name": "Marriage Mode", "short_name": "Marriage Mode", "start_url": "/audit/", "display": "standalone",
+  "background_color": "#F4FBFA", "theme_color": "#06424D", "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }] }
