@@ -96,7 +96,12 @@ export default function CoachApp() {
       try {
         const chunks = await engine.current.chat.completions.create({ stream: true, temperature: 0.7, max_tokens: 220, messages: [{ role: 'system', content: systemPrompt(es) }, ...history.slice(-12)] });
         for await (const c of chunks) { reply += c.choices[0]?.delta?.content ?? ''; setLive(reply); }
-      } catch { reply = t('Sorry, I lost my train of thought. Could you say that again?', 'Perdón, perdí el hilo. ¿Puedes repetirlo?'); }
+      } catch {
+        // The device ran out of graphics memory: keep the session going in Lite mode.
+        engine.current = null; setMode('lite');
+        setErr(t('This device ran out of memory for the full AI, so Mia switched to Lite mode. You can keep talking.', 'Este dispositivo se quedó sin memoria para la IA completa, así que Mia cambió al modo Lite. Puedes seguir hablando.'));
+        reply = guideAnswer(v, es, { base: BASE }).text;
+      }
     }
     setLive(''); setMsgs((m) => [...m, { role: 'assistant', content: reply.trim() }]); setBusy(false); say(reply.trim());
   };
