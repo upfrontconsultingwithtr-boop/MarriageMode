@@ -48,6 +48,7 @@ Why: counselors and pastors who work with engaged couples are the fastest free w
 | Design look (green & pink) | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/DESIGN-SYSTEM.md |
 
 ## 📝 Done log (newest first)
+- **Nov 15:** 28 cancel-subscription guides live. 3 outreach emails saved in your Gmail Drafts.
 - **Nov 15:** One-tap deletion requests: for every app a customer picks, the app writes a formal "delete my account and data" request, links the official privacy page, and tracks what was sent.
 - **Nov 15:** New look: **Champagne** (your pick B). Plum, champagne gold and rose with elegant Fraunces headlines, across the site, dashboard, Couple Mode, hub and Clean Slate Kit.
 - **Nov 15:** Redesign round 3 (a real overhaul): moving aurora light, giant headline, tilted 3D phone with the live demo and floating "Closed ✓" cards, scrolling app-name strip, before/after section, scrolling phone story. Same aurora in the dashboard, Couple Mode and the hub.
