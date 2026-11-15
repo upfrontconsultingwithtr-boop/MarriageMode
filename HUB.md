@@ -77,3 +77,4 @@ Why: counselors and pastors who work with engaged couples are the fastest free w
 - 2026-11-15: Customer dashboard in Spanish (English/Español switch in header and Settings).
 - 2026-11-15: Investor pitch deck as 12 real slides: https://claude.ai/artifact/BwbsC8cNoTZWzJZiwit7PP (source in docs/deck/).
 - 2026-11-15: Value and benefits shown on the home page, Spanish page and dashboard (Your toolkit panel).
+- 2026-11-15: Home page speed: phone score 68 → 72–81 (no background dashboard loading, lazy sections). Hub: post previews + tappable links.
