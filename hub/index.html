@@ -50,6 +50,13 @@ a{color:var(--green)} button,input,textarea{font:inherit;color:inherit}
 .post img{display:block;width:100%;height:auto}
 .post .pb{padding:12px 14px}.post .pm{font-size:12px;color:var(--muted);margin-bottom:6px}
 .post .ptxt{white-space:pre-wrap;font-size:14px;line-height:1.45}
+.review{margin-bottom:18px}.reviews{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.rcard{border:1px solid var(--line,#ffffff22);border-radius:16px;overflow:hidden;background:#00000022;display:flex;flex-direction:column}
+.rcard img{display:block;width:100%;height:auto}.rcard .pb{padding:12px 14px;flex:1}
+.rcard .rt{font-weight:700;margin-bottom:4px}.rcard .pm{font-size:12px;color:var(--muted);margin-bottom:8px}
+.rcard .ptxt{white-space:pre-wrap;font-size:14px;line-height:1.45;max-height:260px;overflow:auto}
+.rcard .rbar{display:flex;gap:8px;flex-wrap:wrap;padding:0 14px 12px}
+.rcard .thread,.rcard .reply{padding-left:14px;padding-right:14px}.rcard .reply{padding-bottom:14px}
 @media (max-width:520px){.post{margin-left:14px}}
 .taskbar{display:flex;gap:8px;flex-wrap:wrap;padding:0 14px 14px 52px}
 .btn{min-height:44px;border:0;border-radius:999px;padding:0 16px;font-weight:600;cursor:pointer}
@@ -110,6 +117,11 @@ a{color:var(--green)} button,input,textarea{font:inherit;color:inherit}
     <div class="stat"><b id="s-done">–</b><span>done</span></div>
   </section>
 
+  <section class="panel review" id="review-panel" hidden aria-label="Posts to review">
+    <h2>📣 Posts to review <span class="count">look, then tap Approve or tell Claude what to change</span></h2>
+    <div class="reviews" id="reviews"></div>
+  </section>
+
   <div class="grid">
     <div class="col">
       <section class="panel">
@@ -164,7 +176,30 @@ function linked(tag, cls, text) { const e = el(tag, cls); String(text).split(/(h
 function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
 const pillText = { todo: 'To do', doing: 'Working', done: 'Done', blocked: 'Needs your yes' };
 
+function renderReviews() {
+  const list = tasks.filter(t => t.preview && t.status !== 'done').sort((a, b) => a.priority - b.priority);
+  $('review-panel').hidden = !list.length; const box = $('reviews'); box.replaceChildren();
+  list.forEach(t => {
+    const card = el('div', 'rcard');
+    if (t.preview.image) { const im = el('img'); im.src = t.preview.image; im.alt = t.preview.alt || 'Post picture'; card.append(im); }
+    const pb = el('div', 'pb'); pb.append(el('div', 'rt', t.title)); pb.append(el('div', 'pm', t.preview.meta || '')); pb.append(linked('div', 'ptxt', t.preview.text || '')); card.append(pb);
+    const thread = msgs.filter(m => m.taskId === t.id);
+    const approved = thread.some(m => m.from === 'you' && /^approve/i.test(String(m.text).replace(/^About “[^”]*”: /, '')));
+    const bar = el('div', 'rbar');
+    const ok = el('button', 'btn primary', approved ? 'Approved ✓ (Claude is scheduling it)' : 'Approve this post'); ok.type = 'button'; ok.disabled = approved;
+    ok.addEventListener('click', async () => { ok.disabled = true; const sent = await sendMessage('approve', t); ok.textContent = sent ? 'Approved ✓ (Claude is scheduling it)' : 'Try again'; if (!sent) ok.disabled = false; });
+    bar.append(ok); card.append(bar);
+    const th = el('div', 'thread'); thread.slice(-4).forEach(m => { const p = el('p', 'tmsg ' + (m.from === 'you' ? 'you' : 'claude')); p.append(el('b', null, m.from === 'you' ? 'You: ' : 'Claude: ')); p.append(linked('span', null, m.text)); th.append(p); });
+    if (thread.length) card.append(th);
+    const f = el('form', 'reply'); const inp = el('input'); inp.placeholder = 'Want a change? Type it here…'; inp.setAttribute('aria-label', 'Tell Claude what to change about: ' + t.title);
+    const sb = el('button', 'btn ghost', 'Send'); sb.type = 'submit'; f.append(inp, sb);
+    f.addEventListener('submit', async (e) => { e.preventDefault(); const v = inp.value.trim(); if (!v) return; sb.disabled = true; if (await sendMessage(v, t)) inp.value = ''; sb.disabled = false; });
+    card.append(f); box.append(card);
+  });
+}
+
 function renderTasks() {
+  renderReviews();
   const you = tasks.filter(t => t.owner === 'you' && t.status !== 'done').sort((a, b) => a.priority - b.priority);
   const cl = tasks.filter(t => t.owner === 'claude' && t.status !== 'done').sort((a, b) => a.priority - b.priority);
   const done = tasks.filter(t => t.status === 'done').sort((a, b) => String(b.doneAt || '').localeCompare(String(a.doneAt || '')));
@@ -184,7 +219,8 @@ function renderTasks() {
       s.append(el('span', 'pill p-' + (t.status || 'todo'), pillText[t.status] || 'To do'));
       d.append(s);
       if (Array.isArray(t.steps) && t.steps.length) { const ol = el('ol', 'steps'); t.steps.forEach(st => ol.append(linked('li', null, st))); d.append(ol); }
-      if (t.preview) { const pv = el('div', 'post'); if (t.preview.image) { const im = el('img'); im.src = t.preview.image; im.alt = t.preview.alt || 'Post picture'; pv.append(im); } const pb = el('div', 'pb'); pb.append(el('div', 'pm', t.preview.meta || 'Post preview')); pb.append(linked('div', 'ptxt', t.preview.text || '')); pv.append(pb); d.append(pv); }
+      if (t.preview) { d.append(el('p', 'why', '👆 This post is shown in “Posts to review” at the top of the page.')); }
+      if (false) { const pv = el('div', 'post'); if (t.preview.image) { const im = el('img'); im.src = t.preview.image; im.alt = t.preview.alt || 'Post picture'; pv.append(im); } const pb = el('div', 'pb'); pb.append(el('div', 'pm', t.preview.meta || 'Post preview')); pb.append(linked('div', 'ptxt', t.preview.text || '')); pv.append(pb); d.append(pv); }
       const bar = el('div', 'taskbar');
       if (t.owner === 'you') { const b = el('button', 'btn primary', 'I did this'); b.type = 'button'; b.addEventListener('click', () => markDone(t.id, b)); bar.append(b); }
       const thread = msgs.filter(m => m.taskId === t.id);
