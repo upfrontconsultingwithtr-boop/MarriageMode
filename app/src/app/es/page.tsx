@@ -5,6 +5,7 @@ import Ring from '@/components/Ring';
 import Aurora from '@/components/Aurora';
 import Marquee from '@/components/Marquee';
 import { PLATFORMS } from '@/lib/catalog';
+import { BENEFITS, TOOLS } from '@/lib/value';
 import { SITE } from '@/lib/base';
 
 export const metadata: Metadata = {
@@ -83,6 +84,37 @@ export default function Espanol() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* VALUE: benefits */}
+      <section id="valor" className="mx-auto max-w-6xl scroll-mt-24 px-4 pt-24">
+        <Eyebrow>Por qué importa</Eyebrow>
+        <h2 className="mt-3 max-w-3xl text-4xl font-bold leading-tight sm:text-5xl">Lo que ganas con una página limpia</h2>
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 [&>*]:min-w-0">
+          {BENEFITS.map((b) => (
+            <div key={b.icon} className="glass p-6">
+              <span className="grid size-12 place-items-center rounded-2xl bg-lagoon/15 text-2xl ring-1 ring-lagoon/40" aria-hidden="true">{b.icon}</span>
+              <h3 className="mt-4 text-xl font-semibold">{b.es.t}</h3>
+              <p className="mt-2 text-ink/70">{b.es.v}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* VALUE: tools */}
+      <section className="mx-auto max-w-6xl px-4 pt-24">
+        <Eyebrow>Todo incluido, gratis</Eyebrow>
+        <h2 className="mt-3 max-w-3xl text-3xl font-bold sm:text-4xl">Cada herramienta que necesitas, en un lugar privado</h2>
+        <p className="mt-3 max-w-2xl text-ink/70">Cada una hace un trabajo real, para que nada viejo quede atrás.</p>
+        <div className="mt-10 grid gap-4 md:grid-cols-2 [&>*]:min-w-0">
+          {TOOLS.map((x) => (
+            <div key={x.id} className="glass flex gap-4 p-5">
+              <span className="grid size-11 shrink-0 place-items-center rounded-full bg-lagoon text-lg font-bold text-night shadow-[0_0_16px_-4px_#D9B77E]" aria-hidden="true">{x.icon}</span>
+              <div><h3 className="font-semibold">{x.es.t}</h3><p className="mt-1 text-sm text-ink/70">{x.es.v}</p></div>
+            </div>
+          ))}
+        </div>
+        <Link href="/audit/?lang=es" className="glow-mango mt-8 inline-block rounded-full bg-mango px-8 py-4 text-lg font-semibold text-night hover:brightness-110">Empezar mi revisión gratis →</Link>
       </section>
 
       <section className="mx-auto max-w-6xl px-4 pt-24">

@@ -1,0 +1,22 @@
+// The value of Marriage Mode, in one place: shared by the home page, the
+// Spanish page and the dashboard so the promise is the same everywhere.
+export type Tab = 'overview' | 'apps' | 'clean' | 'partner' | 'settings';
+type L = { t: string; v: string };
+
+export const BENEFITS: { icon: string; en: L; es: L }[] = [
+  { icon: '🕊️', en: { t: 'Peace of mind', v: 'No old profile, match email or surprise charge waiting to cause a hard moment.' }, es: { t: 'Tranquilidad', v: 'Ningún perfil viejo, correo de matches ni cobro sorpresa esperando causar un mal momento.' } },
+  { icon: '💳', en: { t: 'Stop paying for the past', v: 'Find and cancel forgotten dating subscriptions that keep renewing in the background.' }, es: { t: 'Deja de pagar por el pasado', v: 'Encuentra y cancela suscripciones de citas olvidadas que se siguen renovando.' } },
+  { icon: '🔒', en: { t: 'Take back your data', v: 'Close accounts for real and ask companies to erase what they still hold about you.' }, es: { t: 'Recupera tus datos', v: 'Cierra cuentas de verdad y pide a las empresas que borren lo que aún guardan de ti.' } },
+  { icon: '💞', en: { t: 'Build trust, by choice', v: 'Show your partner a clean slate because you want to, never because you’re checked.' }, es: { t: 'Construye confianza, por decisión', v: 'Muestra a tu pareja una página limpia porque quieres, nunca porque te revisen.' } },
+];
+
+export const TOOLS: { id: string; icon: string; tab: Tab; en: L; es: L }[] = [
+  { id: 'audit', icon: '✓', tab: 'apps', en: { t: 'Guided cleanup checklist', v: 'Exact steps for 29 dating apps and sites: delete the profile, cancel billing, remove the app, stop the emails. No guessing, about 20 minutes.' }, es: { t: 'Lista guiada de limpieza', v: 'Pasos exactos para 29 apps y sitios de citas: eliminar el perfil, cancelar el cobro, quitar la app y detener los correos. Sin adivinar, unos 20 minutos.' } },
+  { id: 'inbox', icon: '✉', tab: 'apps', en: { t: 'Inbox search', v: 'One tap searches your own email for dating apps, so forgotten accounts show up. We never connect to your email.' }, es: { t: 'Búsqueda en tu correo', v: 'Un toque busca apps de citas en tu propio correo para que aparezcan cuentas olvidadas. Nunca nos conectamos a tu correo.' } },
+  { id: 'web', icon: '⌕', tab: 'apps', en: { t: 'Web self-search', v: 'Searches the web for old public profiles under your own usernames and emails, and keeps a record of what you found.' }, es: { t: 'Búsqueda en la web', v: 'Busca en la web perfiles públicos viejos con tus propios usuarios y correos, y guarda lo que encontraste.' } },
+  { id: 'scan', icon: '⇣', tab: 'apps', en: { t: 'Data-download scanner', v: 'Reads your Google or Facebook data download on your device and lists dating sites you signed into. The file never leaves your phone.' }, es: { t: 'Revisión de tu descarga de datos', v: 'Lee tu descarga de datos de Google o Facebook en tu dispositivo y muestra los sitios de citas donde entraste. El archivo nunca sale de tu teléfono.' } },
+  { id: 'letters', icon: '✍', tab: 'clean', en: { t: 'Deletion request letters', v: 'A formal letter for each app asking the company to erase your account and data, written for you and ready to send.' }, es: { t: 'Cartas de eliminación de datos', v: 'Una carta formal para cada app pidiendo a la empresa que borre tu cuenta y tus datos, escrita para ti y lista para enviar.' } },
+  { id: 'billing', icon: '$', tab: 'clean', en: { t: 'Cancel-billing guides', v: 'Direct links to Apple and Google subscriptions plus step-by-step cancel guides, so you stop paying for apps you don’t use.' }, es: { t: 'Guías para cancelar cobros', v: 'Enlaces directos a las suscripciones de Apple y Google y guías paso a paso, para dejar de pagar por apps que no usas.' } },
+  { id: 'progress', icon: '◎', tab: 'overview', en: { t: 'Score, milestones and report', v: 'Watch your clean-slate score rise, celebrate milestones and print or save a dated report of everything you closed.' }, es: { t: 'Puntaje, logros y reporte', v: 'Mira subir tu puntaje, celebra cada logro e imprime o guarda un reporte con fecha de todo lo que cerraste.' } },
+  { id: 'partner', icon: '♡', tab: 'partner', en: { t: 'Partner space', v: 'Private messages, shared goals and the progress you choose to share with your partner. Either of you can leave anytime.' }, es: { t: 'Espacio de pareja', v: 'Mensajes privados, metas en común y el avance que eliges compartir con tu pareja. Cualquiera puede salir cuando quiera.' } },
+];

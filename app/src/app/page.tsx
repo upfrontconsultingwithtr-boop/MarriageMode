@@ -7,6 +7,7 @@ import Phone from '@/components/Phone';
 import Marquee from '@/components/Marquee';
 import StickyStory from '@/components/StickyStory';
 import { PLATFORMS } from '@/lib/catalog';
+import { BENEFITS, TOOLS } from '@/lib/value';
 import type { Metadata } from 'next';
 import { KIT_URL, SITE } from '@/lib/base';
 
@@ -93,6 +94,37 @@ export default function Home() {
             </div>
           </div></div>
         </div>
+      </section>
+
+      {/* VALUE: benefits */}
+      <section id="value" className="mx-auto max-w-6xl scroll-mt-24 px-4 pt-24">
+        <Eyebrow>Why it matters</Eyebrow>
+        <h2 className="mt-3 max-w-3xl text-4xl font-bold leading-tight sm:text-5xl">What you get from a clean slate</h2>
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 [&>*]:min-w-0">
+          {BENEFITS.map((b) => (
+            <div key={b.icon} className="glass p-6">
+              <span className="grid size-12 place-items-center rounded-2xl bg-lagoon/15 text-2xl ring-1 ring-lagoon/40" aria-hidden="true">{b.icon}</span>
+              <h3 className="mt-4 text-xl font-semibold">{b.en.t}</h3>
+              <p className="mt-2 text-ink/70">{b.en.v}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* VALUE: tools */}
+      <section className="mx-auto max-w-6xl px-4 pt-24">
+        <Eyebrow>Everything included, free</Eyebrow>
+        <h2 className="mt-3 max-w-3xl text-3xl font-bold sm:text-4xl">Every tool you need, in one private place</h2>
+        <p className="mt-3 max-w-2xl text-ink/70">Each one does a real job, so nothing old is left behind.</p>
+        <div className="mt-10 grid gap-4 md:grid-cols-2 [&>*]:min-w-0">
+          {TOOLS.map((x) => (
+            <div key={x.id} className="glass flex gap-4 p-5">
+              <span className="grid size-11 shrink-0 place-items-center rounded-full bg-lagoon text-lg font-bold text-night shadow-[0_0_16px_-4px_#D9B77E]" aria-hidden="true">{x.icon}</span>
+              <div><h3 className="font-semibold">{x.en.t}</h3><p className="mt-1 text-sm text-ink/70">{x.en.v}</p></div>
+            </div>
+          ))}
+        </div>
+        <Link href="/audit/" className="glow-mango mt-8 inline-block rounded-full bg-mango px-8 py-4 text-lg font-semibold text-night hover:brightness-110">Start my free audit →</Link>
       </section>
 
       {/* HOW IT WORKS: sticky phone story */}

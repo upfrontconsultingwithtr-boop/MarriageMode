@@ -27,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <img src={`${BASE}/icon.svg`} alt="" width={30} height={30} /> Marriage Mode
             </Link>
             <div className="hidden items-center gap-6 text-sm text-ink/70 md:flex">
+              <Link href="/#value" className="hover:text-ink">Why Marriage Mode</Link>
               <Link href="/#how" className="hover:text-ink">How it works</Link>
               <Link href="/couple/" className="hover:text-ink">Couple Mode</Link>
               <Link href="/guides/" className="hover:text-ink">Guides</Link>
@@ -39,7 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <details className="relative md:hidden">
                 <summary className="grid size-10 cursor-pointer list-none place-items-center rounded-full ring-1 ring-white/15 [&::-webkit-details-marker]:hidden" aria-label="Menu">☰</summary>
                 <div className="glass absolute right-0 top-12 flex w-56 flex-col p-2 text-sm shadow-2xl">
-                  {[['/#how', 'How it works'], ['/couple/', 'Couple Mode'], ['/guides/', 'Delete-account guides'], ['/#pricing', 'Pricing'], ['/audit/', 'My dashboard'], ['/worksheet/', 'Couples worksheet'], ['/es/', 'Español']].map(([h, l]) => (
+                  {[['/#value', 'Why Marriage Mode'], ['/#how', 'How it works'], ['/couple/', 'Couple Mode'], ['/guides/', 'Delete-account guides'], ['/#pricing', 'Pricing'], ['/audit/', 'My dashboard'], ['/worksheet/', 'Couples worksheet'], ['/es/', 'Español']].map(([h, l]) => (
                     <Link key={h} href={h} className="rounded-xl px-3 py-3 hover:bg-white/5">{l}</Link>
                   ))}
                 </div>

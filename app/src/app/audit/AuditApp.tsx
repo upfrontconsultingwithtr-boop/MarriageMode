@@ -13,6 +13,7 @@ import DeletionRequests from '@/components/DeletionRequests';
 import { cloud, cloudEnabled, sendLink, pull, push, merge, signOut } from '@/lib/cloud';
 import { BASE, KIT_URL } from '@/lib/base';
 import { LangCtx, LOCALE, type Lang } from '@/lib/i18n';
+import { BENEFITS, TOOLS } from '@/lib/value';
 import { loadPrefs, savePrefs } from '@/lib/prefs';
 
 const KEY = 'marriage-mode:audit:v1';
@@ -282,6 +283,25 @@ export default function AuditApp() {
                   </li>
                 ))}
               </ul>
+            </div>
+
+            <div className="glass p-6 lg:col-span-3">
+              <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-teal">{t('Your toolkit · all free', 'Tus herramientas · todas gratis')}</p>
+              <h2 className="mt-1 text-lg font-semibold">{t('Everything Marriage Mode does for you', 'Todo lo que Marriage Mode hace por ti')}</h2>
+              <div className="mt-4 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4 [&>*]:min-w-0">
+                {TOOLS.map((x) => (
+                  <button key={x.id} onClick={() => { setTab(x.tab); window.scrollTo({ top: 0 }); }} className="flex flex-col rounded-xl bg-white/[0.03] p-4 text-left ring-1 ring-white/[0.07] transition hover:ring-lagoon/50">
+                    <span className="flex items-center gap-2 font-semibold"><span className="grid size-8 shrink-0 place-items-center rounded-full bg-lagoon/15 text-teal ring-1 ring-lagoon/40" aria-hidden="true">{x.icon}</span>{es ? x.es.t : x.en.t}</span>
+                    <span className="mt-2 text-sm text-ink/65">{es ? x.es.v : x.en.v}</span>
+                    <span className="mt-auto pt-3 text-sm text-teal">{t('Open →', 'Abrir →')}</span>
+                  </button>
+                ))}
+              </div>
+              <div className="mt-5 grid gap-3 border-t border-white/[0.07] pt-5 sm:grid-cols-2 lg:grid-cols-4 [&>*]:min-w-0">
+                {BENEFITS.map((b) => (
+                  <div key={b.icon} className="flex gap-2.5 text-sm"><span aria-hidden="true">{b.icon}</span><span><b className="block text-ink">{es ? b.es.t : b.en.t}</b><span className="text-ink/60">{es ? b.es.v : b.en.v}</span></span></div>
+                ))}
+              </div>
             </div>
 
             {KIT_URL && (
