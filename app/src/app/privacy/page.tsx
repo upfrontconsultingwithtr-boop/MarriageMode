@@ -12,6 +12,8 @@ export default function Privacy() {
       <p>The &ldquo;Search my Gmail&rdquo; button only opens a search in your own Gmail tab. We have no access to your email and never see the results.</p>
       <h2 className="pt-2 text-xl font-bold">The waitlist</h2>
       <p>If you join the waitlist we keep your email address and the relationship stage you chose, only to tell you about Marriage Mode. Our host, Netlify, stores the form. To be removed, email upfrontconsultingwithtr@gmail.com with the subject &ldquo;Remove me&rdquo;.</p>
+      <h2 className="pt-2 text-xl font-bold">Visit counts</h2>
+      <p>We count visits and a few anonymous actions (like &ldquo;an audit was started&rdquo;) with GoatCounter, which uses no cookies and collects no personal data. We never count which apps you pick or anything you type.</p>
       <h2 className="pt-2 text-xl font-bold">What we never do</h2>
       <p>We never sell or share your data, run ad trackers, or collect location, messages, contacts or browsing history.</p>
     </article>

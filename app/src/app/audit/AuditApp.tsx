@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { PLATFORMS, CATEGORY_LABEL, BILLING_LINKS, helpSearchUrl, CATALOG_VERIFIED, type Category } from '@/lib/catalog';
 import { buildSteps, score, emailDomainsFor, gmailQuery, gmailSearchUrl, shareSummary, EMPTY_STATE, type AuditState, type Step } from '@/lib/audit';
+import { track } from '@/lib/track';
 
 const KEY = 'marriage-mode:audit:v1';
 const TABS = ['Your apps', 'Checklist', 'Email check', 'Talk & share'] as const;
@@ -37,9 +38,11 @@ export default function AuditApp() {
 
   useEffect(() => { setState(load()); setReady(true); }, []);
   useEffect(() => { if (ready) save(state); }, [state, ready]);
+  useEffect(() => { if (!ready) return; if (state.platformIds.length + state.custom.length > 0) track('audit-started'); }, [ready, state.platformIds.length, state.custom.length]);
 
   const steps = useMemo(() => buildSteps(state), [state.platformIds, state.custom]); // eslint-disable-line react-hooks/exhaustive-deps
   const s = useMemo(() => score(steps, state.done), [steps, state.done]);
+  useEffect(() => { if (s.progress >= 50) track('audit-half-done'); if (s.progress === 100) track('audit-complete'); }, [s.progress]);
   const domains = useMemo(() => emailDomainsFor(state.platformIds), [state.platformIds]);
 
   const toggle = (id: string) => setState((st) => ({ ...st, platformIds: st.platformIds.includes(id) ? st.platformIds.filter((x) => x !== id) : [...st.platformIds, id], startedAt: st.startedAt ?? new Date().toISOString() }));
@@ -167,7 +170,7 @@ export default function AuditApp() {
               This opens Gmail in a new tab and runs a search there. Marriage Mode never connects to your email or sees the results.
               {state.platformIds.length ? ' The search covers the apps you picked.' : ' Pick no apps and it searches for all of them, which helps you find accounts you forgot.'}
             </p>
-            <a href={gmailSearchUrl(domains)} target="_blank" rel="noopener noreferrer" className="glow-lagoon mt-4 inline-block rounded-full bg-lagoon px-6 py-3 font-semibold text-night">Search my Gmail ↗</a>
+            <a onClick={() => track('gmail-search')} href={gmailSearchUrl(domains)} target="_blank" rel="noopener noreferrer" className="glow-lagoon mt-4 inline-block rounded-full bg-lagoon px-6 py-3 font-semibold text-night">Search my Gmail ↗</a>
             <h3 className="mt-6 font-semibold">Outlook, Yahoo, iCloud or other email</h3>
             <p className="text-sm text-ink/70">Copy this into your email search box:</p>
             <div className="mt-2 flex gap-2">
@@ -191,7 +194,7 @@ export default function AuditApp() {
             <p className="mt-1 text-sm text-ink/70">It never names any app. Edit it any way you like before sending.</p>
             <pre className="mt-4 whitespace-pre-wrap rounded-xl bg-night/70 p-4 font-sans text-sm">{summary}</pre>
             <div className="mt-4 flex flex-wrap gap-2">
-              <button onClick={() => copy(summary, 's')} className="glow-lagoon rounded-full bg-lagoon px-5 py-2.5 font-semibold text-night">{copied === 's' ? 'Copied' : 'Copy message'}</button>
+              <button onClick={() => { copy(summary, 's'); track('share-copied'); }} className="glow-lagoon rounded-full bg-lagoon px-5 py-2.5 font-semibold text-night">{copied === 's' ? 'Copied' : 'Copy message'}</button>
               <button onClick={() => { if (navigator.share) navigator.share({ text: summary }).catch(() => {}); else copy(summary, 's'); }}
                 className="rounded-full bg-white/5 px-5 py-2.5 font-semibold ring-1 ring-white/15">Share…</button>
             </div>

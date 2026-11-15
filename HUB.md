@@ -11,19 +11,7 @@ https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-ei
 
 Each step says exactly where to tap. When you finish one, just tell Claude "done".
 
-### 1. Make a free visitor counter account (2 minutes)
-Why: so we can see how many people visit and start the audit. It counts visits only; it never sees what people type. Free, no card.
-
-1. Open Safari and go to: https://www.goatcounter.com/signup
-2. **Code**: type `marriagemode`
-3. **Email**: use the business email, upfrontconsultingwithtr@gmail.com
-4. Make up a **password** and type it in. Save it somewhere safe; don't send it to Claude.
-5. Tap **Sign up**.
-6. Open the email GoatCounter sends you and tap the link inside to confirm.
-7. Tell Claude: **"counter is made"**. Claude adds it to the site and checks it works.
-   If `marriagemode` is taken, use `marriagemode-app` and tell Claude which one you used.
-
-### 2. (Optional, when you have time) Email counselors about the free worksheet
+### 1. (Optional, when you have time) Email counselors about the free worksheet
 Why: counselors and pastors who work with engaged couples are the fastest free way to reach new users.
 
 1. On your iPad, open Safari and search Google for: **premarital counseling** plus your city (or any city).
@@ -49,12 +37,14 @@ Why: counselors and pastors who work with engaged couples are the fastest free w
 | Pricing plan | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/14-MONETIZATION.md |
 | Marketing & launch | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/09-MARKETING-LAUNCH.md |
 | Investor pitch | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/08-PITCH-DECK.md |
+| Visitor numbers | https://marriagemode.goatcounter.com (log in with the business email) |
 | Your AI team | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/AI-TEAM.md |
 | Safety rules | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/TRUST-AND-SAFETY.md |
 | Couples worksheet (printable) | https://upfrontconsultingwithtr-boop.github.io/MarriageMode/worksheet/ |
 | Design look (green & pink) | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/DESIGN-SYSTEM.md |
 
 ## 📝 Done log (newest first)
+- **Nov 15:** Visitor counter connected (GoatCounter, free, no cookies). See your numbers: https://marriagemode.goatcounter.com
 - **Nov 15:** "Digital checklist for newly engaged couples" page for Google search, linked from the home page.
 - **Nov 15:** Built your AI team: 7 expert agents (chief of staff, engineer, growth, trust & safety, finance & ops, customer success, analyst). See docs/AI-TEAM.md.
 - **Nov 15:** Free printable "Digital Boundaries" worksheet for couples and counselors (/worksheet/), plus a ready-to-send counselor email.

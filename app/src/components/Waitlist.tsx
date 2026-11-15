@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { BASE } from '@/lib/base';
+import { track } from '@/lib/track';
 
 // Fallback when the form host can't store submissions: open an email to the business inbox.
 const MAILTO = 'mailto:upfrontconsultingwithtr@gmail.com?subject=' + encodeURIComponent('Marriage Mode waitlist');
@@ -12,6 +13,7 @@ export default function Waitlist() {
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setState('sending');
+    track('waitlist-submit');
     const data = new FormData(e.currentTarget);
     data.set('form-name', 'waitlist');
     try {
