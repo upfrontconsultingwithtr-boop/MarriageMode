@@ -13,7 +13,7 @@ import DeletionRequests from '@/components/DeletionRequests';
 import Recheck from '@/components/Recheck';
 import ProofBox from '@/components/ProofBox';
 import InstallApp from '@/components/InstallApp';
-import { cloud, cloudEnabled, sendLink, pull, push, merge, signOut } from '@/lib/cloud';
+import { cloud, cloudEnabled, sendLink, pull, push, merge, signOut, amIComped, kitDownloadUrl } from '@/lib/cloud';
 import { BASE, KIT_URL } from '@/lib/base';
 import { LangCtx, LOCALE, type Lang } from '@/lib/i18n';
 import { BENEFITS, TOOLS } from '@/lib/value';
@@ -52,6 +52,9 @@ export default function AuditApp() {
   const [syncOpen, setSyncOpen] = useState(false);
   const [syncMsg, setSyncMsg] = useState('');
   const [emailInput, setEmailInput] = useState('');
+  const [comped, setComped] = useState(false);
+  useEffect(() => { if (syncEmail) void amIComped().then(setComped); else setComped(false); }, [syncEmail]);
+  const getKit = async () => { const u = await kitDownloadUrl(); if (u) window.location.href = u; };
   const [lang, setLangState] = useState<Lang>('en');
   const setLang = (l: Lang) => { setLangState(l); const p = { ...loadPrefs(), lang: l }; savePrefs(p); document.documentElement.lang = l; };
   useEffect(() => { const q = new URLSearchParams(window.location.search).get('lang'); if (q === 'es' || q === 'en') setLang(q); else setLangState(loadPrefs().lang); }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -309,7 +312,17 @@ export default function AuditApp() {
               </div>
             </div>
 
-            {KIT_URL && (
+            {comped && (
+              <div className="halo-border lg:col-span-3"><div className="flex flex-wrap items-center justify-between gap-4 rounded-[1.75rem] bg-deep/95 p-6">
+                <div>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-mango">{t('Founders’ access ✓', 'Acceso de fundadores ✓')}</p>
+                  <h2 className="mt-1 text-lg font-semibold">{t('Every Marriage Mode product is free for you', 'Todos los productos de Marriage Mode son gratis para ti')}</h2>
+                  <p className="text-sm text-ink/65">{t('Paid products and add-ons unlock here automatically as they launch.', 'Los productos y extras de pago se desbloquean aquí automáticamente al lanzarse.')}</p>
+                </div>
+                <button onClick={getKit} className="glow-mango min-h-11 rounded-full bg-mango px-5 py-3 text-sm font-semibold text-night">{t('Download the Clean Slate Kit', 'Descargar el Clean Slate Kit')}</button>
+              </div></div>
+            )}
+            {KIT_URL && !comped && (
               <div className="glass flex flex-wrap items-center justify-between gap-4 p-6 lg:col-span-3">
                 <div>
                   <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-mango">{t('Optional · $19 one time', 'Opcional · $19 un solo pago')}</p>

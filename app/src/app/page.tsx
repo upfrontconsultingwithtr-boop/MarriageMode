@@ -167,7 +167,8 @@ export default function Home() {
             <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-violet">AI Relationship Coach</p>
             <p className="mt-2 font-display text-2xl font-bold">Add-ons</p>
             <ul className="mt-4 space-y-2 text-sm text-ink/75">{['Coach chat', 'Couple sessions by chat or email', 'Voice sessions', 'Live video coach'].map((t) => <li key={t} className="flex gap-2"><span className="text-violet">✓</span>{t}</li>)}</ul>
-            <p className="mt-6 text-sm text-ink/50">Coming later. Always clearly AI, never a replacement for a licensed counselor.</p>
+            <a href="coach/" className="mt-6 inline-block rounded-full px-6 py-3 text-sm font-semibold ring-1 ring-violet/50">Try the free beta →</a>
+            <p className="mt-3 text-xs text-ink/50">Runs privately on your device. Always clearly AI, never a replacement for a licensed counselor.</p>
           </div>
         </div>
       </section>

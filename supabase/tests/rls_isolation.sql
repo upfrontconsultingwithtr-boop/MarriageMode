@@ -159,5 +159,17 @@ do $$ begin
   raise exception 'RLS FAIL: signed-in user read leads';
 exception when insufficient_privilege then raise notice 'pass: signed-in user cannot read leads'; end $$;
 reset role;
+-- founders' access: list is unreadable; only the listed user is comped
+insert into app.comp_accounts (email) values ('a@test');
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
+select pg_temp.check(app.am_i_comped(), 'listed founder is comped');
+do $$ begin
+  perform count(*) from app.comp_accounts;
+  raise exception 'RLS FAIL: user read the comp list';
+exception when insufficient_privilege then raise notice 'pass: comp list is private'; end $$;
+reset role;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000c');
+select pg_temp.check(not app.am_i_comped(), 'other user is not comped');
+reset role;
 rollback;
 \echo RLS_ISOLATION_ALL_PASSED

@@ -154,3 +154,14 @@ h3.font-bold, h3.font-semibold { font-weight: 600; }
 
 /* Speed: skip styling/layout of below-the-fold home sections until they near the screen. */
 main > section:nth-child(n+3) { content-visibility: auto; contain-intrinsic-size: auto 900px; }
+
+/* AI coach avatar */
+@keyframes coach-blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
+.coach-blink { animation: coach-blink 4.5s infinite; transform-origin: 100px 90px; }
+@keyframes coach-talk { 0%, 100% { transform: scaleY(1); } 25% { transform: scaleY(3.2); } 50% { transform: scaleY(1.6); } 75% { transform: scaleY(2.6); } }
+.coach-talk { animation: coach-talk .42s infinite; }
+@keyframes coach-think { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(2px) translateY(-1px); } }
+.coach-think { animation: coach-think 1.6s ease-in-out infinite; }
+@keyframes coach-listen { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+.coach-listen { animation: coach-listen 1.2s ease-in-out infinite; }
+[data-motion="reduce"] .coach-blink, [data-motion="reduce"] .coach-talk, [data-motion="reduce"] .coach-think, [data-motion="reduce"] .coach-listen { animation: none; }

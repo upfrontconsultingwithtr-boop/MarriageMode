@@ -155,6 +155,8 @@ export default function PartnerTab({ signedIn, openSignIn, stats, summary }: Pro
             </div>
           </div>
 
+          <div className="glass flex flex-wrap items-center justify-between gap-3 p-5"><div><p className="font-semibold">{t('Talk it through with Mia, your AI coach', 'Habla con Mia, tu coach de IA')}</p><p className="text-sm text-ink/60">{t('Free live voice sessions, private on your device. Or try a 5-minute guided lesson together.', 'Sesiones de voz gratis y privadas en tu dispositivo. O prueben una lección guiada de 5 minutos.')}</p></div><span className="flex gap-2"><a href="../coach/" className="glow-mango min-h-11 rounded-full bg-mango px-5 py-2.5 text-sm font-semibold text-night">{t('Start a session', 'Empezar sesión')}</a><a href="../lessons/" className="min-h-11 rounded-full px-5 py-2.5 text-sm ring-1 ring-white/15">{t('Lessons', 'Lecciones')}</a></span></div>
+
           <DailyQuestion coupleId={couple.id} me={couple.me} partnerName={partner?.display_name || t('Your partner', 'Tu pareja')} />
 
           <div className="grid gap-4 lg:grid-cols-[1fr_1.3fr] [&>*]:min-w-0">

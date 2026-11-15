@@ -64,3 +64,5 @@ fresh screenshot captured from the LIVE site URL, never a local copy (upload wit
 Whenever a task Tiffany asks for (now, in the future, or from past requests) needs a
 website, add its exact host to the environment's allowed hosts with update_environment
 without asking her in chat first. The approval card still appears; tell her to tap Allow.
+Also install any free tool that helps build or maintain the products (npm packages,
+CLIs, open-source models) and allow its download hosts the same way. Never paid ones.

@@ -48,6 +48,7 @@ export function merge(a: AuditState, b: AuditState): AuditState {
     platformIds: [...new Set([...a.platformIds, ...b.platformIds])],
     custom: [...new Set([...a.custom, ...b.custom])],
     requests: { ...(b.requests ?? {}), ...(a.requests ?? {}) },
+    replied: { ...(b.replied ?? {}), ...(a.replied ?? {}) },
     proof: { ...(b.proof ?? {}), ...(a.proof ?? {}) },
     recheckedAt: [...new Set([...(a.recheckedAt ?? []), ...(b.recheckedAt ?? [])])].sort(),
     done, doneAt, startedAt: [a.startedAt, b.startedAt].filter(Boolean).sort()[0],
@@ -65,4 +66,16 @@ export async function addLead(lead: Lead): Promise<boolean> {
   const c = cloud(); if (!c) return false;
   const { error } = await c.from('leads').insert(lead);
   return !error;
+}
+
+// Founders' access (Tiffany, Reco and the business account get every product free).
+export async function amIComped(): Promise<boolean> {
+  const c = cloud(); if (!c) return false;
+  const { data, error } = await c.rpc('am_i_comped');
+  return !error && data === true;
+}
+export async function kitDownloadUrl(): Promise<string | null> {
+  const c = cloud(); if (!c) return null;
+  const { data } = await c.storage.from('kits').createSignedUrl('Clean-Slate-Kit.pdf', 3600, { download: true });
+  return data?.signedUrl ?? null;
 }

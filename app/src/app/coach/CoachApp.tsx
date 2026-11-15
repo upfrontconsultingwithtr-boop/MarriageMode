@@ -1,0 +1,199 @@
+'use client';
+import { useEffect, useRef, useState } from 'react';
+import { MODELS, MODELS_F32, hasF16, pickModel, canRunAI, systemPrompt, crisis, CRISIS_EN, CRISIS_ES } from '@/lib/coach';
+import { answer as guideAnswer } from '@/lib/guide';
+import { loadPrefs } from '@/lib/prefs';
+import { BASE } from '@/lib/base';
+import { track } from '@/lib/track';
+
+type Msg = { role: 'user' | 'assistant'; content: string };
+type Engine = { chat: { completions: { create: (o: unknown) => Promise<AsyncIterable<{ choices: { delta: { content?: string } }[] }>> } } };
+type Rec = { lang: string; interimResults: boolean; continuous: boolean; onresult: (e: { results: { 0: { transcript: string }; isFinal: boolean }[] & { length: number } }) => void; onend: () => void; onerror: () => void; start: () => void; stop: () => void };
+
+function Avatar({ speaking, listening, thinking }: { speaking: boolean; listening: boolean; thinking: boolean }) {
+  return (
+    <div className="relative mx-auto aspect-square w-full max-w-[340px]">
+      <div className={`absolute inset-0 rounded-full transition ${listening ? 'coach-listen' : ''}`} style={{ boxShadow: listening ? '0 0 0 6px #D9B77E55, 0 0 60px #D9B77E66' : speaking ? '0 0 50px #E7A3AE55' : '0 0 30px #00000055' }} />
+      <svg viewBox="0 0 200 200" className="relative h-full w-full rounded-full" role="img" aria-label="Mia, the AI coach (animated)">
+        <defs>
+          <radialGradient id="cbg" cx="50%" cy="40%" r="70%"><stop offset="0" stopColor="#3A1D2E" /><stop offset="1" stopColor="#140B10" /></radialGradient>
+          <linearGradient id="skin" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#C68B65" /><stop offset="1" stopColor="#A86E4C" /></linearGradient>
+          <linearGradient id="hair" x1="0" x2="1"><stop offset="0" stopColor="#2A1610" /><stop offset="1" stopColor="#4A2A1C" /></linearGradient>
+        </defs>
+        <rect width="200" height="200" fill="url(#cbg)" />
+        <path d="M40 200 C45 150 75 138 100 138 C125 138 155 150 160 200 Z" fill="#5B2A4A" />
+        <path d="M86 128 L86 142 C92 150 108 150 114 142 L114 128 Z" fill="#B57856" />
+        <path d="M52 92 C48 40 152 40 148 92 C150 120 140 140 136 150 L64 150 C60 140 50 120 52 92 Z" fill="url(#hair)" />
+        <ellipse cx="100" cy="92" rx="36" ry="43" fill="url(#skin)" />
+        <path d="M64 80 C70 52 130 50 137 82 C120 66 92 62 64 80 Z" fill="url(#hair)" />
+        <g className={thinking ? 'coach-think' : 'coach-blink'}>
+          <ellipse cx="86" cy="90" rx="4.2" ry="4.6" fill="#1E120E" /><ellipse cx="114" cy="90" rx="4.2" ry="4.6" fill="#1E120E" />
+          <circle cx="87.4" cy="88.6" r="1.2" fill="#fff" /><circle cx="115.4" cy="88.6" r="1.2" fill="#fff" />
+        </g>
+        <path d="M79 81 Q86 77 93 80" stroke="#2A1610" strokeWidth="2" fill="none" strokeLinecap="round" />
+        <path d="M107 80 Q114 77 121 81" stroke="#2A1610" strokeWidth="2" fill="none" strokeLinecap="round" />
+        <path d="M100 95 Q97 104 100 107" stroke="#8E5A3E" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+        <ellipse cx="80" cy="104" rx="6" ry="3" fill="#E7A3AE" opacity="0.35" /><ellipse cx="120" cy="104" rx="6" ry="3" fill="#E7A3AE" opacity="0.35" />
+        <ellipse className={speaking ? 'coach-talk' : ''} cx="100" cy="117" rx="9" ry="2.6" fill="#6E2B35" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} />
+        <circle cx="66" cy="104" r="2.4" fill="#D9B77E" /><circle cx="134" cy="104" r="2.4" fill="#D9B77E" />
+      </svg>
+    </div>
+  );
+}
+
+export default function CoachApp() {
+  const [lang, setLang] = useState<'en' | 'es'>('en');
+  const es = lang === 'es';
+  const t = (en: string, sp: string) => (es ? sp : en);
+  const [phase, setPhase] = useState<'intro' | 'loading' | 'call'>('intro');
+  const [mode, setMode] = useState<'ai' | 'lite'>('ai');
+  const [gpu, setGpu] = useState<boolean | null>(null);
+  const [progress, setProgress] = useState(0); const [progressText, setProgressText] = useState('');
+  const [msgs, setMsgs] = useState<Msg[]>([]); const [live, setLive] = useState('');
+  const [input, setInput] = useState(''); const [busy, setBusy] = useState(false);
+  const [speaking, setSpeaking] = useState(false); const [listening, setListening] = useState(false);
+  const [voiceOn, setVoiceOn] = useState(true); const [cam, setCam] = useState(false); const [err, setErr] = useState('');
+  const engine = useRef<Engine | null>(null); const rec = useRef<Rec | null>(null);
+  const video = useRef<HTMLVideoElement>(null); const stream = useRef<MediaStream | null>(null);
+  const [size, setSize] = useState(MODELS.full.sizeMB);
+
+  useEffect(() => { setLang(loadPrefs().lang); setSize(MODELS[pickModel()].sizeMB); void canRunAI().then(setGpu); return () => { try { speechSynthesis.cancel(); } catch { /* none */ } stream.current?.getTracks().forEach((x) => x.stop()); }; }, []);
+
+  const say = (text: string) => {
+    if (!voiceOn || !('speechSynthesis' in window)) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text); u.lang = es ? 'es-US' : 'en-US'; u.rate = 1; u.pitch = 1.05;
+    const vs = speechSynthesis.getVoices().filter((v) => v.lang.startsWith(es ? 'es' : 'en'));
+    const v = vs.find((x) => /female|samantha|victoria|ava|allison|zira|jenny|aria|paulina|monica|google us english|google español/i.test(x.name)) ?? vs[0]; if (v) u.voice = v;
+    u.onstart = () => setSpeaking(true); u.onend = () => setSpeaking(false); u.onerror = () => setSpeaking(false);
+    speechSynthesis.speak(u);
+  };
+
+  const opening = () => t('Hi, I’m Mia, your Marriage Mode AI relationship coach. I’m an AI, not a counselor, and our conversation stays on your device. What would you like to work on today?', 'Hola, soy Mia, tu coach de relaciones con IA de Marriage Mode. Soy una IA, no una consejera, y nuestra conversación se queda en tu dispositivo. ¿En qué te gustaría trabajar hoy?');
+
+  const start = async (useAI: boolean) => {
+    setErr(''); track(useAI ? 'coach-start-ai' : 'coach-start-lite');
+    if (!useAI) { setMode('lite'); setPhase('call'); const o = opening(); setMsgs([{ role: 'assistant', content: o }]); say(o); return; }
+    setMode('ai'); setPhase('loading');
+    try {
+      const webllm = await import('@mlc-ai/web-llm');
+      const id = ((await hasF16()) ? MODELS : MODELS_F32)[pickModel()].id;
+      engine.current = (await webllm.CreateMLCEngine(id, { initProgressCallback: (r: { progress: number; text: string }) => { setProgress(r.progress); setProgressText(r.text); } })) as unknown as Engine;
+      setPhase('call'); const o = opening(); setMsgs([{ role: 'assistant', content: o }]); say(o);
+    } catch {
+      setErr(t('This device couldn’t start the AI coach, so you’re in Lite mode (a simpler chat helper). On a newer phone or computer with Chrome, Edge or Safari, the full AI coach can run.', 'Este dispositivo no pudo iniciar la coach de IA, así que estás en modo Lite (un asistente más simple). En un teléfono o computadora más nuevo con Chrome, Edge o Safari, la coach completa puede funcionar.'));
+      setMode('lite'); setPhase('call'); const o = opening(); setMsgs([{ role: 'assistant', content: o }]); say(o);
+    }
+  };
+
+  const send = async (text: string) => {
+    const v = text.trim(); if (!v || busy) return; setInput('');
+    const history: Msg[] = [...msgs, { role: 'user', content: v }]; setMsgs(history); setBusy(true);
+    let reply = '';
+    if (crisis(v)) reply = es ? CRISIS_ES : CRISIS_EN;
+    else if (mode === 'lite' || !engine.current) reply = guideAnswer(v, es, { base: BASE }).text;
+    else {
+      try {
+        const chunks = await engine.current.chat.completions.create({ stream: true, temperature: 0.7, max_tokens: 220, messages: [{ role: 'system', content: systemPrompt(es) }, ...history.slice(-12)] });
+        for await (const c of chunks) { reply += c.choices[0]?.delta?.content ?? ''; setLive(reply); }
+      } catch { reply = t('Sorry, I lost my train of thought. Could you say that again?', 'Perdón, perdí el hilo. ¿Puedes repetirlo?'); }
+    }
+    setLive(''); setMsgs((m) => [...m, { role: 'assistant', content: reply.trim() }]); setBusy(false); say(reply.trim());
+  };
+
+  const toggleMic = () => {
+    const W = window as unknown as { SpeechRecognition?: new () => Rec; webkitSpeechRecognition?: new () => Rec };
+    const R = W.SpeechRecognition ?? W.webkitSpeechRecognition;
+    if (!R) { setErr(t('Voice input isn’t available in this browser. You can type instead.', 'La voz no está disponible en este navegador. Puedes escribir.')); return; }
+    if (listening) { rec.current?.stop(); return; }
+    speechSynthesis.cancel(); setSpeaking(false);
+    const r = new R(); r.lang = es ? 'es-US' : 'en-US'; r.interimResults = true; r.continuous = false;
+    let finalText = '';
+    r.onresult = (e) => { let s = ''; for (let i = 0; i < e.results.length; i++) { s += e.results[i][0].transcript; if (e.results[i].isFinal) finalText = s; } setInput(s); };
+    r.onend = () => { setListening(false); if (finalText) void send(finalText); };
+    r.onerror = () => setListening(false);
+    rec.current = r; setListening(true); r.start();
+  };
+
+  const toggleCam = async () => {
+    if (cam) { stream.current?.getTracks().forEach((x) => x.stop()); stream.current = null; setCam(false); return; }
+    try { stream.current = await navigator.mediaDevices.getUserMedia({ video: true, audio: false }); setCam(true); setTimeout(() => { if (video.current && stream.current) video.current.srcObject = stream.current; }, 0); }
+    catch { setErr(t('Camera not available. That’s fine: the coach works without it.', 'Cámara no disponible. No pasa nada: la coach funciona sin ella.')); }
+  };
+
+  const end = () => { speechSynthesis.cancel(); rec.current?.stop(); stream.current?.getTracks().forEach((x) => x.stop()); setCam(false); setPhase('intro'); setMsgs([]); };
+  const lastCoach = live || [...msgs].reverse().find((m) => m.role === 'assistant')?.content || '';
+
+  return (
+    <div lang={lang} className="mx-auto max-w-5xl px-4 py-10">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-teal">{t('AI Relationship Coach · free · beta', 'Coach de relaciones con IA · gratis · beta')}</p>
+        <div role="group" aria-label="Language" className="flex rounded-full bg-white/[0.04] p-1 text-xs ring-1 ring-white/10">
+          {(['en', 'es'] as const).map((l) => <button key={l} aria-pressed={lang === l} disabled={phase !== 'intro'} onClick={() => setLang(l)} className={`min-h-9 rounded-full px-3 font-semibold disabled:opacity-50 ${lang === l ? 'bg-lagoon/20 text-ink' : 'text-ink/60'}`}>{l === 'en' ? 'English' : 'Español'}</button>)}
+        </div>
+      </div>
+
+      {phase === 'intro' && (
+        <div className="mt-6 grid items-center gap-8 md:grid-cols-[1fr_1.1fr]">
+          <Avatar speaking={false} listening={false} thinking={false} />
+          <div>
+            <h1 className="text-4xl font-bold leading-tight">{t('Talk it through with Mia, your AI coach', 'Habla con Mia, tu coach de IA')}</h1>
+            <p className="mt-4 text-ink/75">{t('A live, face-to-face style session: speak or type, and Mia answers out loud. Use it alone or together as a couple.', 'Una sesión en vivo, cara a cara: habla o escribe y Mia responde en voz alta. Úsala a solas o juntos como pareja.')}</p>
+            <ul className="mt-4 space-y-2 text-sm text-ink/75">
+              <li>🔒 {t('Private: the AI runs on your own device. Nothing you say is sent to us or anyone.', 'Privado: la IA funciona en tu propio dispositivo. Nada de lo que dices se nos envía a nosotros ni a nadie.')}</li>
+              <li>💸 {t('Free: no account, no subscription.', 'Gratis: sin cuenta ni suscripción.')}</li>
+              <li>🤖 {t('Mia is an AI coach, not a person or a licensed counselor.', 'Mia es una coach de IA, no una persona ni una consejera con licencia.')}</li>
+              <li>📶 {t(`First time only: a one-time download of about ${size >= 1000 ? (size / 1000).toFixed(1) + ' GB' : size + ' MB'}. Wi-Fi recommended.`, `Solo la primera vez: una descarga única de unos ${size >= 1000 ? (size / 1000).toFixed(1) + ' GB' : size + ' MB'}. Se recomienda Wi-Fi.`)}</li>
+            </ul>
+            <div className="mt-6 flex flex-wrap gap-3">
+              {gpu !== false && <button onClick={() => start(true)} disabled={gpu === null} className="glow-mango min-h-12 rounded-full bg-mango px-7 font-semibold text-night disabled:opacity-50">{t('Start my free session', 'Empezar mi sesión gratis')}</button>}
+              <button onClick={() => start(false)} className="min-h-12 rounded-full px-6 font-semibold ring-1 ring-white/15">{gpu === false ? t('Start (Lite mode)', 'Empezar (modo Lite)') : t('Quick Lite mode', 'Modo Lite rápido')}</button>
+            </div>
+            {gpu === false && <p className="mt-3 text-sm text-ink/60">{t('This browser can’t run the full AI coach yet (it needs WebGPU: recent Chrome, Edge or Safari). Lite mode works everywhere.', 'Este navegador aún no puede usar la coach completa (necesita WebGPU: Chrome, Edge o Safari recientes). El modo Lite funciona en todas partes.')}</p>}
+          </div>
+        </div>
+      )}
+
+      {phase === 'loading' && (
+        <div className="mx-auto mt-10 max-w-xl text-center">
+          <Avatar speaking={false} listening={false} thinking />
+          <p className="mt-6 font-semibold">{t('Getting Mia ready on your device…', 'Preparando a Mia en tu dispositivo…')}</p>
+          <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-gradient-to-r from-lagoon to-mango transition-all" style={{ width: `${Math.round(progress * 100)}%` }} /></div>
+          <p className="mt-2 text-xs text-ink/55">{Math.round(progress * 100)}% · {t('one-time download, then it opens instantly', 'descarga única, después abre al instante')}</p>
+          <p className="mt-1 truncate text-[11px] text-ink/40" aria-hidden="true">{progressText}</p>
+        </div>
+      )}
+
+      {phase === 'call' && (
+        <div className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_1fr] [&>*]:min-w-0">
+          <div className="relative overflow-hidden rounded-[2rem] bg-deep/95 p-6 ring-1 ring-white/10">
+            <div className="flex items-center justify-between text-xs text-ink/60"><span className="flex items-center gap-2"><span className="size-2 rounded-full bg-palm shadow-[0_0_8px_#7BC59A]" />{t('Live session with Mia', 'Sesión en vivo con Mia')} · {mode === 'ai' ? t('AI on your device', 'IA en tu dispositivo') : t('Lite mode', 'Modo Lite')}</span><span>{t('AI coach · not a counselor', 'Coach de IA · no es consejera')}</span></div>
+            <div className="mt-4"><Avatar speaking={speaking} listening={listening} thinking={busy && !live} /></div>
+            {cam && <video ref={video} autoPlay muted playsInline className="absolute bottom-24 right-4 h-28 w-20 rounded-xl object-cover ring-2 ring-white/20 sm:h-36 sm:w-28" aria-label={t('Your camera (stays on your device)', 'Tu cámara (se queda en tu dispositivo)')} />}
+            <p aria-live="polite" className="mt-4 min-h-[4.5rem] text-center text-lg leading-snug">{busy && !live ? <span className="text-ink/50">{t('Mia is thinking…', 'Mia está pensando…')}</span> : lastCoach}</p>
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+              <button onClick={toggleMic} aria-pressed={listening} className={`grid size-14 place-items-center rounded-full text-xl ${listening ? 'bg-mango text-night shadow-[0_0_24px_#E7A3AE]' : 'bg-white/10'}`} aria-label={listening ? t('Stop listening', 'Dejar de escuchar') : t('Talk', 'Hablar')}>🎙</button>
+              <button onClick={toggleCam} aria-pressed={cam} className={`grid size-14 place-items-center rounded-full text-xl ${cam ? 'bg-lagoon/30' : 'bg-white/10'}`} aria-label={t('Show my camera', 'Mostrar mi cámara')}>📷</button>
+              <button onClick={() => { setVoiceOn((v) => !v); speechSynthesis.cancel(); }} aria-pressed={voiceOn} className="grid size-14 place-items-center rounded-full bg-white/10 text-xl" aria-label={voiceOn ? t('Mute Mia', 'Silenciar a Mia') : t('Unmute Mia', 'Activar voz de Mia')}>{voiceOn ? '🔊' : '🔇'}</button>
+              <button onClick={end} className="min-h-14 rounded-full bg-coral/25 px-6 font-semibold text-coral">{t('End', 'Terminar')}</button>
+            </div>
+          </div>
+          <div className="glass flex flex-col p-5">
+            <h2 className="font-semibold">{t('Conversation', 'Conversación')}</h2>
+            <div className="mt-3 flex max-h-[420px] min-h-56 flex-col gap-2 overflow-y-auto pr-1">
+              {msgs.map((m, i) => <p key={i} className={`max-w-[88%] rounded-2xl px-3 py-2 text-sm [overflow-wrap:anywhere] ${m.role === 'user' ? 'self-end bg-mango/15 ring-1 ring-mango/30' : 'self-start bg-lagoon/10 ring-1 ring-lagoon/30'}`}>{m.content}</p>)}
+              {live && <p className="max-w-[88%] self-start rounded-2xl bg-lagoon/10 px-3 py-2 text-sm ring-1 ring-lagoon/30">{live}</p>}
+            </div>
+            <form onSubmit={(e) => { e.preventDefault(); void send(input); }} className="mt-3 flex gap-2">
+              <label htmlFor="coach-in" className="sr-only">{t('Message Mia', 'Mensaje para Mia')}</label>
+              <input id="coach-in" value={input} onChange={(e) => setInput(e.target.value)} placeholder={listening ? t('Listening…', 'Escuchando…') : t('Type or tap the mic…', 'Escribe o toca el micrófono…')} className="min-h-11 min-w-0 flex-1 rounded-full border border-white/15 bg-night/60 px-4" />
+              <button disabled={busy} className="glow-lagoon min-h-11 rounded-full bg-lagoon px-5 font-semibold text-night disabled:opacity-50">{t('Send', 'Enviar')}</button>
+            </form>
+            {err && <p role="status" className="mt-2 text-xs text-coral">{err}</p>}
+            <p className="mt-3 text-[11px] text-ink/50">{t('Mia is an AI and can make mistakes. Not therapy or medical advice. In danger? Call 911. Hotline: 1-800-799-7233 · Crisis: 988.', 'Mia es una IA y puede equivocarse. No es terapia ni consejo médico. ¿En peligro? Llama al 911. Línea: 1-800-799-7233 · Crisis: 988.')}</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
