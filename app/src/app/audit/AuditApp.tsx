@@ -4,6 +4,8 @@ import { PLATFORMS, CATEGORY_LABEL, BILLING_LINKS, helpSearchUrl, CATALOG_VERIFI
 import { buildSteps, score, emailDomainsFor, gmailQuery, gmailSearchUrl, shareSummary, EMPTY_STATE, type AuditState, type Step } from '@/lib/audit';
 import { track } from '@/lib/track';
 import Ring from '@/components/Ring';
+import { cloud, cloudEnabled, sendLink, pull, push, merge, signOut } from '@/lib/cloud';
+import { SITE } from '@/lib/base';
 
 const KEY = 'marriage-mode:audit:v1';
 const TABS = [
@@ -32,6 +34,31 @@ export default function AuditApp() {
   const [custom, setCustom] = useState('');
   const [copied, setCopied] = useState('');
   const [celebrate, setCelebrate] = useState(false);
+  const [syncEmail, setSyncEmail] = useState<string | null>(null);
+  const [syncOpen, setSyncOpen] = useState(false);
+  const [syncMsg, setSyncMsg] = useState('');
+  const [emailInput, setEmailInput] = useState('');
+
+  // Optional sync: on sign-in, merge this device with the saved copy, then keep it saved.
+  useEffect(() => {
+    const c = cloud(); if (!c || !ready) return;
+    const onSignedIn = async (email: string) => {
+      setSyncEmail(email);
+      const remote = await pull();
+      setState((local) => { const m = remote ? merge(local, remote.state) : local; void push(m); return m; });
+    };
+    c.auth.getSession().then(({ data }) => { if (data.session?.user.email) onSignedIn(data.session.user.email); });
+    const { data: sub } = c.auth.onAuthStateChange((ev, session) => {
+      if (ev === 'SIGNED_IN' && session?.user.email) onSignedIn(session.user.email);
+      if (ev === 'SIGNED_OUT') setSyncEmail(null);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, [ready]);
+  useEffect(() => {
+    if (!syncEmail || !ready) return;
+    const t = setTimeout(() => { void push(state); }, 1500);
+    return () => clearTimeout(t);
+  }, [state, syncEmail, ready]);
 
   useEffect(() => { const s = load(); setState(s); setReady(true); if (s.platformIds.length + s.custom.length === 0) setTab('apps'); }, []);
   useEffect(() => { if (ready) save(state); }, [state, ready]);
@@ -137,6 +164,11 @@ export default function AuditApp() {
           <div>
             <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-teal">Private · saved on this device only</p>
             <h1 className="mt-1 text-3xl font-bold">Your dashboard</h1>
+            {cloudEnabled && (
+              <button onClick={() => setSyncOpen((o) => !o)} className="mt-2 inline-flex min-h-9 items-center gap-2 rounded-full bg-white/[0.04] px-3 text-xs ring-1 ring-white/10 hover:ring-lagoon/50">
+                <span className={`size-1.5 rounded-full ${syncEmail ? 'bg-lagoon shadow-[0_0_8px_#34E29B]' : 'bg-ink/40'}`} />{syncEmail ? 'Synced across devices' : 'Use on more than one device?'}
+              </button>
+            )}
           </div>
           <nav className="hidden gap-1 rounded-full bg-white/[0.04] p-1 ring-1 ring-white/10 md:flex" role="tablist">
             {TABS.map((t) => (
@@ -145,6 +177,29 @@ export default function AuditApp() {
             ))}
           </nav>
         </div>
+
+        {syncOpen && cloudEnabled && (
+          <div className="glass mt-4 max-w-xl p-5">
+            {syncEmail ? (
+              <>
+                <p className="font-semibold">Synced as {syncEmail}</p>
+                <p className="mt-1 text-sm text-ink/60">Your checklist is saved to your private account and stays the same on every device you sign in on. Only you can see it.</p>
+                <button onClick={() => { void signOut(); setSyncOpen(false); }} className="mt-3 min-h-11 rounded-full px-4 text-sm ring-1 ring-white/15">Sign out</button>
+              </>
+            ) : (
+              <form onSubmit={async (e) => { e.preventDefault(); setSyncMsg('Sending…'); const err = await sendLink(emailInput.trim(), `${SITE}/audit/`); setSyncMsg(err ? `That didn't work: ${err}` : 'Check your email and tap the link to finish. You can close this.'); }}>
+                <p className="font-semibold">Sync across your devices (optional)</p>
+                <p className="mt-1 text-sm text-ink/60">Without signing in, your audit stays only on this device. Sign in with an email link (no password) to keep it on every device. Only you can see it, and you can sign out anytime.</p>
+                <div className="mt-3 flex gap-2">
+                  <label htmlFor="sync-email" className="sr-only">Email</label>
+                  <input id="sync-email" type="email" required value={emailInput} onChange={(e) => setEmailInput(e.target.value)} placeholder="you@email.com" className="min-h-11 min-w-0 flex-1 rounded-full border border-white/15 bg-night/60 px-4" />
+                  <button className="glow-lagoon min-h-11 rounded-full bg-lagoon px-4 text-sm font-semibold text-night">Email me a link</button>
+                </div>
+                {syncMsg && <p className="mt-2 text-sm text-ink/70" role="status">{syncMsg}</p>}
+              </form>
+            )}
+          </div>
+        )}
 
         {/* OVERVIEW */}
         {tab === 'overview' && (

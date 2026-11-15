@@ -9,8 +9,10 @@ const URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 export const cloudEnabled = Boolean(URL && KEY);
 
-let client: SupabaseClient | null = null;
-export function cloud(): SupabaseClient | null {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let client: SupabaseClient<any, any, any> | null = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function cloud(): SupabaseClient<any, any, any> | null {
   if (!cloudEnabled) return null;
   if (!client) client = createClient(URL, KEY, { db: { schema: 'app' }, auth: { persistSession: true, detectSessionInUrl: true, flowType: 'pkce' } });
   return client;
