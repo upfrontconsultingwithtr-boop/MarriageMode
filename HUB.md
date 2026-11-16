@@ -48,6 +48,7 @@ Why: counselors and pastors who work with engaged couples are the fastest free w
 | Design look (green & pink) | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/DESIGN-SYSTEM.md |
 
 ## 📝 Done log (newest first)
+- 2026-11-16: Free phone reminders LIVE on the cleanup page (web push: opt-in, no account, dates only, generic lock-screen text, instant off; daily 10am CT sender in Supabase). Supabase token saved to this cloud environment. Gemini review pending (key must be added in environment settings, see hub y14).
 - 2026-11-16: Gemini second opinion (docs/GEMINI-REVIEW-2026-11-16.md). Applied: counselors book-direct first, short topic only, crisis lines, counselor insurance/license pledge, yearly re-check; Mia always-visible AI label + one-tap counselor link. Already covered: Lite mode, instant unlink cut-off, private proof, survey reveal after you answer. Kept per Tiffany: Mia's human face, preferred-sex flag, sign-in scanning.
 - 2026-11-16: Real counselors tool live (/counselors/): licensed counselors apply, founders check license and approve in the Founders hub, couples request sessions and pay the counselor directly.
 - 2026-11-16: Connect YouTube live (Google sign-in via Upfront HQ, nothing stored). Mia: no sway, seamless video loops, no head jump when she starts talking.
