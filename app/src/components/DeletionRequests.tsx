@@ -16,6 +16,7 @@ const EMAIL: Record<string, string> = {
   Feeld: 'privacy@feeld.co',        // feeld.co/privacy: "in relation to the exercise of any of your rights ... privacy@feeld.co"
   Taimi: 'gdpr@taimi.com',          // taimi.com/privacy-policy: "our Data Protection Officer (DPO), please email: gdpr@taimi.com"
   Muzz: 'privacy@muzz.com',         // muzz.com/en-GB/privacy: "Our data protection officer can be contacted at privacy@muzz.com"
+  Boo: 'hello@boo.world',           // boo.world/privacy-policy: "You may request a copy or file of your personal information by contacting hello@boo.world"
 };
 
 const OFFICIAL: Record<string, string> = {
@@ -26,6 +27,10 @@ const OFFICIAL: Record<string, string> = {
   Feeld: 'https://feeld.co/privacy',
   Taimi: 'https://www.taimi.com/privacy-policy',
   Muzz: 'https://muzz.com/en-GB/privacy/',
+  Hinge: 'https://hinge.co/privacy',
+  Badoo: 'https://badoo.com/privacy',
+  'Coffee Meets Bagel': 'https://www.coffeemeetsbagel.com/privacy-policy',
+  Boo: 'https://boo.world/privacy-policy',
 };
 
 export function letter(app: string, name: string, email: string, user: string) {
