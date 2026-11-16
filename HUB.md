@@ -48,6 +48,7 @@ Why: counselors and pastors who work with engaged couples are the fastest free w
 | Design look (green & pink) | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/DESIGN-SYSTEM.md |
 
 ## 📝 Done log (newest first)
+- 2026-11-16: Mia fixed on iPad (starts instantly with real video face, AI loads in background, lighter AI on iPad); tablet menu overlap fixed.
 - **Nov 15:** 28 cancel-subscription guides live. 3 outreach emails saved in your Gmail Drafts.
 - **Nov 15:** One-tap deletion requests: for every app a customer picks, the app writes a formal "delete my account and data" request, links the official privacy page, and tracks what was sent.
 - **Nov 15:** New look: **Champagne** (your pick B). Plum, champagne gold and rose with elegant Fraunces headlines, across the site, dashboard, Couple Mode, hub and Clean Slate Kit.
