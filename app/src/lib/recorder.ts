@@ -19,7 +19,7 @@ function pick(kind: Kind): string {
 
 export type Rec = { kind: Kind; stop: () => Promise<Part | null> };
 
-export async function startRecording(opts: { kind: Kind; key: string; coachAudio: MediaStream | null; frame?: () => { coach: HTMLVideoElement | null; cam: HTMLVideoElement | null; caption: string } }): Promise<Rec | null> {
+export async function startRecording(opts: { kind: Kind; key: string; coachAudio: MediaStream | null; frame?: () => { coach: HTMLVideoElement | HTMLCanvasElement | null; cam: HTMLVideoElement | null; caption: string } }): Promise<Rec | null> {
   if (typeof MediaRecorder === 'undefined') return null;
   const mime = pick(opts.kind); if (!mime) return null;
   // Mix Mia's voice + the person's microphone into one track.
@@ -33,7 +33,7 @@ export async function startRecording(opts: { kind: Kind; key: string; coachAudio
     const canvas = document.createElement('canvas'); canvas.width = 640; canvas.height = 640; const g = canvas.getContext('2d')!;
     const draw = () => {
       const f = opts.frame!(); g.fillStyle = '#140B10'; g.fillRect(0, 0, 640, 640);
-      if (f.coach && f.coach.readyState >= 2) g.drawImage(f.coach, 0, 0, 640, 640);
+      if (f.coach && (!('readyState' in f.coach) || f.coach.readyState >= 2)) g.drawImage(f.coach, 0, 0, 640, 640);
       if (f.cam && f.cam.readyState >= 2) { g.save(); g.beginPath(); g.roundRect(468, 412, 156, 208, 16); g.clip(); g.drawImage(f.cam, 468, 412, 156, 208); g.restore(); }
       if (f.caption) { g.fillStyle = 'rgba(12,7,9,0.72)'; g.fillRect(0, 560, 640, 80); g.fillStyle = '#F6EFE6'; g.font = '20px system-ui, sans-serif'; const words = f.caption.split(' '); let line = ''; const lines: string[] = []; for (const w of words) { if (g.measureText(line + w).width > 600) { lines.push(line); line = ''; } line += w + ' '; } lines.push(line); lines.slice(-2).forEach((l, i) => g.fillText(l.trim(), 20, 592 + i * 26)); }
       g.fillStyle = '#D9B77E'; g.font = '14px system-ui, sans-serif'; g.fillText('Marriage Mode · Mia (AI coach)', 16, 24);

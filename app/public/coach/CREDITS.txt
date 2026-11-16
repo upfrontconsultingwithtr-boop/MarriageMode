@@ -7,3 +7,6 @@ Mia's video face (mia-idle.mp4, mia-talk.mp4, mia-poster.jpg) is cut from the fr
 "Woman Talking In Front of Camera" (Pexels video 8048249, https://www.pexels.com/video/woman-talking-in-front-of-camera-8048249/),
 used under the Pexels License (free for commercial use, modification allowed). The person shown is an actor
 in stock footage; Mia is an AI and the actor does not endorse Marriage Mode.
+
+Mia lip sync (mia-mouths.webp, mia-lips.json): mouth shapes cut from the same Pexels clips by Marriage Mode,
+face positions measured with MediaPipe Face Landmarker (Apache 2.0). Built in-house, free.

@@ -18,19 +18,66 @@ type Msg = { role: 'user' | 'assistant'; content: string };
 type Engine = { chat: { completions: { create: (o: unknown) => Promise<AsyncIterable<{ choices: { delta: { content?: string } }[] }>> } } };
 type Rec = { lang: string; interimResults: boolean; continuous: boolean; onresult: (e: { results: { 0: { transcript: string }; isFinal: boolean }[] & { length: number } }) => void; onend: () => void; onerror: () => void; start: () => void; stop: () => void };
 
-// Mia's real-human video face: an idle (listening) loop and a talking loop, cross-faded live.
-function VideoAvatar({ speaking, listening }: { speaking: boolean; listening: boolean }) {
-  const idle = useRef<HTMLVideoElement>(null); const talk = useRef<HTMLVideoElement>(null);
-  useEffect(() => {
-    const t = talk.current; if (!t) return;
-    if (speaking) { if (t.paused) { try { t.currentTime = 4.48; } catch { /* not ready */ } } void t.play().catch(() => {}); }
-    else { const h = setTimeout(() => t.pause(), 900); return () => clearTimeout(h); }
-  }, [speaking]);
+// Mia's real-human face with word-for-word lip sync, built free. Listening: the calm actor video.
+// Talking: the actor's real talking footage (natural head, brows, blinks, shoulders), with real mouth
+// shapes cut from the same actor drawn over her mouth for each sound, matched to her head turn and
+// light-corrected frame by frame. Falls back to the plain video if anything can't load.
+type Pose = [number, number, number, number];
+type Lips = { u: number; box: [number, number, number, number]; cols: number; fps: number; visemes: string[]; bins: number[]; idle: Pose[]; talk: Pose[]; yIdle: number[]; yTalk: number[]; gIdle: number[][]; gTalk: number[][] };
+function VideoAvatar({ speaking, listening, mouth, canvasRef }: { speaking: boolean; listening: boolean; mouth?: (now: number) => [string, number][]; canvasRef?: React.RefObject<HTMLCanvasElement | null> }) {
+  const idle = useRef<HTMLVideoElement>(null); const talk = useRef<HTMLVideoElement>(null); const own = useRef<HTMLCanvasElement>(null); const cv = canvasRef ?? own;
+  const mouthRef = useRef(mouth); mouthRef.current = mouth; const speakRef = useRef(speaking); speakRef.current = speaking; const [ready, setReady] = useState(false);
   useEffect(() => { void idle.current?.play().catch(() => {}); }, []);
+  useEffect(() => {
+    const t = talk.current; if (!t || !mouthRef.current) return;
+    if (speaking) { if (t.paused) { try { t.currentTime = 4.48; } catch { /* not ready */ } } void t.play().catch(() => {}); }
+    else { const h = setTimeout(() => t.pause(), 600); return () => clearTimeout(h); }
+  }, [speaking]);
+  useEffect(() => {
+    if (!mouthRef.current) return;
+    let raf = 0; let dead = false; let L: Lips | null = null; const img = new Image(); let shown = false; let mix = 0; let last = performance.now();
+    const sm = new Map<string, number>(); const off = document.createElement('canvas'); let o: CanvasRenderingContext2D | null = null;
+    void fetch(`${BASE}/coach/mia-lips.json`).then((r) => r.json()).then((j: Lips) => { L = j; off.width = j.box[2]; off.height = j.box[3]; o = off.getContext('2d', { willReadFrequently: true }); img.src = `${BASE}/coach/mia-mouths.webp`; }).catch(() => {});
+    const cell = (bin: number, name: string, a: number) => { const j = L!.visemes.indexOf(name); if (j < 0 || a <= 0) return; const [, , W, H] = L!.box; const n = bin * L!.visemes.length + j;
+      o!.globalAlpha = Math.min(1, a); o!.drawImage(img, (n % L!.cols) * W, Math.floor(n / L!.cols) * H, W, H, 0, 0, W, H); };
+    const draw = () => {
+      if (dead) return; raf = requestAnimationFrame(draw);
+      const vi = idle.current; const vt = talk.current; const c = cv.current; const g = c?.getContext('2d');
+      if (!vi || !vt || !c || !g || !L || !o || !img.complete || !img.naturalWidth || vi.readyState < 2) return;
+      if (!shown) { shown = true; setReady(true); }
+      const now = performance.now(); const dt = Math.min(100, now - last); last = now;
+      mix = Math.max(0, Math.min(1, mix + (speakRef.current && vt.readyState >= 2 ? 1 : -1) * dt / 300));
+      g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.drawImage(vi, 0, 0, c.width, c.height);
+      if (mix > 0) { g.globalAlpha = mix; g.drawImage(vt, 0, 0, c.width, c.height); g.globalAlpha = 1; }
+      const want = new Map((mouthRef.current?.(now) ?? []));
+      for (const k of new Set([...sm.keys(), ...want.keys()])) { const w = (sm.get(k) ?? 0) * 0.45 + (want.get(k) ?? 0) * 0.55; if (w < 0.02) sm.delete(k); else sm.set(k, w); }
+      const top = [...sm.entries()].sort((x, y) => y[1] - x[1]).slice(0, 2);
+      if (!top.length && mix === 0) return;
+      // Pose, head-turn version and lighting come from whichever body video is showing most.
+      const useTalk = mix >= 0.5; const vid = useTalk ? vt : vi; const poses = useTalk ? L.talk : L.idle;
+      const f = Math.min(poses.length - 1, Math.floor(vid.currentTime * L.fps)); const [nx, ny, ang, e] = poses[f];
+      const yaw = (useTalk ? L.yTalk : L.yIdle)[f]; const bin = L.bins.filter((b) => yaw > b).length; const gain = (useTalk ? L.gTalk : L.gIdle)[f];
+      const [X0, Y0, W, H] = L.box; o.setTransform(1, 0, 0, 1, 0, 0); o.clearRect(0, 0, W, H);
+      cell(bin, 'rest', mix); // while talking, her own footage's mouth is always covered
+      const total = Math.min(1, top.reduce((a, x) => a + x[1], 0));
+      top.forEach(([name, w], i) => cell(bin, name, i === 0 ? total : (total * w) / (top[0][1] + w)));
+      const id = o.getImageData(0, 0, W, H); const px = id.data;
+      for (let ch = 0; ch < 3; ch++) {
+        const [c0, cx, cy] = [gain[ch * 3], gain[ch * 3 + 1], gain[ch * 3 + 2]]; const ex = new Float32Array(W); for (let x = 0; x < W; x++) ex[x] = Math.exp(c0 + cx * (x / W - 0.5));
+        for (let y = 0; y < H; y++) { const ey = Math.exp(cy * (y / H - 0.5)); let p = y * W * 4 + ch; for (let x = 0; x < W; x++, p += 4) px[p] = px[p] * ex[x] * ey; }
+      }
+      o.putImageData(id, 0, 0);
+      const sc = c.width / 720; const k = (e / L.u) * sc;
+      g.setTransform(k * Math.cos(ang), k * Math.sin(ang), -k * Math.sin(ang), k * Math.cos(ang), nx * sc, ny * sc); g.globalAlpha = 1;
+      g.drawImage(off, X0 * L.u, Y0 * L.u);
+    };
+    raf = requestAnimationFrame(draw); return () => { dead = true; cancelAnimationFrame(raf); };
+  }, [cv]);
   return (
     <div className="absolute inset-0">
       <video ref={idle} src={`${BASE}/coach/mia-idle.mp4`} poster={`${BASE}/coach/mia-poster.jpg`} muted loop playsInline autoPlay preload="auto" className="absolute inset-0 h-full w-full object-cover" aria-hidden="true" />
-      <video ref={talk} src={`${BASE}/coach/mia-talk.mp4`} muted loop playsInline preload="auto" className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${speaking ? 'opacity-100' : 'opacity-0'}`} aria-hidden="true" />
+      {mouth && <video ref={talk} src={`${BASE}/coach/mia-talk.mp4`} muted loop playsInline preload="auto" className="absolute inset-0 h-full w-full object-cover opacity-0" aria-hidden="true" />}
+      {mouth && <canvas ref={cv} width={720} height={720} className={`absolute inset-0 h-full w-full object-cover ${ready ? '' : 'opacity-0'}`} aria-hidden="true" />}
       {listening && <span className="absolute left-3 top-3 rounded-full bg-night/70 px-3 py-1 text-xs text-mango">● listening</span>}
     </div>
   );
@@ -54,7 +101,7 @@ export default function CoachApp() {
   const engine = useRef<Engine | null>(null); const rec = useRef<Rec | null>(null);
   const session = useRef<{ id: string; startedAt: string } | null>(null);
   const recording = useRef<Recording | null>(null); const parts = useRef<Part[]>([]); const [format, setFormat] = useState<'text' | 'voice' | 'video'>('text');
-  const faceBox = useRef<HTMLDivElement>(null); const caption = useRef(''); const speakingRef = useRef(false);
+  const faceBox = useRef<HTMLDivElement>(null); const caption = useRef(''); const speakingRef = useRef(false); const faceCanvas = useRef<HTMLCanvasElement>(null); const mouthOf = useRef((now: number) => voice.current?.mouth(now) ?? []);
   const mia = useRef<Mia | null>(null); const stage = useRef<HTMLDivElement>(null); const voice = useRef<Voice | null>(null);
   const [face3d, setFace3d] = useState<'off' | 'loading' | 'on' | 'failed'>('off'); const [faceP, setFaceP] = useState(0);
   const video = useRef<HTMLVideoElement>(null); const stream = useRef<MediaStream | null>(null);
@@ -69,24 +116,13 @@ export default function CoachApp() {
     saveSession({ ...session.current, updatedAt: '', mode, lang, msgs, format, parts: parts.current });
   }, [msgs, phase, mode, lang, format]);
   useEffect(() => { speakingRef.current = speaking; }, [speaking]);
-  // Lip sync: show the talking clip only while sound is actually coming out (mouth rests on pauses).
-  const [mouth, setMouth] = useState(false);
-  useEffect(() => {
-    if (!speaking) { setMouth(false); return; }
-    let raf = 0; let on = false; let off = 0;
-    const tick = () => { const a = voice.current ? voice.current.active() : true; const now = performance.now();
-      if (a) { off = now; if (!on) { on = true; setMouth(true); } } else if (on && now - off > 180) { on = false; setMouth(false); }
-      raf = requestAnimationFrame(tick); };
-    raf = requestAnimationFrame(tick); return () => cancelAnimationFrame(raf);
-  }, [speaking]);
-
   // Record in the format the session happens in: voice when the mic is used, video when the camera is on.
   const record = async (kind: 'voice' | 'video') => {
     if (recording.current?.kind === kind || (recording.current?.kind === 'video')) return;
     if (!session.current) session.current = { id: `s-${Date.now()}`, startedAt: new Date().toISOString() };
     if (recording.current) { const p = await recording.current.stop(); if (p) parts.current = [...parts.current, p]; recording.current = null; }
     recording.current = await startRecording({ kind, key: `${session.current.id}-${parts.current.length + 1}`, coachAudio: voice.current?.stream() ?? null,
-      frame: () => { const vids = faceBox.current?.querySelectorAll('video'); return { coach: (vids && (speakingRef.current ? vids[1] : vids[0])) ?? null, cam: video.current, caption: caption.current }; } });
+      frame: () => { return { coach: faceCanvas.current ?? faceBox.current?.querySelector('video') ?? null, cam: video.current, caption: caption.current }; } });
     setFormat(kind);
   };
   const finishRecording = async () => {
@@ -223,7 +259,7 @@ export default function CoachApp() {
             {mode === 'lite' && progress > 0 && <div className="mt-2" role="status"><p className="text-[11px] text-ink/60">{t('Getting Mia’s full AI ready in the background, keep talking meanwhile', 'Preparando la IA completa de Mia, puedes seguir hablando')} · {Math.round(progress * 100)}%</p><div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-gradient-to-r from-lagoon to-mango transition-all" style={{ width: `${Math.round(progress * 100)}%` }} /></div></div>}
             <div className="relative mx-auto mt-4 aspect-square w-full max-w-[420px] overflow-hidden rounded-[1.5rem] bg-gradient-to-b from-[#2A1520] to-night" style={{ boxShadow: listening ? '0 0 0 4px #D9B77E66, 0 0 50px #D9B77E55' : speaking ? '0 0 40px #E7A3AE44' : undefined }}>
               <div ref={stage} className={`absolute inset-0 ${face3d === 'on' ? '' : 'invisible'}`} aria-label={t('Mia, the AI coach (3D)', 'Mia, la coach de IA (3D)')} role="img" />
-              {face3d !== 'on' && face3d !== 'loading' && <div ref={faceBox} className="absolute inset-0"><VideoAvatar speaking={speaking} listening={listening} /></div>}
+              {face3d !== 'on' && face3d !== 'loading' && <div ref={faceBox} className="absolute inset-0"><VideoAvatar speaking={speaking} listening={listening} mouth={mouthOf.current} canvasRef={faceCanvas} /></div>}
               <span className="pointer-events-none absolute bottom-2 left-2 rounded-full bg-night/70 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-ink/80">{t('AI coach · not a therapist', 'Coach de IA · no es terapeuta')}</span>
               {format !== 'text' && <span className="absolute right-3 top-3 rounded-full bg-night/70 px-3 py-1 text-xs text-coral">● {format === 'video' ? t('Recording video to this device', 'Grabando video en este dispositivo') : t('Recording audio to this device', 'Grabando audio en este dispositivo')}</span>}
               {face3d === 'loading' && <p className="absolute inset-x-0 bottom-2 text-center text-[11px] text-ink/60">{t('Loading Mia’s 3D face…', 'Cargando el rostro 3D de Mia…')} {Math.round(faceP * 100)}%</p>}
