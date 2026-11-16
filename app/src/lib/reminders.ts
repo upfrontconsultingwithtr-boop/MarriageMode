@@ -17,7 +17,7 @@ const key = (b64: string) => { const s = atob((b64 + '='.repeat((4 - (b64.length
 async function save(sub: PushSubscription, t: string, lang: string, dates: string[]) {
   const c = cloud(); if (!c) return 'Reminders are not set up yet.';
   const j = sub.toJSON();
-  const { error } = await c.rpc('push_save', { t, ep: j.endpoint, key: j.keys?.p256dh, au: j.keys?.auth, lg: lang === 'es' ? 'es' : 'en', dates });
+  const { error } = await c.rpc('push_save', { t, ep: j.endpoint, key: j.keys?.p256dh, au: j.keys?.auth, lg: lang === 'es' ? 'es' : 'en', dates, tz: -new Date().getTimezoneOffset() });
   return error ? error.message : null;
 }
 
@@ -28,7 +28,11 @@ export async function enablePush(lang: string, dates: string[]): Promise<string 
   const sub = (await reg.pushManager.getSubscription()) ?? (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key(VAPID_PUBLIC) }));
   const t = token() ?? crypto.randomUUID();
   const err = await save(sub, t, lang, dates);
-  if (!err) try { localStorage.setItem(TOKEN, t); } catch { /* private mode */ }
+  if (!err) {
+    try { localStorage.setItem(TOKEN, t); } catch { /* private mode */ }
+    // Instant proof it works (Gemini second opinion): one local note, nothing sent to us.
+    reg.showNotification('Marriage Mode', { body: lang === 'es' ? 'Listo. Te avisaremos a las 9 a. m. cuando toque algo.' : "You're set. We'll nudge you at 9am when something is due.", icon: `${BASE}/icon-192.png`, tag: 'mm-due' }).catch(() => {});
+  }
   return err;
 }
 
