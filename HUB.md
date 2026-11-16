@@ -48,6 +48,7 @@ Why: counselors and pastors who work with engaged couples are the fastest free w
 | Design look (green & pink) | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/DESIGN-SYSTEM.md |
 
 ## 📝 Done log (newest first)
+- 2026-11-16: Connect YouTube live (Google sign-in via Upfront HQ, nothing stored). Mia: no sway, seamless video loops, no head jump when she starts talking.
 - 2026-11-16: Mia fixed on iPad (starts instantly with real video face, AI loads in background, lighter AI on iPad); tablet menu overlap fixed.
 - **Nov 15:** 28 cancel-subscription guides live. 3 outreach emails saved in your Gmail Drafts.
 - **Nov 15:** One-tap deletion requests: for every app a customer picks, the app writes a formal "delete my account and data" request, links the official privacy page, and tracks what was sent.
