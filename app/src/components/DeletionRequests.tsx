@@ -88,17 +88,17 @@ export default function DeletionRequests({ apps, state, setState }: Props) {
   const fmt = (iso: string) => new Date(iso).toLocaleDateString(LOCALE[lang], { month: 'short', day: 'numeric' });
   const calendar = (app: string, iso: string) => { const u = URL.createObjectURL(new Blob([reminderIcs(app, iso)], { type: 'text/calendar' })); const el = document.createElement('a'); el.href = u; el.download = `follow-up-${app.replace(/\W+/g, '-').toLowerCase()}.ics`; el.click(); URL.revokeObjectURL(u); track('followup-calendar'); };
   // "Do it for me": every request (and any due follow-up) that has a confirmed privacy email.
-  const [confirm, setConfirm] = useState(false); const [busy, setBusy] = useState(false); const [note, setNote] = useState('');
+  const [confirm, setConfirm] = useState(false); const [busy, setBusy] = useState(false); const [note, setNote] = useState(''); const [prog, setProg] = useState(0);
   const queue = apps.filter((a) => EMAIL[a] && !replied[a] && (!sent[a] || Date.now() - Date.parse(sent[a]) >= 30 * DAY));
   const mails: (Mail & { app: string })[] = queue.map((a) => { const txt = sent[a] ? followUp(a, name, email, sent[a]) : letter(a, name, email, user); return { app: a, to: EMAIL[a], subject: txt.split('\n')[0].replace('Subject: ', ''), body: txt.replace(/^Subject:.*\n\n/, '') }; });
   const doIt = async () => {
     setBusy(true); setNote('');
     try {
-      const r = await sendAll(mails);
+      setProg(0); const r = await sendAll(mails, setProg);
       const now = new Date().toISOString(); const ok = r.sent.map((i) => mails[i].app);
       if (ok.length) setState((s) => ({ ...s, requests: { ...(s.requests ?? {}), ...Object.fromEntries(ok.map((a) => [a, now])) } }));
       track('gmail-send');
-      setNote(r.error ? t(`Sent ${ok.length} of ${mails.length}. Gmail stopped the rest; you can still use the buttons below.`, `Se enviaron ${ok.length} de ${mails.length}. Gmail detuvo el resto; aún puedes usar los botones de abajo.`) : t(`Done: ${ok.length} sent from your Gmail. Replies will come to your inbox. We dropped the access right after.`, `Listo: ${ok.length} enviadas desde tu Gmail. Las respuestas llegarán a tu correo. Quitamos el acceso enseguida.`));
+      setNote(r.error ? t(`Sent ${ok.length} of ${mails.length}. Gmail stopped the rest; you can still use the buttons below.`, `Se enviaron ${ok.length} de ${mails.length}. Gmail detuvo el resto; aún puedes usar los botones de abajo.`) : t(`Done: ${ok.length} sent from your Gmail. We dropped the access right after. Next: watch your inbox for 2 days. Most companies send a link to confirm it's you, and the deletion only happens after you click it.`, `Listo: ${ok.length} enviadas desde tu Gmail. Quitamos el acceso enseguida. Ahora: revisa tu correo por 2 días. La mayoría de las empresas envía un enlace para confirmar que eres tú, y la eliminación solo ocurre después de que lo abras.`));
     } catch { setNote(t('Nothing was sent. You can try again or use the buttons below.', 'No se envió nada. Puedes intentar de nuevo o usar los botones de abajo.')); }
     setBusy(false); setConfirm(false);
   };
@@ -121,10 +121,11 @@ export default function DeletionRequests({ apps, state, setState }: Props) {
           <p className="mt-1 text-sm text-ink/70">{t(`Send ${mails.length} request${mails.length === 1 ? '' : 's'} from your own Gmail in one step. Google asks you to allow "send email" only: we can't read your inbox, we keep nothing, and the access is dropped right after.`, `Envía ${mails.length} solicitud${mails.length === 1 ? '' : 'es'} desde tu propio Gmail en un paso. Google solo te pide permitir "enviar correo": no podemos leer tu bandeja, no guardamos nada y el acceso se quita enseguida.`)}</p>
           {confirm ? (
             <div className="mt-3 text-sm">
-              <p className="text-ink/80">{t('These will be sent from your Gmail:', 'Se enviarán desde tu Gmail:')}</p>
+              <p className="inline-block rounded-full bg-palm/15 px-3 py-1 text-xs text-palm">{t('🔒 Send-only: we can\'t read your inbox. Access is removed the moment sending ends.', '🔒 Solo enviar: no podemos leer tu correo. El acceso se quita al terminar de enviar.')}</p>
+              <p className="mt-2 text-ink/80">{t('These will be sent from your Gmail (tap "See letter" below to read each one):', 'Se enviarán desde tu Gmail (toca "Ver carta" abajo para leer cada una):')}</p>
               <ul className="mt-1 list-disc pl-5 text-ink/70">{mails.map((m) => <li key={m.app}>{m.app} → {m.to}{sent[m.app] ? t(' (follow-up)', ' (seguimiento)') : ''}</li>)}</ul>
               <span className="mt-3 flex flex-wrap gap-2">
-                <button onClick={doIt} disabled={busy} className="min-h-11 rounded-full bg-mango px-4 font-semibold text-night">{busy ? t('Sending…', 'Enviando…') : t('Send them now', 'Enviarlas ahora')}</button>
+                <button onClick={doIt} disabled={busy} className="min-h-11 rounded-full bg-mango px-4 font-semibold text-night">{busy ? t(`Sending ${prog + 1} of ${mails.length}…`, `Enviando ${prog + 1} de ${mails.length}…`) : t('Send them now', 'Enviarlas ahora')}</button>
                 <button onClick={() => setConfirm(false)} disabled={busy} className="min-h-11 rounded-full px-4 ring-1 ring-white/15">{t('Cancel', 'Cancelar')}</button>
               </span>
             </div>
@@ -167,7 +168,7 @@ export default function DeletionRequests({ apps, state, setState }: Props) {
             );
           })()}
         </li>))}</ul>
-      <p className="mt-3 text-xs text-ink/50">{t('Companies usually answer within 30–45 days. After you tap “I sent it”, Marriage Mode keeps the date, reminds you when to follow up and writes the follow-up letter for you.', 'Las empresas suelen responder en 30 a 45 días. Cuando tocas “La envié”, Marriage Mode guarda la fecha, te recuerda cuándo dar seguimiento y escribe la carta de seguimiento por ti.')}</p>
+      <p className="mt-3 text-xs text-ink/50">{t('Most companies first email you a link to confirm it\'s you; the deletion only happens after you click it. They usually answer within 30–45 days. After you tap “I sent it”, Marriage Mode keeps the date, reminds you when to follow up and writes the follow-up letter for you.', 'La mayoría primero te envía un enlace para confirmar que eres tú; la eliminación solo ocurre después de abrirlo. Las empresas suelen responder en 30 a 45 días. Cuando tocas “La envié”, Marriage Mode guarda la fecha, te recuerda cuándo dar seguimiento y escribe la carta de seguimiento por ti.')}</p>
     </div></div>
   );
 }

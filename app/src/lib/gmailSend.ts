@@ -23,12 +23,13 @@ async function gmailToken(): Promise<string> {
 }
 
 // Sends each mail from the customer's own Gmail. Returns which ones went out.
-export async function sendAll(mails: Mail[]): Promise<{ sent: number[]; error?: string }> {
+export async function sendAll(mails: Mail[], progress?: (done: number) => void): Promise<{ sent: number[]; error?: string }> {
   const token = await gmailToken();
   const sent: number[] = []; let error: string | undefined;
   for (const [i, m] of mails.entries()) {
+    if (i) await new Promise((r) => setTimeout(r, 2000)); // gentle pace so Gmail never sees a burst
     const r = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ raw: rawMessage(m) }) });
-    if (r.ok) sent.push(i); else { error = r.status === 403 ? 'blocked' : 'api'; break; }
+    if (r.ok) { sent.push(i); progress?.(sent.length); } else { error = r.status === 403 ? 'blocked' : 'api'; break; }
   }
   void fetch(`https://oauth2.googleapis.com/revoke?token=${token}`, { method: 'POST', mode: 'no-cors' }).catch(() => {}); // drop access right away
   return { sent, error };
