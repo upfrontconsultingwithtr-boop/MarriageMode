@@ -27,7 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Link prefetch={false} href="/" className="flex items-center gap-2.5 whitespace-nowrap font-display text-lg font-bold tracking-tight">
               <img src={`${BASE}/icon.svg`} alt="" width={30} height={30} /> Marriage Mode
             </Link>
-            <div className="hidden items-center gap-6 text-sm text-ink/70 md:flex">
+            <div className="hidden items-center gap-5 whitespace-nowrap text-sm text-ink/70 lg:flex">
               <Link prefetch={false} href="/#value" className="hover:text-ink">Why Marriage Mode</Link>
               <Link prefetch={false} href="/#how" className="hover:text-ink">How it works</Link>
               <Link prefetch={false} href="/couple/" className="hover:text-ink">Couple Mode</Link>
@@ -38,7 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
             <div className="flex items-center gap-2">
               <Link prefetch={false} href="/audit/" className="btn-press glow-mango whitespace-nowrap rounded-full bg-mango px-4 py-1.5 text-sm font-semibold text-night hover:brightness-110"><span className="sm:hidden">Free audit</span><span className="hidden sm:inline">Start free audit</span></Link>
-              <details className="relative md:hidden">
+              <details className="relative lg:hidden">
                 <summary className="grid size-10 cursor-pointer list-none place-items-center rounded-full ring-1 ring-white/15 [&::-webkit-details-marker]:hidden" aria-label="Menu">☰</summary>
                 <div className="glass absolute right-0 top-12 flex w-56 flex-col p-2 text-sm shadow-2xl">
                   {[['/#value', 'Why Marriage Mode'], ['/#how', 'How it works'], ['/couple/', 'Couple Mode'], ['/guides/', 'Delete-account guides'], ['/#pricing', 'Pricing'], ['/audit/', 'My dashboard'], ['/worksheet/', 'Couples worksheet'], ['/coach/', 'AI coach (free beta)'], ['/lessons/', 'Couple lessons'], ['/partners/', 'For counselors & pros'], ['/es/', 'Español']].map(([h, l]) => (
