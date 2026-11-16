@@ -26,8 +26,11 @@ type Pose = [number, number, number, number];
 type Lips = { u: number; box: [number, number, number, number]; cols: number; fps: number; visemes: string[]; bins: number[]; idle: Pose[]; talk: Pose[]; yIdle: number[]; yTalk: number[]; gIdle: number[][]; gTalk: number[][]; eIdle?: number[][]; eTalk?: number[][] };
 function VideoAvatar({ speaking, listening, mouth, canvasRef }: { speaking: boolean; listening: boolean; mouth?: (now: number) => [string, number][]; canvasRef?: React.RefObject<HTMLCanvasElement | null> }) {
   const idle = useRef<HTMLVideoElement>(null); const talk = useRef<HTMLVideoElement>(null); const own = useRef<HTMLCanvasElement>(null); const cv = canvasRef ?? own;
+  // Honor 'reduce motion': her face stays still (poster frame), no mouth animation; captions still show.
+  const [rm, setRm] = useState(false); useEffect(() => { try { setRm(matchMedia('(prefers-reduced-motion: reduce)').matches); } catch { /* old browser */ } }, []);
+  if (rm) mouth = undefined;
   const mouthRef = useRef(mouth); mouthRef.current = mouth; const speakRef = useRef(speaking); speakRef.current = speaking; const [ready, setReady] = useState(false);
-  useEffect(() => { void idle.current?.play().catch(() => {}); }, []);
+  useEffect(() => { if (rm) idle.current?.pause(); else void idle.current?.play().catch(() => {}); }, [rm]);
   useEffect(() => {
     const t = talk.current; if (!t || !mouthRef.current) return;
     if (speaking) { if (t.paused) { try { t.currentTime = 4.48; } catch { /* not ready */ } } void t.play().catch(() => {}); }
@@ -35,13 +38,14 @@ function VideoAvatar({ speaking, listening, mouth, canvasRef }: { speaking: bool
   }, [speaking]);
   useEffect(() => {
     if (!mouthRef.current) return;
-    let raf = 0; let dead = false; let L: Lips | null = null; const img = new Image(); let shown = false; let mix = 0; let last = performance.now();
+    let raf = 0; let dead = false; let L: Lips | null = null; const img = new Image(); let shown = false; let mix = 0; let last = performance.now(); let lastDraw = 0;
     const sm = new Map<string, number>(); const off = document.createElement('canvas'); let o: CanvasRenderingContext2D | null = null;
     void fetch(`${BASE}/coach/mia-lips.json`).then((r) => r.json()).then((j: Lips) => { L = j; off.width = j.box[2]; off.height = j.box[3]; o = off.getContext('2d', { willReadFrequently: true }); img.src = `${BASE}/coach/mia-mouths.webp`; }).catch(() => {});
     const cell = (bin: number, name: string, a: number) => { const j = L!.visemes.indexOf(name); if (j < 0 || a <= 0) return; const [, , W, H] = L!.box; const n = bin * L!.visemes.length + j;
       o!.globalAlpha = Math.min(1, a); o!.drawImage(img, (n % L!.cols) * W, Math.floor(n / L!.cols) * H, W, H, 0, 0, W, H); };
     const draw = () => {
       if (dead) return; raf = requestAnimationFrame(draw);
+      const t0 = performance.now(); if (t0 - lastDraw < 31) return; lastDraw = t0; // ~30 fps: plenty for lips, half the work on low-end phones
       const vi = idle.current; const vt = talk.current; const c = cv.current; const g = c?.getContext('2d');
       if (!vi || !vt || !c || !g || !L || !o || !img.complete || !img.naturalWidth || vi.readyState < 2) return;
       if (!shown) { shown = true; setReady(true); }
