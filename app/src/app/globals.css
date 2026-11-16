@@ -167,6 +167,3 @@ main > section:nth-child(n+3) { content-visibility: auto; contain-intrinsic-size
 [data-motion="reduce"] .coach-blink, [data-motion="reduce"] .coach-talk, [data-motion="reduce"] .coach-think, [data-motion="reduce"] .coach-listen { animation: none; }
 
 /* Mia: gentle breathing and head sway so the video feels alive between clips */
-@keyframes mia-alive { 0%, 100% { transform: scale(1.02) translate(0, 0) rotate(0deg); } 33% { transform: scale(1.03) translate(-0.4%, -0.3%) rotate(-0.4deg); } 66% { transform: scale(1.025) translate(0.4%, 0.2%) rotate(0.3deg); } }
-.mia-alive { animation: mia-alive 7s ease-in-out infinite; transform-origin: 50% 40%; }
-[data-motion="reduce"] .mia-alive { animation: none; }

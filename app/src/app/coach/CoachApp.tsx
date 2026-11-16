@@ -28,9 +28,9 @@ function VideoAvatar({ speaking, listening }: { speaking: boolean; listening: bo
   }, [speaking]);
   useEffect(() => { void idle.current?.play().catch(() => {}); }, []);
   return (
-    <div className="mia-alive absolute inset-0">
+    <div className="absolute inset-0">
       <video ref={idle} src={`${BASE}/coach/mia-idle.mp4`} poster={`${BASE}/coach/mia-poster.jpg`} muted loop playsInline autoPlay preload="auto" className="absolute inset-0 h-full w-full object-cover" aria-hidden="true" />
-      <video ref={talk} src={`${BASE}/coach/mia-talk.mp4`} muted loop playsInline preload="auto" className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-150 ${speaking ? 'opacity-100' : 'opacity-0'}`} aria-hidden="true" />
+      <video ref={talk} src={`${BASE}/coach/mia-talk.mp4`} muted loop playsInline preload="auto" className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${speaking ? 'opacity-100' : 'opacity-0'}`} aria-hidden="true" />
       {listening && <span className="absolute left-3 top-3 rounded-full bg-night/70 px-3 py-1 text-xs text-mango">● listening</span>}
     </div>
   );
@@ -223,7 +223,7 @@ export default function CoachApp() {
             {mode === 'lite' && progress > 0 && <div className="mt-2" role="status"><p className="text-[11px] text-ink/60">{t('Getting Mia’s full AI ready in the background, keep talking meanwhile', 'Preparando la IA completa de Mia, puedes seguir hablando')} · {Math.round(progress * 100)}%</p><div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-gradient-to-r from-lagoon to-mango transition-all" style={{ width: `${Math.round(progress * 100)}%` }} /></div></div>}
             <div className="relative mx-auto mt-4 aspect-square w-full max-w-[420px] overflow-hidden rounded-[1.5rem] bg-gradient-to-b from-[#2A1520] to-night" style={{ boxShadow: listening ? '0 0 0 4px #D9B77E66, 0 0 50px #D9B77E55' : speaking ? '0 0 40px #E7A3AE44' : undefined }}>
               <div ref={stage} className={`absolute inset-0 ${face3d === 'on' ? '' : 'invisible'}`} aria-label={t('Mia, the AI coach (3D)', 'Mia, la coach de IA (3D)')} role="img" />
-              {face3d !== 'on' && face3d !== 'loading' && <div ref={faceBox} className="absolute inset-0"><VideoAvatar speaking={mouth} listening={listening} /></div>}
+              {face3d !== 'on' && face3d !== 'loading' && <div ref={faceBox} className="absolute inset-0"><VideoAvatar speaking={speaking} listening={listening} /></div>}
               {format !== 'text' && <span className="absolute right-3 top-3 rounded-full bg-night/70 px-3 py-1 text-xs text-coral">● {format === 'video' ? t('Recording video to this device', 'Grabando video en este dispositivo') : t('Recording audio to this device', 'Grabando audio en este dispositivo')}</span>}
               {face3d === 'loading' && <p className="absolute inset-x-0 bottom-2 text-center text-[11px] text-ink/60">{t('Loading Mia’s 3D face…', 'Cargando el rostro 3D de Mia…')} {Math.round(faceP * 100)}%</p>}
             </div>
