@@ -28,5 +28,6 @@ for m in MODELS:
                                  data=json.dumps(oa).encode(), headers={'Content-Type': 'application/json', 'Authorization': f'Bearer {k}'})
     try: d = json.load(urllib.request.urlopen(req, timeout=180)); break
     except urllib.error.HTTPError as e: print(f'[{m}: {e.code} {e.read()[:200]!r}]', file=sys.stderr)
+    except (OSError, ValueError) as e: print(f'[{m}: {e!r}]', file=sys.stderr)
 else: sys.exit('Gemini unavailable right now (free-tier limit or no key saved)')
 print(f'[{m}]', d['choices'][0]['message']['content'])

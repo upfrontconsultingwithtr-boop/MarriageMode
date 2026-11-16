@@ -3,6 +3,7 @@ import { useState } from 'react';
 import type { AuditState } from '@/lib/audit';
 import { track } from '@/lib/track';
 import { useT, useLang, LOCALE } from '@/lib/i18n';
+import { gmailEnabled, sendAll, type Mail } from '@/lib/gmailSend';
 
 // Official request pages confirmed from the company's own help center.
 // Privacy emails confirmed on each company's own privacy policy (checked 2026-11-15).
@@ -86,6 +87,21 @@ export default function DeletionRequests({ apps, state, setState }: Props) {
   const markReplied = (app: string) => setState((s) => ({ ...s, replied: { ...(s.replied ?? {}), [app]: s.replied?.[app] ? undefined! : new Date().toISOString() } }));
   const fmt = (iso: string) => new Date(iso).toLocaleDateString(LOCALE[lang], { month: 'short', day: 'numeric' });
   const calendar = (app: string, iso: string) => { const u = URL.createObjectURL(new Blob([reminderIcs(app, iso)], { type: 'text/calendar' })); const el = document.createElement('a'); el.href = u; el.download = `follow-up-${app.replace(/\W+/g, '-').toLowerCase()}.ics`; el.click(); URL.revokeObjectURL(u); track('followup-calendar'); };
+  // "Do it for me": every request (and any due follow-up) that has a confirmed privacy email.
+  const [confirm, setConfirm] = useState(false); const [busy, setBusy] = useState(false); const [note, setNote] = useState('');
+  const queue = apps.filter((a) => EMAIL[a] && !replied[a] && (!sent[a] || Date.now() - Date.parse(sent[a]) >= 30 * DAY));
+  const mails: (Mail & { app: string })[] = queue.map((a) => { const txt = sent[a] ? followUp(a, name, email, sent[a]) : letter(a, name, email, user); return { app: a, to: EMAIL[a], subject: txt.split('\n')[0].replace('Subject: ', ''), body: txt.replace(/^Subject:.*\n\n/, '') }; });
+  const doIt = async () => {
+    setBusy(true); setNote('');
+    try {
+      const r = await sendAll(mails);
+      const now = new Date().toISOString(); const ok = r.sent.map((i) => mails[i].app);
+      if (ok.length) setState((s) => ({ ...s, requests: { ...(s.requests ?? {}), ...Object.fromEntries(ok.map((a) => [a, now])) } }));
+      track('gmail-send');
+      setNote(r.error ? t(`Sent ${ok.length} of ${mails.length}. Gmail stopped the rest; you can still use the buttons below.`, `Se enviaron ${ok.length} de ${mails.length}. Gmail detuvo el resto; aún puedes usar los botones de abajo.`) : t(`Done: ${ok.length} sent from your Gmail. Replies will come to your inbox. We dropped the access right after.`, `Listo: ${ok.length} enviadas desde tu Gmail. Las respuestas llegarán a tu correo. Quitamos el acceso enseguida.`));
+    } catch { setNote(t('Nothing was sent. You can try again or use the buttons below.', 'No se envió nada. Puedes intentar de nuevo o usar los botones de abajo.')); }
+    setBusy(false); setConfirm(false);
+  };
   const copyText = async (key: string, text: string) => { try { await navigator.clipboard.writeText(text); setCopied(key); setTimeout(() => setCopied(''), 2000); } catch { /* ignore */ } };
 
   return (
@@ -99,6 +115,25 @@ export default function DeletionRequests({ apps, state, setState }: Props) {
         <label className="text-sm text-ink/70">{t('Username or phone (optional)', 'Usuario o teléfono (opcional)')}<input value={user} onChange={(e) => setUser(e.target.value)} className="mt-1 min-h-11 w-full rounded-full border border-white/15 bg-night/60 px-4" /></label>
       </div>
       <p className="mt-2 text-xs text-ink/50">{t('These stay on your device and only fill in the letters.', 'Esto se queda en tu dispositivo y solo llena las cartas.')}</p>
+      {gmailEnabled && (mails.length > 0 || note) && (
+        <div className="mt-4 rounded-xl bg-mango/10 p-4 ring-1 ring-mango/40">
+          <p className="font-semibold">{t('Do it for me', 'Hazlo por mí')}</p>
+          <p className="mt-1 text-sm text-ink/70">{t(`Send ${mails.length} request${mails.length === 1 ? '' : 's'} from your own Gmail in one step. Google asks you to allow "send email" only: we can't read your inbox, we keep nothing, and the access is dropped right after.`, `Envía ${mails.length} solicitud${mails.length === 1 ? '' : 'es'} desde tu propio Gmail en un paso. Google solo te pide permitir "enviar correo": no podemos leer tu bandeja, no guardamos nada y el acceso se quita enseguida.`)}</p>
+          {confirm ? (
+            <div className="mt-3 text-sm">
+              <p className="text-ink/80">{t('These will be sent from your Gmail:', 'Se enviarán desde tu Gmail:')}</p>
+              <ul className="mt-1 list-disc pl-5 text-ink/70">{mails.map((m) => <li key={m.app}>{m.app} → {m.to}{sent[m.app] ? t(' (follow-up)', ' (seguimiento)') : ''}</li>)}</ul>
+              <span className="mt-3 flex flex-wrap gap-2">
+                <button onClick={doIt} disabled={busy} className="min-h-11 rounded-full bg-mango px-4 font-semibold text-night">{busy ? t('Sending…', 'Enviando…') : t('Send them now', 'Enviarlas ahora')}</button>
+                <button onClick={() => setConfirm(false)} disabled={busy} className="min-h-11 rounded-full px-4 ring-1 ring-white/15">{t('Cancel', 'Cancelar')}</button>
+              </span>
+            </div>
+          ) : mails.length > 0 && (
+            <button onClick={() => (email.trim() && name.trim() ? setConfirm(true) : setNote(t('Add your name and the email you used above first, so the letters can find your account.', 'Primero agrega tu nombre y el correo que usaste arriba, para que las cartas encuentren tu cuenta.')))} className="glow-mango mt-3 min-h-11 rounded-full bg-mango px-4 text-sm font-semibold text-night">{t('Send with my Gmail', 'Enviar con mi Gmail')}</button>
+          )}
+          {note && <p role="status" className="mt-2 text-sm text-ink/80">{note}</p>}
+        </div>
+      )}
       <ul className="mt-4 space-y-2">{apps.map((a) => (
         <li key={a} className="rounded-xl bg-white/[0.03] p-3 ring-1 ring-white/[0.07]">
           <div className="flex flex-wrap items-center justify-between gap-2">
