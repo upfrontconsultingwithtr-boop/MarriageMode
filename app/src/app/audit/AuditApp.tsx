@@ -11,6 +11,7 @@ import WebSearch from '@/components/WebSearch';
 import DataScan from '@/components/DataScan';
 import SocialScan from '@/components/SocialScan';
 import DeletionRequests from '@/components/DeletionRequests';
+import PushReminders from '@/components/PushReminders';
 import Recheck from '@/components/Recheck';
 import ProofBox from '@/components/ProofBox';
 import InstallApp from '@/components/InstallApp';
@@ -303,6 +304,7 @@ export default function AuditApp() {
             <CoachSessions />
 
             {hasApps && <Recheck state={state} setState={setState} goApps={() => { setTab('apps'); window.scrollTo({ top: 0 }); }} />}
+            {hasApps && <PushReminders state={state} />}
 
             <div className="glass p-6 lg:col-span-3">
               <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-teal">{t('Your toolkit · all free', 'Tus herramientas · todas gratis')}</p>

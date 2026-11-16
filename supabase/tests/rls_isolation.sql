@@ -234,5 +234,32 @@ select pg_temp.check((select count(*) from app.founder_counselor_requests()) = 1
 select app.founder_set_counselor('00000000-0000-0000-0000-0000000000c2', 'approved');
 reset role;
 select pg_temp.check((select status from app.counselors where id = '00000000-0000-0000-0000-0000000000c2') = 'approved', 'founder approval saved');
+-- 0010 push reminders: anonymous save/forget only through the token; nobody but the sender reads rows
+set local role anon;
+select app.push_save('00000000-0000-0000-0000-0000000000f1', 'https://fcm.googleapis.com/fcm/send/abc', repeat('k', 40), repeat('a', 16), 'en', array[current_date, current_date + 30, current_date - 9]);
+do $$ begin
+  perform count(*) from app.push_subs;
+  raise exception 'RLS FAIL: public read push subscriptions';
+exception when insufficient_privilege then raise notice 'pass: push subscriptions private'; end $$;
+do $$ begin
+  perform * from app.push_due_today();
+  raise exception 'RLS FAIL: public ran the push sender';
+exception when insufficient_privilege then raise notice 'pass: only the sender lists due reminders'; end $$;
+do $$ begin
+  perform app.push_save('00000000-0000-0000-0000-0000000000f2', 'https://evil.example.com/x', repeat('k', 40), repeat('a', 16), 'en', '{}');
+  raise exception 'RLS FAIL: push to a non-push host accepted';
+exception when check_violation then raise notice 'pass: only real push services'; end $$;
+reset role;
+select pg_temp.check((select due from app.push_subs where token = '00000000-0000-0000-0000-0000000000f1') = array[current_date, current_date + 30], 'old dates dropped on save');
+select pg_temp.check((select count(*) from app.push_due_today()) = 1, 'due today is sent');
+select pg_temp.check((select count(*) from app.push_due_today()) = 0, 'sent once a day only');
+set local role anon;
+select app.push_forget('00000000-0000-0000-0000-0000000000f9');
+reset role;
+select pg_temp.check((select count(*) from app.push_subs) = 1, 'wrong token deletes nothing');
+set local role anon;
+select app.push_forget('00000000-0000-0000-0000-0000000000f1');
+reset role;
+select pg_temp.check((select count(*) from app.push_subs) = 0, 'right token deletes instantly');
 rollback;
 \echo RLS_ISOLATION_ALL_PASSED
