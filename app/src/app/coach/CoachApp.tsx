@@ -23,7 +23,7 @@ type Rec = { lang: string; interimResults: boolean; continuous: boolean; onresul
 // shapes cut from the same actor drawn over her mouth for each sound, matched to her head turn and
 // light-corrected frame by frame. Falls back to the plain video if anything can't load.
 type Pose = [number, number, number, number];
-type Lips = { u: number; box: [number, number, number, number]; cols: number; fps: number; visemes: string[]; bins: number[]; idle: Pose[]; talk: Pose[]; yIdle: number[]; yTalk: number[]; gIdle: number[][]; gTalk: number[][] };
+type Lips = { u: number; box: [number, number, number, number]; cols: number; fps: number; visemes: string[]; bins: number[]; idle: Pose[]; talk: Pose[]; yIdle: number[]; yTalk: number[]; gIdle: number[][]; gTalk: number[][]; eIdle?: number[][]; eTalk?: number[][] };
 function VideoAvatar({ speaking, listening, mouth, canvasRef }: { speaking: boolean; listening: boolean; mouth?: (now: number) => [string, number][]; canvasRef?: React.RefObject<HTMLCanvasElement | null> }) {
   const idle = useRef<HTMLVideoElement>(null); const talk = useRef<HTMLVideoElement>(null); const own = useRef<HTMLCanvasElement>(null); const cv = canvasRef ?? own;
   const mouthRef = useRef(mouth); mouthRef.current = mouth; const speakRef = useRef(speaking); speakRef.current = speaking; const [ready, setReady] = useState(false);
@@ -66,6 +66,11 @@ function VideoAvatar({ speaking, listening, mouth, canvasRef }: { speaking: bool
         const [c0, cx, cy] = [gain[ch * 3], gain[ch * 3 + 1], gain[ch * 3 + 2]]; const ex = new Float32Array(W); for (let x = 0; x < W; x++) ex[x] = Math.exp(c0 + cx * (x / W - 0.5));
         for (let y = 0; y < H; y++) { const ey = Math.exp(cy * (y / H - 0.5)); let p = y * W * 4 + ch; for (let x = 0; x < W; x++, p += 4) px[p] = px[p] * ex[x] * ey; }
       }
+      // Pull the blend in from any side where hair falls beside her mouth in this frame.
+      const ed = (useTalk ? L.eTalk : L.eIdle)?.[f];
+      if (ed) { const el = Math.min(ed[0], -0.42); const er = Math.max(ed[1], 0.42);
+        for (let x = 0; x < W; x++) { const xu = x / L.u + X0; let a = Math.max(0, Math.min(1, (er + 0.03 - xu) / 0.08, (xu - el + 0.03) / 0.08)); if (a >= 1) continue; a = a * a * (3 - 2 * a);
+          for (let y = 0, p = x * 4 + 3; y < H; y++, p += W * 4) px[p] = px[p] * a; } }
       o.putImageData(id, 0, 0);
       const sc = c.width / 720; const k = (e / L.u) * sc;
       g.setTransform(k * Math.cos(ang), k * Math.sin(ang), -k * Math.sin(ang), k * Math.cos(ang), nx * sc, ny * sc); g.globalAlpha = 1;
