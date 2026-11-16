@@ -22,6 +22,7 @@ export async function hasF16(): Promise<boolean> {
 
 export function pickModel(): keyof typeof MODELS {
   const nav = navigator as Navigator & { deviceMemory?: number };
+  if (/macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1) return 'lite'; // iPad (it reports itself as a Mac)
   if (!/iphone|ipad|android|mobile/i.test(navigator.userAgent) && (nav.deviceMemory ?? 0) >= 8) return 'smart';
   const mobile = /iphone|ipad|android|mobile/i.test(navigator.userAgent);
   return mobile || (nav.deviceMemory !== undefined && nav.deviceMemory <= 4) ? 'lite' : 'full';

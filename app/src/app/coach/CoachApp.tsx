@@ -36,42 +36,11 @@ function VideoAvatar({ speaking, listening }: { speaking: boolean; listening: bo
   );
 }
 
-function Avatar({ speaking, listening, thinking }: { speaking: boolean; listening: boolean; thinking: boolean }) {
-  return (
-    <div className="relative mx-auto aspect-square w-full max-w-[340px]">
-      <div className={`absolute inset-0 rounded-full transition ${listening ? 'coach-listen' : ''}`} style={{ boxShadow: listening ? '0 0 0 6px #D9B77E55, 0 0 60px #D9B77E66' : speaking ? '0 0 50px #E7A3AE55' : '0 0 30px #00000055' }} />
-      <svg viewBox="0 0 200 200" className="relative h-full w-full rounded-full" role="img" aria-label="Mia, the AI coach (animated)">
-        <defs>
-          <radialGradient id="cbg" cx="50%" cy="40%" r="70%"><stop offset="0" stopColor="#3A1D2E" /><stop offset="1" stopColor="#140B10" /></radialGradient>
-          <linearGradient id="skin" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#C68B65" /><stop offset="1" stopColor="#A86E4C" /></linearGradient>
-          <linearGradient id="hair" x1="0" x2="1"><stop offset="0" stopColor="#2A1610" /><stop offset="1" stopColor="#4A2A1C" /></linearGradient>
-        </defs>
-        <rect width="200" height="200" fill="url(#cbg)" />
-        <path d="M40 200 C45 150 75 138 100 138 C125 138 155 150 160 200 Z" fill="#5B2A4A" />
-        <path d="M86 128 L86 142 C92 150 108 150 114 142 L114 128 Z" fill="#B57856" />
-        <path d="M52 92 C48 40 152 40 148 92 C150 120 140 140 136 150 L64 150 C60 140 50 120 52 92 Z" fill="url(#hair)" />
-        <ellipse cx="100" cy="92" rx="36" ry="43" fill="url(#skin)" />
-        <path d="M64 80 C70 52 130 50 137 82 C120 66 92 62 64 80 Z" fill="url(#hair)" />
-        <g className={thinking ? 'coach-think' : 'coach-blink'}>
-          <ellipse cx="86" cy="90" rx="4.2" ry="4.6" fill="#1E120E" /><ellipse cx="114" cy="90" rx="4.2" ry="4.6" fill="#1E120E" />
-          <circle cx="87.4" cy="88.6" r="1.2" fill="#fff" /><circle cx="115.4" cy="88.6" r="1.2" fill="#fff" />
-        </g>
-        <path d="M79 81 Q86 77 93 80" stroke="#2A1610" strokeWidth="2" fill="none" strokeLinecap="round" />
-        <path d="M107 80 Q114 77 121 81" stroke="#2A1610" strokeWidth="2" fill="none" strokeLinecap="round" />
-        <path d="M100 95 Q97 104 100 107" stroke="#8E5A3E" strokeWidth="1.6" fill="none" strokeLinecap="round" />
-        <ellipse cx="80" cy="104" rx="6" ry="3" fill="#E7A3AE" opacity="0.35" /><ellipse cx="120" cy="104" rx="6" ry="3" fill="#E7A3AE" opacity="0.35" />
-        <ellipse className={speaking ? 'coach-talk' : ''} cx="100" cy="117" rx="9" ry="2.6" fill="#6E2B35" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} />
-        <circle cx="66" cy="104" r="2.4" fill="#D9B77E" /><circle cx="134" cy="104" r="2.4" fill="#D9B77E" />
-      </svg>
-    </div>
-  );
-}
-
 export default function CoachApp() {
   const [lang, setLang] = useState<'en' | 'es'>('en');
   const es = lang === 'es';
   const t = (en: string, sp: string) => (es ? sp : en);
-  const [phase, setPhase] = useState<'intro' | 'loading' | 'call'>('intro');
+  const [phase, setPhase] = useState<'intro' | 'call'>('intro');
   const [mode, setMode] = useState<'ai' | 'lite'>('ai');
   const [gpu, setGpu] = useState<boolean | null>(null);
   const [progress, setProgress] = useState(0); const [progressText, setProgressText] = useState('');
@@ -156,15 +125,16 @@ export default function CoachApp() {
     setErr(''); track(useAI ? 'coach-start-ai' : 'coach-start-lite');
     if (!voice.current) voice.current = createVoice();
     if (!useAI) { setMode('lite'); setPhase('call'); await startFace(); const o = opening(); setMsgs([{ role: 'assistant', content: o }]); say(o); return; }
-    setMode('ai'); setPhase('loading');
+    // Start talking right away (Lite), and download the full AI quietly in the background.
+    setMode('lite'); setPhase('call'); setProgress(0.001); await startFace(); const o = opening(); setMsgs([{ role: 'assistant', content: o }]); say(o);
     try {
       const webllm = await import('@mlc-ai/web-llm');
       const id = ((await hasF16()) ? MODELS : MODELS_F32)[pickModel()].id;
-      engine.current = (await webllm.CreateMLCEngine(id, { initProgressCallback: (r: { progress: number; text: string }) => { setProgress(r.progress); setProgressText(r.text); } })) as unknown as Engine;
-      setPhase('call'); await startFace(); const o = opening(); setMsgs([{ role: 'assistant', content: o }]); say(o);
+      engine.current = (await webllm.CreateMLCEngine(id, { initProgressCallback: (r: { progress: number; text: string }) => { setProgress(Math.max(0.001, r.progress)); setProgressText(r.text); } })) as unknown as Engine;
+      setMode('ai'); setProgress(0); track('coach-ai-ready');
     } catch {
-      setErr(t('This device couldn’t start the AI coach, so you’re in Lite mode (a simpler chat helper). On a newer phone or computer with Chrome, Edge or Safari, the full AI coach can run.', 'Este dispositivo no pudo iniciar la coach de IA, así que estás en modo Lite (un asistente más simple). En un teléfono o computadora más nuevo con Chrome, Edge o Safari, la coach completa puede funcionar.'));
-      setMode('lite'); setPhase('call'); await startFace(); const o = opening(); setMsgs([{ role: 'assistant', content: o }]); say(o);
+      setProgress(0);
+      setErr(t('The full AI couldn’t start on this device, so Mia stays in Lite mode. You can keep talking.', 'La IA completa no pudo iniciar en este dispositivo, así que Mia sigue en modo Lite. Puedes seguir hablando.'));
     }
   };
 
@@ -245,20 +215,12 @@ export default function CoachApp() {
         </div>
       )}
 
-      {phase === 'loading' && (
-        <div className="mx-auto mt-10 max-w-xl text-center">
-          <Avatar speaking={false} listening={false} thinking />
-          <p className="mt-6 font-semibold">{t('Getting Mia ready on your device…', 'Preparando a Mia en tu dispositivo…')}</p>
-          <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-gradient-to-r from-lagoon to-mango transition-all" style={{ width: `${Math.round(progress * 100)}%` }} /></div>
-          <p className="mt-2 text-xs text-ink/55">{Math.round(progress * 100)}% · {t('one-time download, then it opens instantly', 'descarga única, después abre al instante')}</p>
-          <p className="mt-1 truncate text-[11px] text-ink/40" aria-hidden="true">{progressText}</p>
-        </div>
-      )}
 
       {phase === 'call' && (
         <div className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_1fr] [&>*]:min-w-0">
           <div className="relative overflow-hidden rounded-[2rem] bg-deep/95 p-6 ring-1 ring-white/10">
             <div className="flex items-center justify-between text-xs text-ink/60"><span className="flex items-center gap-2"><span className="size-2 rounded-full bg-palm shadow-[0_0_8px_#7BC59A]" />{t('Live session with Mia', 'Sesión en vivo con Mia')} · {mode === 'ai' ? t('AI on your device', 'IA en tu dispositivo') : t('Lite mode', 'Modo Lite')}</span><span>{t('AI coach · not a counselor', 'Coach de IA · no es consejera')}</span></div>
+            {mode === 'lite' && progress > 0 && <div className="mt-2" role="status"><p className="text-[11px] text-ink/60">{t('Getting Mia’s full AI ready in the background, keep talking meanwhile', 'Preparando la IA completa de Mia, puedes seguir hablando')} · {Math.round(progress * 100)}%</p><div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-gradient-to-r from-lagoon to-mango transition-all" style={{ width: `${Math.round(progress * 100)}%` }} /></div></div>}
             <div className="relative mx-auto mt-4 aspect-square w-full max-w-[420px] overflow-hidden rounded-[1.5rem] bg-gradient-to-b from-[#2A1520] to-night" style={{ boxShadow: listening ? '0 0 0 4px #D9B77E66, 0 0 50px #D9B77E55' : speaking ? '0 0 40px #E7A3AE44' : undefined }}>
               <div ref={stage} className={`absolute inset-0 ${face3d === 'on' ? '' : 'invisible'}`} aria-label={t('Mia, the AI coach (3D)', 'Mia, la coach de IA (3D)')} role="img" />
               {face3d !== 'on' && face3d !== 'loading' && <div ref={faceBox} className="absolute inset-0"><VideoAvatar speaking={mouth} listening={listening} /></div>}
