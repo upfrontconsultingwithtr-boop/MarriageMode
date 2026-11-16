@@ -10,12 +10,21 @@ import { useT, useLang, LOCALE } from '@/lib/i18n';
 const EMAIL: Record<string, string> = {
   Bumble: 'DPO@bumble.com',        // bumble.com/en/privacy: "exercise your rights ... email our Data Protection Officer"
   eharmony: 'privacy@eharmony.com', // eharmony.com/about/privacy: "submit a privacy rights request ... privacy@eharmony.com"
+  // Checked 2026-11-16 on each company's own privacy policy:
+  Grindr: 'privacy@grindr.com',     // grindr.com/privacy-policy: "request to exercise these rights by emailing us at privacy@grindr.com"
+  Feeld: 'privacy@feeld.co',        // feeld.co/privacy: "in relation to the exercise of any of your rights ... privacy@feeld.co"
+  Taimi: 'gdpr@taimi.com',          // taimi.com/privacy-policy: "our Data Protection Officer (DPO), please email: gdpr@taimi.com"
+  Muzz: 'privacy@muzz.com',         // muzz.com/en-GB/privacy: "Our data protection officer can be contacted at privacy@muzz.com"
 };
 
 const OFFICIAL: Record<string, string> = {
   Bumble: 'https://bumble.com/en/privacy',
   eharmony: 'https://www.eharmony.com/about/privacy/',
   Tinder: 'https://www.help.tinder.com/hc/en-us/articles/5349453268877',
+  Grindr: 'https://www.grindr.com/privacy-policy',
+  Feeld: 'https://feeld.co/privacy',
+  Taimi: 'https://www.taimi.com/privacy-policy',
+  Muzz: 'https://muzz.com/en-GB/privacy/',
 };
 
 export function letter(app: string, name: string, email: string, user: string) {
