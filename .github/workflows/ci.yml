@@ -29,6 +29,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: Migrate and run RLS isolation tests
         run: |
-          psql -v ON_ERROR_STOP=1 -q -f supabase/tests/auth_stub.sql -f supabase/migrations/0001_init.sql -f supabase/migrations/0002_audit_snapshots.sql -f supabase/migrations/0003_partner_space_settings.sql
+          psql -v ON_ERROR_STOP=1 -q -f supabase/tests/auth_stub.sql $(ls supabase/migrations/*.sql | grep -v supabase_only | sed 's/^/-f /')
           psql -v ON_ERROR_STOP=1 -f supabase/tests/rls_isolation.sql | tee rls.log
           grep -q RLS_ISOLATION_ALL_PASSED rls.log

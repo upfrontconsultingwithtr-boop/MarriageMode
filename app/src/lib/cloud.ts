@@ -79,3 +79,39 @@ export async function kitDownloadUrl(): Promise<string | null> {
   const { data } = await c.storage.from('kits').createSignedUrl('Clean-Slate-Kit.pdf', 3600, { download: true });
   return data?.signedUrl ?? null;
 }
+
+// "Talk to a real counselor": licensed counselors apply, founders approve, couples request a session.
+export type Counselor = { id: string; name: string; credential: string; license_state: string; license_number: string; specialties: string[]; languages: string[]; formats: string[]; fee_note: string | null; bio: string | null; booking_url: string | null };
+export type CounselorApp = Omit<Counselor, 'id'> & { email: string };
+export type CounselorRequest = { counselor_id: string; name: string; email: string; state?: string; format?: string; times?: string; note?: string };
+const COUNSELOR_COLS = 'id,name,credential,license_state,license_number,specialties,languages,formats,fee_note,bio,booking_url';
+export async function listCounselors(): Promise<Counselor[]> {
+  const c = cloud(); if (!c) return [];
+  const { data } = await c.from('counselors').select(COUNSELOR_COLS).order('name');
+  return (data as Counselor[] | null) ?? [];
+}
+export async function applyCounselor(a: CounselorApp): Promise<boolean> {
+  const c = cloud(); if (!c) return false;
+  const { error } = await c.from('counselors').insert(a); return !error;
+}
+export async function requestCounselor(r: CounselorRequest): Promise<boolean> {
+  const c = cloud(); if (!c) return false;
+  const { error } = await c.from('counselor_requests').insert(r); return !error;
+}
+// Founders only (the database checks): review applications and requests.
+export async function founderCounselors(): Promise<(Counselor & { email: string; status: string; created_at: string })[]> {
+  const c = cloud(); if (!c) return [];
+  const { data } = await c.rpc('founder_counselors'); return data ?? [];
+}
+export async function founderRequests(): Promise<(CounselorRequest & { id: string; created_at: string; forwarded: boolean })[]> {
+  const c = cloud(); if (!c) return [];
+  const { data } = await c.rpc('founder_counselor_requests'); return data ?? [];
+}
+export async function founderSetCounselor(cid: string, status: 'approved' | 'paused' | 'pending'): Promise<boolean> {
+  const c = cloud(); if (!c) return false;
+  const { error } = await c.rpc('founder_set_counselor', { cid, new_status: status }); return !error;
+}
+export async function founderMarkForwarded(rid: string): Promise<boolean> {
+  const c = cloud(); if (!c) return false;
+  const { error } = await c.rpc('founder_mark_forwarded', { rid }); return !error;
+}

@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { cloud, cloudEnabled, sendLink, amIComped, signOut } from '@/lib/cloud';
 import { BASE } from '@/lib/base';
+import FounderCounselors from './FounderCounselors';
 
 // Tiffany & Reco's founder hub, live on the Marriage Mode site (not hosted by Claude).
 // Founders only: data lives in app.hub_tasks / app.hub_messages behind row-level security.
@@ -88,6 +89,7 @@ export default function FounderHub() {
         {[[you.length, 'for you to do'], [claude.filter((t) => t.status !== 'blocked').length, 'Claude is working on'], [claude.filter((t) => t.status === 'blocked').length, 'waiting on your yes'], [done.length, 'done']].map(([n, l]) => <div key={l as string} className="glass p-4"><b className="text-2xl">{n}</b><p className="text-sm text-ink/60">{l}</p></div>)}
       </div>
 
+      <FounderCounselors />
       {reviews.length > 0 && <section className="glass mt-6 p-5"><h2 className="text-lg font-semibold">📣 Posts to review</h2>
         <div className="mt-3 grid gap-4 md:grid-cols-2">{reviews.map((t) => (
           <div key={t.id} className="overflow-hidden rounded-2xl ring-1 ring-white/10">

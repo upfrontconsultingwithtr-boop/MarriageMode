@@ -250,6 +250,7 @@ export default function CoachApp() {
             {assigned && <p role="status" className="mt-2 rounded-xl bg-mango/10 p-2 text-xs ring-1 ring-mango/30">📌 {t('Added to your assignments in My dashboard:', 'Agregada a tus tareas en Mi panel:')} {assigned}</p>}
             {err && <p role="status" className="mt-2 text-xs text-coral">{err}</p>}
             <p className="mt-3 text-[11px] text-ink/50">{t('Your transcript is saved on this device: find it in My dashboard → Overview. ', 'Tu transcripción se guarda en este dispositivo: está en Mi panel → Resumen. ')}{t('Mia is an AI and can make mistakes. Not therapy or medical advice. In danger? Call 911. Hotline: 1-800-799-7233 · Crisis: 988.', 'Mia es una IA y puede equivocarse. No es terapia ni consejo médico. ¿En peligro? Llama al 911. Línea: 1-800-799-7233 · Crisis: 988.')}</p>
+            <p className="mt-2 text-xs"><a href={`${BASE}/counselors/`} className="text-mango underline">{t('Want a human expert too? Talk to a licensed counselor →', '¿Quieres también a una persona experta? Habla con un consejero con licencia →')}</a></p>
           </div>
         </div>
       )}

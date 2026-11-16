@@ -192,5 +192,47 @@ do $$ begin
   raise exception 'RLS FAIL: non-founder wrote hub message';
 exception when insufficient_privilege then raise notice 'pass: non-founder cannot write hub'; end $$;
 reset role;
+-- counselors: apply = pending only; public sees approved only and never emails; founders approve
+insert into app.counselors (id, status, name, credential, license_state, license_number, email) values
+  ('00000000-0000-0000-0000-0000000000c1', 'approved', 'Dr A', 'LMFT', 'MO', '123', 'a@ex.com'),
+  ('00000000-0000-0000-0000-0000000000c2', 'pending',  'Bee',  'LPC',  'MO', '456', 'b@ex.com');
+set local role anon;
+select pg_temp.check((select count(*) from app.counselors) = 1, 'public sees approved counselors only');
+do $$ begin
+  perform email from app.counselors;
+  raise exception 'RLS FAIL: public read counselor email';
+exception when insufficient_privilege then raise notice 'pass: counselor emails private'; end $$;
+insert into app.counselors (name, credential, license_state, license_number, email) values ('Cee', 'LCSW', 'IL', '789', 'c@ex.com');
+do $$ begin
+  insert into app.counselors (status, name, credential, license_state, license_number, email) values ('approved', 'Dee', 'XX', 'IL', '1', 'd@ex.com');
+  raise exception 'RLS FAIL: applicant self-approved';
+exception when insufficient_privilege then raise notice 'pass: cannot self-approve'; end $$;
+insert into app.counselor_requests (counselor_id, name, email) values ('00000000-0000-0000-0000-0000000000c1', 'Pat', 'p@ex.com');
+do $$ begin
+  insert into app.counselor_requests (counselor_id, name, email) values ('00000000-0000-0000-0000-0000000000c2', 'Pat', 'p@ex.com');
+  raise exception 'RLS FAIL: request to unapproved counselor';
+exception when insufficient_privilege then raise notice 'pass: requests only to approved'; end $$;
+do $$ begin
+  perform count(*) from app.counselor_requests;
+  raise exception 'RLS FAIL: public read requests';
+exception when insufficient_privilege then raise notice 'pass: requests private'; end $$;
+reset role;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000c');
+do $$ begin
+  perform email from app.counselors;
+  raise exception 'RLS FAIL: signed-in user read counselor email';
+exception when insufficient_privilege then raise notice 'pass: emails private to users'; end $$;
+select pg_temp.check((select count(*) from app.founder_counselors()) = 0, 'non-founder gets no applications');
+do $$ begin
+  perform app.founder_set_counselor('00000000-0000-0000-0000-0000000000c2', 'approved');
+  raise exception 'RLS FAIL: non-founder approved counselor';
+exception when insufficient_privilege then raise notice 'pass: only founders approve'; end $$;
+reset role;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
+select pg_temp.check((select count(*) from app.founder_counselors()) = 3, 'founder sees all applications');
+select pg_temp.check((select count(*) from app.founder_counselor_requests()) = 1, 'founder sees requests');
+select app.founder_set_counselor('00000000-0000-0000-0000-0000000000c2', 'approved');
+reset role;
+select pg_temp.check((select status from app.counselors where id = '00000000-0000-0000-0000-0000000000c2') = 'approved', 'founder approval saved');
 rollback;
 \echo RLS_ISOLATION_ALL_PASSED
