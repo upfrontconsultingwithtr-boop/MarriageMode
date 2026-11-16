@@ -10,6 +10,11 @@ no spending without Tiffany's yes, truth only, never delete: archive).
 - Every schema change ships as a new migration plus a passing `supabase/tests/rls_isolation.sql`.
 - Paid steps go to `docs/DECISIONS-NEEDED.md` with the exact cost.
 
+## ADVERTISING PAUSED (Tiffany, 2026-11-16, until she says otherwise)
+No Marriage Mode ads, social posts, outreach or follow-up emails, campaigns or promotions:
+do not draft, schedule, publish or send any. The 3 Metricool posts (Nov 16/18/20) are kept as
+drafts; the Marble Wellness follow-up is on hold. Product, site, safety and support work continues.
+
 ## Standing rule: lean usage, same quality (Tiffany, 2026-11-15)
 - Use as few tokens and tool calls as the job allows: read only what's needed,
   batch commands, skip repeat checks, no long explanations or re-summaries.
