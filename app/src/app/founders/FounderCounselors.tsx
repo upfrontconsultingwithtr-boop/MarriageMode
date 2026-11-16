@@ -21,7 +21,7 @@ export default function FounderCounselors() {
         <div key={c.id} className="mt-3 rounded-2xl bg-white/[0.04] p-4 text-sm">
           <p className="font-semibold">{c.name}, {c.credential} · {c.license_state} #{c.license_number}</p>
           <p className="text-ink/60">{c.email}{c.fee_note ? ` · ${c.fee_note}` : ''}</p>
-          <p className="mt-1 text-ink/70">Step 1: look up the license on the {c.license_state} state board site (search “{c.license_state} license lookup {c.credential}”). Step 2: if it’s active, tap Approve.</p>
+          <p className="mt-1 text-ink/70">Step 1 (and again every year): look up the license on the {c.license_state} state board site (search “{c.license_state} license lookup {c.credential}”). Step 2: if it’s active, tap Approve.</p>
           <div className="mt-2 flex gap-2">
             <button onClick={async () => { await founderSetCounselor(c.id, 'approved'); load(); }} className="min-h-10 rounded-full bg-mango px-4 font-semibold text-night">Approve</button>
             <button onClick={async () => { await founderSetCounselor(c.id, 'paused'); load(); }} className="min-h-10 rounded-full px-4 ring-1 ring-white/15">Decline</button>

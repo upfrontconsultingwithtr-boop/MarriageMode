@@ -37,6 +37,7 @@ export default function CounselorsApp() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 pb-20">
+      <p className="mb-4 rounded-2xl bg-coral/10 p-3 text-sm text-ink/80">In danger or in crisis right now? This directory isn’t emergency help. Call 911, text or call 988 (crisis line), or 1-800-799-7233 (domestic violence hotline).</p>
       <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-4 sm:p-6">
         <div className="grid gap-3 sm:grid-cols-3">
           <label className="text-sm text-ink/75">Your state<input value={state} onChange={(e) => setState(e.target.value)} placeholder="e.g. MO" className={field} /></label>
@@ -69,8 +70,8 @@ export default function CounselorsApp() {
             <div className="mt-3 flex flex-wrap gap-1.5 text-xs">{[...c.specialties, ...c.formats, ...c.languages].map((x) => <span key={x} className="rounded-full bg-white/[0.06] px-2.5 py-1">{x}</span>)}</div>
             {c.fee_note && <p className="mt-3 text-sm text-ink/70">Fee: {c.fee_note} (paid to the counselor)</p>}
             <div className="mt-4 flex flex-wrap gap-2">
-              <button onClick={() => { setPick(c); setSent(''); }} className="min-h-11 rounded-full bg-mango px-5 text-sm font-semibold text-night">Request a session</button>
-              {c.booking_url && <a href={c.booking_url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center rounded-full px-5 text-sm font-semibold ring-1 ring-white/15">Book on their site</a>}
+              {c.booking_url && <a href={c.booking_url} target="_blank" rel="noopener noreferrer" onClick={() => track('counselor-book')} className="inline-flex min-h-11 items-center rounded-full bg-mango px-5 text-sm font-semibold text-night">Book directly (most private)</a>}
+              <button onClick={() => { setPick(c); setSent(''); }} className={`min-h-11 rounded-full px-5 text-sm font-semibold ${c.booking_url ? 'ring-1 ring-white/15' : 'bg-mango text-night'}`}>Request a session</button>
             </div>
             {pick?.id === c.id && (
               <form onSubmit={sendRequest} className="mt-4 grid gap-3 [&>*]:min-w-0">
@@ -82,7 +83,7 @@ export default function CounselorsApp() {
                   <label className="text-sm text-ink/75">How<select name="format" className={field}>{c.formats.map((x) => <option key={x}>{x}</option>)}</select></label>
                 </div>
                 <label className="text-sm text-ink/75">Good times<input name="times" maxLength={200} placeholder="e.g. weekday evenings" className={field} /></label>
-                <label className="text-sm text-ink/75">What you’d like help with (optional, keep it short)<textarea name="note" maxLength={1000} className={area} /></label>
+                <label className="text-sm text-ink/75">Topic in a few words (optional; save private details for the counselor)<input name="note" maxLength={160} placeholder="e.g. communication, premarital" className={field} /></label>
                 {err && <p role="alert" className="text-sm text-coral">{err}</p>}
                 <button className="min-h-11 rounded-full bg-mango px-5 font-semibold text-night">Send request</button>
                 <p className="text-xs text-ink/55">Only {c.name} and the Marriage Mode team see this. In danger right now? Call 911, or 988 for crisis support.</p>
@@ -110,10 +111,12 @@ export default function CounselorsApp() {
             <fieldset className="text-sm text-ink/75 sm:col-span-2"><legend>Focus areas</legend><div className="mt-2 flex flex-wrap gap-2">{SPECIALTIES.map((s) => <label key={s} className="flex min-h-9 items-center gap-2 rounded-full bg-white/[0.05] px-3"><input type="checkbox" name="specialties" value={s} />{s}</label>)}</div></fieldset>
             <fieldset className="text-sm text-ink/75 sm:col-span-2"><legend>Sessions by</legend><div className="mt-2 flex flex-wrap gap-2">{FORMATS.map((s) => <label key={s} className="flex min-h-9 items-center gap-2 rounded-full bg-white/[0.05] px-3"><input type="checkbox" name="formats" value={s} defaultChecked={s === 'video'} />{s}</label>)}</div></fieldset>
             <label className="text-sm text-ink/75 sm:col-span-2">Short bio for couples<textarea name="bio" maxLength={800} className={area} /></label>
+            <label className="flex items-start gap-2 text-sm text-ink/75 sm:col-span-2"><input type="checkbox" required className="mt-1" />I confirm my license is active and in good standing, I carry professional liability (malpractice) insurance, I only see clients where I’m licensed, and I’ll tell Marriage Mode right away if any of that changes. I’m responsible for my own clinical care, records and payments.</label>
             {err && <p role="alert" className="text-sm text-coral sm:col-span-2">{err}</p>}
             <button className="min-h-12 rounded-full bg-mango px-6 font-semibold text-night sm:col-span-2 sm:justify-self-start">Apply to join</button>
           </form>
         )}
+        <p className="mt-4 text-xs text-ink/50">We re-check every listed license once a year. Listing isn’t an endorsement: Marriage Mode by Upfront Consulting with Tiff &amp; Reco LLC doesn’t provide clinical care and isn’t part of any counseling relationship.</p>
         {!cloudEnabled && <p className="mt-3 text-xs text-ink/55">Sign-ups are offline on this copy of the site.</p>}
       </section>
     </div>

@@ -64,3 +64,10 @@ website, add its exact host to the environment's allowed hosts with update_envir
 without asking her in chat first. The approval card still appears; tell her to tap Allow.
 Also install any free tool that helps build or maintain the products (npm packages,
 CLIs, open-source models) and allow its download hosts the same way. Never paid ones.
+
+## Standing rule: Gemini second opinion (Tiffany, 2026-11-16)
+Before shipping anything built for Marriage Mode, ask Gemini for a second opinion with
+`python3 scripts/second_opinion.py "<what was built + the question>"` (free tier, billing OFF on
+its project, so it can't cost money). Apply every suggestion that makes the product better and
+log what was applied in the HUB Done log. Never send customer data, only plans, copy and code.
+Tiffany's explicit instructions win over Gemini (e.g. Mia keeps a real human face).
