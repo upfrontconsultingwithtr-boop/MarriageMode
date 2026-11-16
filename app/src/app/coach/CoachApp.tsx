@@ -23,7 +23,7 @@ function VideoAvatar({ speaking, listening }: { speaking: boolean; listening: bo
   const idle = useRef<HTMLVideoElement>(null); const talk = useRef<HTMLVideoElement>(null);
   useEffect(() => {
     const t = talk.current; if (!t) return;
-    if (speaking) { if (t.paused) { try { t.currentTime = Math.random() * Math.max(0, (t.duration || 7) - 2); } catch { /* not ready */ } } void t.play().catch(() => {}); }
+    if (speaking) { if (t.paused) { try { t.currentTime = 4.48; } catch { /* not ready */ } } void t.play().catch(() => {}); }
     else { const h = setTimeout(() => t.pause(), 900); return () => clearTimeout(h); }
   }, [speaking]);
   useEffect(() => { void idle.current?.play().catch(() => {}); }, []);
