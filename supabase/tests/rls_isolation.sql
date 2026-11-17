@@ -262,6 +262,12 @@ set local role anon;
 select app.push_forget('00000000-0000-0000-0000-0000000000f1');
 reset role;
 select pg_temp.check((select count(*) from app.push_subs) = 0, 'right token deletes instantly');
+-- Invite rate limit: the 11th invite in a day is refused.
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000c');
+do $$ begin for i in 1..10 loop perform app.create_couple_invite(); end loop;
+  begin perform app.create_couple_invite(); raise exception 'RLS FAIL: 11th invite allowed';
+  exception when others then if sqlerrm not like 'too many invites%' then raise; end if; end; end $$;
+select pg_temp.check(true, 'invites capped at 10 per day');
 -- Catch-all guards: no table can ship without row-level security, and only
 -- the reviewed public catalogs may be read without signing in.
 reset role;
