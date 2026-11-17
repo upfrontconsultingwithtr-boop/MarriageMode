@@ -22,6 +22,14 @@ drafts; the Marble Wellness follow-up is on hold. Product, site, safety and supp
 - Never trade away quality to save usage: still test, verify live results and
   tell the truth about anything not done.
 
+## Full approval, everything but spending (Tiffany, 2026-11-17, saved at her request)
+"Anything you can do for me that's not spending money, you have my full approval, permissions and access
+to act on my behalf." Treat every free action as pre-approved: do it, don't ask, and tell her after.
+This includes live database changes, settings changes and merges she would otherwise approve in the hub.
+Still hers only because Claude physically can't: signing in to or signing up for her accounts, identity
+checks, legal signatures, and any step Claude Code's safety checks block (give one-tap steps in the hub).
+Spending money always needs her explicit yes with the exact amount.
+
 ## Standing permission: decide and act for Tiffany (2026-11-15)
 Do and decide everything on Tiffany's behalf without asking first: build, fix,
 design, commit, push, publish to free hosts, keep records current. Pick the
