@@ -42,6 +42,23 @@ export async function push(state: AuditState): Promise<boolean> {
 export async function googleEnabled(): Promise<boolean> {
   try { const r = await fetch(`${URL}/auth/v1/settings`, { headers: { apikey: KEY } }); const j = await r.json(); return Boolean(j?.external?.google); } catch { return false; }
 }
+// Google sign-in through Firebase (the same Google sign-in as Upfront HQ), then into Supabase with the
+// Google ID token. Avoids a separate Google OAuth client. Needs the hub domain in Firebase authorized domains.
+export async function signInGoogleFirebase(): Promise<string | null> {
+  const c = cloud(); if (!c) return 'not configured';
+  try {
+    const { initializeApp, getApps } = await import('firebase/app');
+    const { getAuth, GoogleAuthProvider, signInWithPopup, signOut: fbOut } = await import('firebase/auth');
+    const FB = { apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || '', authDomain: 'upfront-command-center.firebaseapp.com', projectId: 'upfront-command-center' };
+    const app = getApps().find((x) => x.name === 'mm-hub') ?? initializeApp(FB, 'mm-hub');
+    const auth = getAuth(app); const provider = new GoogleAuthProvider(); provider.setCustomParameters({ prompt: 'select_account' });
+    const res = await signInWithPopup(auth, provider);
+    const token = GoogleAuthProvider.credentialFromResult(res)?.idToken; await fbOut(auth).catch(() => {});
+    if (!token) return 'Google did not return a sign-in token';
+    const { error } = await c.auth.signInWithIdToken({ provider: 'google', token });
+    return error ? error.message : null;
+  } catch (e) { return e instanceof Error ? e.message : 'sign-in failed'; }
+}
 // Google sign-in (same Google account as the Upfront Consulting login). Needs Google enabled in Supabase Auth.
 export async function signInGoogle(redirectTo: string): Promise<string | null> {
   const c = cloud(); if (!c) return 'not configured';

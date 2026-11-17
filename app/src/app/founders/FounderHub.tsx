@@ -1,6 +1,6 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
-import { cloud, cloudEnabled, sendLink, signInGoogle, googleEnabled, amIComped, signOut } from '@/lib/cloud';
+import { cloud, cloudEnabled, sendLink, signInGoogleFirebase, googleEnabled, amIComped, signOut } from '@/lib/cloud';
 import { BASE } from '@/lib/base';
 import FounderCounselors from './FounderCounselors';
 
@@ -59,7 +59,7 @@ export default function FounderHub() {
       <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-teal">Founders only</p>
       <h1 className="mt-3 text-3xl font-bold">Your Marriage Mode hub</h1>
       {state === 'denied' && <p className="mt-3 text-sm text-coral">This email isn’t on the founders’ list. Sign in with tiffanyh9218@gmail.com or williamrec04@gmail.com.</p>}
-      {gOn && <><button type="button" onClick={async () => { if (state === 'denied') await signOut(); const err = await signInGoogle(`${window.location.origin}${BASE}/founders/`); if (err) setSent(`That didn’t work: ${err}`); }} className="mt-6 flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-white font-semibold text-night"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.9 6.1C12.5 13.6 17.8 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.4 5.7c4.3-4 6.9-9.9 6.9-17.1z"/><path fill="#FBBC05" d="M10.6 28.6A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.6l-7.9-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.7 10.7l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.4-5.7c-2.1 1.4-4.8 2.3-8.5 2.3-6.2 0-11.5-4.1-13.4-9.8l-7.9 6.1C6.6 42.6 14.6 48 24 48z"/></svg>Sign in with Google</button>
+      {gOn && <><button type="button" onClick={async () => { if (state === 'denied') await signOut(); const err = await signInGoogleFirebase(); if (err) setSent(`That didn’t work: ${err}`); else window.location.reload(); }} className="mt-6 flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-white font-semibold text-night"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.9 6.1C12.5 13.6 17.8 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.4 5.7c4.3-4 6.9-9.9 6.9-17.1z"/><path fill="#FBBC05" d="M10.6 28.6A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.6l-7.9-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.7 10.7l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.4-5.7c-2.1 1.4-4.8 2.3-8.5 2.3-6.2 0-11.5-4.1-13.4-9.8l-7.9 6.1C6.6 42.6 14.6 48 24 48z"/></svg>Sign in with Google</button>
       <p className="mt-4 text-xs text-ink/50">or get an email link</p></>}
       <form className="mt-2 flex flex-col gap-2" onSubmit={async (e) => { e.preventDefault(); if (state === 'denied') await signOut(); const err = await sendLink(email.trim(), `${window.location.origin}${BASE}/founders/`); setSent(err ? `That didn’t work: ${err}` : 'Check your email and tap the link to open your hub.'); }}>
         <label htmlFor="fh-email" className="sr-only">Email</label>
