@@ -48,6 +48,7 @@ Why: counselors and pastors who work with engaged couples are the fastest free w
 | Design look (green & pink) | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/DESIGN-SYSTEM.md |
 
 ## 📝 Done log (newest first)
+- 2026-11-17: Marriage Mode Hub LIVE on its own site https://marriage-mode-hub.web.app (Firebase, free).
 - 2026-11-17: Privacy policy rewritten to match every feature (with Google Limited Use statement) + new Terms of Use page, live. State-law line waits on y26.
 - 2026-11-17: Invite limit live (0012 applied, verified). Hub site address approved for sign-in. Front page Sign in merged to main (publishes once Firebase key is in). Mia voice 11 confirmed.
 - 2026-11-17: Hub as its own site built (marriage-mode-hub.web.app, Marriage Mode look, Sign in with Google) + front page Sign in link; Netlify out of free credits so using free Firebase. Steps y23-y25.
