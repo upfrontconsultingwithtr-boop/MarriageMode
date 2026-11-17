@@ -1,0 +1,12 @@
+# Free weekly security and version checks (GitHub Dependabot).
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /app
+    target-branch: claude/nice-einstein-h76zzg
+    schedule: { interval: weekly }
+    open-pull-requests-limit: 5
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: claude/nice-einstein-h76zzg
+    schedule: { interval: weekly }

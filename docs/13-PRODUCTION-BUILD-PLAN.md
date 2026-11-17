@@ -33,7 +33,7 @@ never edit production by hand. Releases tagged `v0.x` with notes in `CHANGELOG.m
 - [ ] Service role key only in Edge Function secrets
 - [ ] Stripe webhook signature verified
 - [ ] Rate limits on auth and invites
-- [ ] Dependency scanning (Dependabot) and secret scanning on
+- [~] Dependency scanning (Dependabot) and secret scanning on: config added 2026-11-17; alerts toggle is hub y18
 - [ ] Backups: Supabase daily (paid plan) or a nightly `pg_dump` via GitHub Action to private storage (free)
 - [ ] Privacy policy and terms reviewed by a lawyer
 
