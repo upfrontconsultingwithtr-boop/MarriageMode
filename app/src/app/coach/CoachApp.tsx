@@ -39,9 +39,15 @@ function VideoAvatar({ speaking, listening }: { speaking: boolean; listening: bo
     <div className="absolute inset-0">
       <video ref={idle} src={`${BASE}/coach/mia-idle.mp4`} poster={`${BASE}/coach/mia-poster.jpg`} muted loop playsInline autoPlay preload="auto" className="absolute inset-0 h-full w-full object-cover" aria-hidden="true" />
       {!rm && <video ref={talk} data-talk="" src={`${BASE}/coach/mia-talk.mp4`} muted loop playsInline preload="auto" className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${speaking ? 'opacity-100' : 'opacity-0'}`} aria-hidden="true" />}
-      {listening && <span className="absolute left-3 top-3 rounded-full bg-night/70 px-3 py-1 text-xs text-mango">● listening</span>}
+      {listening && <span className="absolute bottom-10 left-2 rounded-full bg-night/70 px-3 py-1 text-xs text-mango">● listening</span>}
     </div>
   );
+}
+
+function CallTimer() {
+  const [s, setS] = useState(0);
+  useEffect(() => { const t0 = Date.now(); const i = setInterval(() => setS(Math.floor((Date.now() - t0) / 1000)), 1000); return () => clearInterval(i); }, []);
+  return <span className="tabular-nums">{Math.floor(s / 60)}:{String(s % 60).padStart(2, '0')}</span>;
 }
 
 export default function CoachApp() {
@@ -218,14 +224,15 @@ export default function CoachApp() {
           <div className="relative overflow-hidden rounded-[2rem] bg-deep/95 p-6 ring-1 ring-white/10">
             <div className="flex items-center justify-between text-xs text-ink/60"><span className="flex items-center gap-2"><span className="size-2 rounded-full bg-palm shadow-[0_0_8px_#7BC59A]" />{t('Live session with Mia', 'Sesión en vivo con Mia')} · {mode === 'ai' ? t('AI on your device', 'IA en tu dispositivo') : t('Lite mode', 'Modo Lite')}</span><span>{t('AI coach · not a counselor', 'Coach de IA · no es consejera')}</span></div>
             {mode === 'lite' && progress > 0 && <div className="mt-2" role="status"><p className="text-[11px] text-ink/60">{t('Getting Mia’s full AI ready in the background, keep talking meanwhile', 'Preparando la IA completa de Mia, puedes seguir hablando')} · {Math.round(progress * 100)}%</p><div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-gradient-to-r from-lagoon to-mango transition-all" style={{ width: `${Math.round(progress * 100)}%` }} /></div></div>}
-            <div className="relative mx-auto mt-4 aspect-square w-full max-w-[420px] overflow-hidden rounded-[1.5rem] bg-gradient-to-b from-[#2A1520] to-night" style={{ boxShadow: listening ? '0 0 0 4px #D9B77E66, 0 0 50px #D9B77E55' : speaking ? '0 0 40px #E7A3AE44' : undefined }}>
+            <div className="relative mx-auto mt-4 aspect-[3/4] w-full max-w-[460px] overflow-hidden rounded-[1.5rem] bg-night shadow-2xl ring-1 ring-white/10">
               <div ref={stage} className={`absolute inset-0 ${face3d === 'on' ? '' : 'invisible'}`} aria-label={t('Mia, the AI coach (3D)', 'Mia, la coach de IA (3D)')} role="img" />
               {face3d !== 'on' && face3d !== 'loading' && <div ref={faceBox} className="absolute inset-0"><VideoAvatar speaking={speaking} listening={listening} mouth={mouthOf.current} canvasRef={faceCanvas} /></div>}
               <span className="pointer-events-none absolute bottom-2 left-2 rounded-full bg-night/70 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-ink/80">{t('AI coach · not a therapist', 'Coach de IA · no es terapeuta')}</span>
               {format !== 'text' && <span className="absolute right-3 top-3 rounded-full bg-night/70 px-3 py-1 text-xs text-coral">● {format === 'video' ? t('Recording video to this device', 'Grabando video en este dispositivo') : t('Recording audio to this device', 'Grabando audio en este dispositivo')}</span>}
+              <span className="pointer-events-none absolute left-3 top-3 flex items-center gap-2 rounded-full bg-night/60 px-3 py-1 text-xs text-ink/90 backdrop-blur"><span className="size-2 rounded-full bg-palm" />Mia · {t('Relationship coach', 'Coach de pareja')} · <CallTimer /></span>
+              {cam && <video ref={video} autoPlay muted playsInline className="absolute bottom-12 right-3 h-32 w-24 rounded-xl object-cover ring-2 ring-white/30 shadow-lg sm:h-40 sm:w-28" aria-label={t('Your camera (stays on your device)', 'Tu cámara (se queda en tu dispositivo)')} />}
               {face3d === 'loading' && <p className="absolute inset-x-0 bottom-2 text-center text-[11px] text-ink/60">{t('Loading Mia’s 3D face…', 'Cargando el rostro 3D de Mia…')} {Math.round(faceP * 100)}%</p>}
             </div>
-            {cam && <video ref={video} autoPlay muted playsInline className="absolute bottom-24 right-4 h-28 w-20 rounded-xl object-cover ring-2 ring-white/20 sm:h-36 sm:w-28" aria-label={t('Your camera (stays on your device)', 'Tu cámara (se queda en tu dispositivo)')} />}
             <p aria-live="polite" className="mt-4 line-clamp-4 min-h-[4.5rem] text-center text-lg leading-snug">{busy && !live ? <span className="text-ink/50">{t('Mia is thinking…', 'Mia está pensando…')}</span> : lastCoach}</p>
             {/counsel|therap|consejer|terapeut|988|911/i.test(lastCoach) && !live && <p className="mt-2 text-center"><a href={`${BASE}/counselors/`} className="inline-flex min-h-10 items-center rounded-full bg-white/[0.06] px-4 text-sm font-semibold text-mango ring-1 ring-white/10">{t('Find a licensed counselor →', 'Busca un consejero con licencia →')}</a></p>}
             <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
