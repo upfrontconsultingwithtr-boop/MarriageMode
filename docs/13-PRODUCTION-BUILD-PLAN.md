@@ -32,7 +32,7 @@ never edit production by hand. Releases tagged `v0.x` with notes in `CHANGELOG.m
 - [x] RLS test covers every table (CI fails otherwise): catch-all guards added 2026-11-17
 - [ ] Service role key only in Edge Function secrets
 - [ ] Stripe webhook signature verified
-- [~] Rate limits on auth and invites: invites capped at 10/day (migration 0012, live step hub y19); sign-in links use Supabase built-in limits
+- [x] Rate limits on auth and invites: invites capped at 10/day (migration 0012, live 2026-11-17); sign-in links use Supabase built-in limits
 - [~] Dependency scanning (Dependabot) and secret scanning on: config added 2026-11-17; alerts toggle is hub y18
 - [~] Backups: free nightly encrypted `pg_dump` GitHub Action built 2026-11-17 (`.github/workflows/backup.yml`); secrets step is hub y20
 - [ ] Privacy policy and terms reviewed by a lawyer
