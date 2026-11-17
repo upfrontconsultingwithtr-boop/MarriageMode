@@ -1,0 +1,31 @@
+name: Nightly database backup (free)
+# Locked with a passphrase before upload, because this repository is public. Kept 30 days.
+# Needs two repository secrets: SUPABASE_DB_URL (session pooler URL) and BACKUP_PASSPHRASE.
+on:
+  schedule:
+    - cron: '43 7 * * *'
+  workflow_dispatch:
+permissions: { contents: read }
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check secrets are set
+        id: ok
+        env: { A: '${{ secrets.SUPABASE_DB_URL }}', B: '${{ secrets.BACKUP_PASSPHRASE }}' }
+        run: if [ -n "$A" ] && [ -n "$B" ]; then echo go=1 >> "$GITHUB_OUTPUT"; else echo "Secrets not set yet; skipping."; fi
+      - name: Dump and lock
+        if: steps.ok.outputs.go == '1'
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSo /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client-17
+          PG_DUMP=/usr/lib/postgresql/17/bin/pg_dump scripts/backup.sh
+      - uses: actions/upload-artifact@v4
+        if: steps.ok.outputs.go == '1'
+        with: { name: db-backup, path: backup/, retention-days: 30 }
