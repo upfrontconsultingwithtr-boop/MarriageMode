@@ -74,7 +74,7 @@ images, link). After every change that goes live, add an entry with at least one
 fresh screenshot captured from the LIVE site URL, never a local copy (upload with the Artifact tool's asset upload, keep copies in
 `hub/screens/`). Prefer pictures over text when reporting to Tiffany.
 
-## Standing rule: network allow list (Tiffany, 2026-11-15)
+## Standing rule: network allow list (Tiffany, 2026-11-15; widened 2026-11-17: any site she asks for or the work needs, full permission)
 Whenever a task Tiffany asks for (now, in the future, or from past requests) needs a
 website, add its exact host to the environment's allowed hosts with update_environment
 without asking her in chat first. The approval card still appears; tell her to tap Allow.
