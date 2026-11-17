@@ -70,9 +70,5 @@ without asking her in chat first. The approval card still appears; tell her to t
 Also install any free tool that helps build or maintain the products (npm packages,
 CLIs, open-source models) and allow its download hosts the same way. Never paid ones.
 
-## Standing rule: Gemini second opinion (Tiffany, 2026-11-16)
-Before shipping anything built for Marriage Mode, ask Gemini for a second opinion with
-`python3 scripts/second_opinion.py "<what was built + the question>"` (free tier, billing OFF on
-its project, so it can't cost money). Apply every suggestion that makes the product better and
-log what was applied in the HUB Done log. Never send customer data, only plans, copy and code.
-Tiffany's explicit instructions win over Gemini (e.g. Mia keeps a real human face).
+## Gemini second opinion: RETIRED (Tiffany, 2026-11-17)
+Tiffany: "you don't need the second opinion anymore." Do not run `scripts/second_opinion.py` or ask for a Gemini key.
