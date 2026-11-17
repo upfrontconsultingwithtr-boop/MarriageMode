@@ -1,0 +1,24 @@
+name: Firebase sign-in setup (one-off, free)
+# Uses the FIREBASE_SERVICE_ACCOUNT secret to (1) allow the hub site to use Firebase Google sign-in and
+# (2) print the public Google web client ID (not a secret) so Supabase can accept Google sign-ins from it.
+on: { workflow_dispatch: {} }
+permissions: { contents: read }
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pip install -q google-auth requests
+      - env: { SA: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' }
+        shell: python
+        run: |
+          import os, json, requests, google.oauth2.service_account as s, google.auth.transport.requests as t
+          c = s.Credentials.from_service_account_info(json.loads(os.environ['SA']), scopes=['https://www.googleapis.com/auth/cloud-platform'])
+          c.refresh(t.Request()); h = {'Authorization': 'Bearer ' + c.token}
+          base = 'https://identitytoolkit.googleapis.com/admin/v2/projects/upfront-command-center'
+          cfg = requests.get(base + '/config', headers=h); print('get config', cfg.status_code)
+          doms = cfg.json().get('authorizedDomains', [])
+          for d in ['marriage-mode-hub.web.app', 'marriage-mode-hub.firebaseapp.com']:
+              if d not in doms: doms.append(d)
+          r = requests.patch(base + '/config?updateMask=authorizedDomains', headers=h, json={'authorizedDomains': doms}); print('add domains', r.status_code, r.text[:200] if r.status_code != 200 else 'ok')
+          g = requests.get(base + '/defaultSupportedIdpConfigs/google.com', headers=h); print('google idp', g.status_code)
+          if g.ok: print('GOOGLE_WEB_CLIENT_ID=' + g.json().get('clientId', ''))
