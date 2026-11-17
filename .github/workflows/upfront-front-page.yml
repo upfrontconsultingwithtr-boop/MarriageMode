@@ -1,0 +1,33 @@
+name: Publish only the Upfront front page (free, Firebase)
+# Clones the LIVE upfront-consulting-tr site version and swaps in just /index.html, so no other live page
+# can change. Source of truth stays upfront-ai-team-cloud/website/index.html (copied to ops/upfront-front-page/).
+on: { workflow_dispatch: {} }
+permissions: { contents: read }
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install -q google-auth requests
+      - env: { SA: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' }
+        shell: python
+        run: |
+          import os, json, gzip, hashlib, time, requests, google.oauth2.service_account as s, google.auth.transport.requests as t
+          c = s.Credentials.from_service_account_info(json.loads(os.environ['SA']), scopes=['https://www.googleapis.com/auth/cloud-platform'])
+          c.refresh(t.Request()); h = {'Authorization': 'Bearer ' + c.token}
+          A = 'https://firebasehosting.googleapis.com/v1beta1/'; site = 'sites/upfront-consulting-tr'
+          live = requests.get(A + site + '/releases?pageSize=1', headers=h).json()['releases'][0]['version']['name']; print('live version', live)
+          op = requests.post(A + site + '/versions:clone', headers=h, json={'sourceVersion': live, 'finalize': False}).json(); print('clone', op.get('name'))
+          for _ in range(60):
+              o = requests.get(A + op['name'], headers=h).json()
+              if o.get('done'): break
+              time.sleep(3)
+          if 'error' in o: raise SystemExit(o['error'])
+          ver = o['response']['name']; print('new version', ver)
+          body = gzip.compress(open('ops/upfront-front-page/index.html', 'rb').read()); sha = hashlib.sha256(body).hexdigest()
+          pf = requests.post(A + ver + ':populateFiles', headers=h, json={'files': {'/index.html': sha}}).json(); print('populate', list(pf))
+          for x in pf.get('uploadRequiredHashes', []):
+              u = requests.post(pf['uploadUrl'] + '/' + x, headers={**h, 'Content-Type': 'application/octet-stream'}, data=body); print('upload', u.status_code)
+          f = requests.patch(A + ver + '?update_mask=status', headers=h, json={'status': 'FINALIZED'}); print('finalize', f.status_code, f.text[:200] if not f.ok else '')
+          r = requests.post(A + site + '/releases?versionName=' + ver, headers=h, json={'message': 'Front page: Sign in link (Claude)'}); print('release', r.status_code, r.text[:200] if not r.ok else '')
+          if not (f.ok and r.ok): raise SystemExit(1)
