@@ -48,6 +48,7 @@ Why: counselors and pastors who work with engaged couples are the fastest free w
 | Design look (green & pink) | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/DESIGN-SYSTEM.md |
 
 ## 📝 Done log (newest first)
+- 2026-11-17: Hub as its own site built (marriage-mode-hub.web.app, Marriage Mode look, Sign in with Google) + front page Sign in link; Netlify out of free credits so using free Firebase. Steps y23-y25.
 - 2026-11-17: Mia video-call look (portrait frame, name tag, call timer, self-view in call) + 6 business-woman voice samples (y21); Pexels key step (y22).
 - 2026-11-17: Mia: drawn-on mouth removed (real footage only), slower gentler voice, 5 voice samples to pick (y21). Hourly hub check set up (2-way sync, catches up after usage runs out).
 - 2026-11-17: Deletion helper (c14 done): official privacy links found via web search on each app's own site / app-store listing for Match, OkCupid, Plenty of Fish, JDate, SilverSingles, Hily, Raya, Zoosk, The League, OurTime, happn, Facebook Dating, Seeking, Christian Mingle, HER, EliteSingles (27 of 29 apps covered). Gemini review applied: EU-only pages (Zoosk, EliteSingles) labelled "EU version", and a "Link not working? Tell us" email link on each. Gemini script updated to the current flash model. Not possible: Internet Archive and Ashley Madison / AdultFriendFinder block our tools.
