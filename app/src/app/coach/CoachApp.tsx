@@ -24,69 +24,21 @@ type Rec = { lang: string; interimResults: boolean; continuous: boolean; onresul
 // light-corrected frame by frame. Falls back to the plain video if anything can't load.
 type Pose = [number, number, number, number];
 type Lips = { u: number; box: [number, number, number, number]; cols: number; fps: number; visemes: string[]; bins: number[]; idle: Pose[]; talk: Pose[]; yIdle: number[]; yTalk: number[]; gIdle: number[][]; gTalk: number[][]; eIdle?: number[][]; eTalk?: number[][] };
-function VideoAvatar({ speaking, listening, mouth, canvasRef }: { speaking: boolean; listening: boolean; mouth?: (now: number) => [string, number][]; canvasRef?: React.RefObject<HTMLCanvasElement | null> }) {
-  const idle = useRef<HTMLVideoElement>(null); const talk = useRef<HTMLVideoElement>(null); const own = useRef<HTMLCanvasElement>(null); const cv = canvasRef ?? own;
-  // Honor 'reduce motion': her face stays still (poster frame), no mouth animation; captions still show.
+function VideoAvatar({ speaking, listening }: { speaking: boolean; listening: boolean; mouth?: unknown; canvasRef?: unknown }) {
+  // Only the actor's own real footage: calm listening clip, and her real talking clip while Mia speaks,
+  // with a soft cross-fade. No drawn-on mouth (Tiffany 2026-11-17: the pasted mouth looked fake).
+  const idle = useRef<HTMLVideoElement>(null); const talk = useRef<HTMLVideoElement>(null);
   const [rm, setRm] = useState(false); useEffect(() => { try { setRm(matchMedia('(prefers-reduced-motion: reduce)').matches); } catch { /* old browser */ } }, []);
-  if (rm) mouth = undefined;
-  const mouthRef = useRef(mouth); mouthRef.current = mouth; const speakRef = useRef(speaking); speakRef.current = speaking; const [ready, setReady] = useState(false);
   useEffect(() => { if (rm) idle.current?.pause(); else void idle.current?.play().catch(() => {}); }, [rm]);
   useEffect(() => {
-    const t = talk.current; if (!t || !mouthRef.current) return;
+    const t = talk.current; if (!t || rm) return;
     if (speaking) { if (t.paused) { try { t.currentTime = 4.48; } catch { /* not ready */ } } void t.play().catch(() => {}); }
-    else { const h = setTimeout(() => t.pause(), 600); return () => clearTimeout(h); }
-  }, [speaking]);
-  useEffect(() => {
-    if (!mouthRef.current) return;
-    let raf = 0; let dead = false; let L: Lips | null = null; const img = new Image(); let shown = false; let mix = 0; let last = performance.now(); let lastDraw = 0;
-    const sm = new Map<string, number>(); const off = document.createElement('canvas'); let o: CanvasRenderingContext2D | null = null;
-    void fetch(`${BASE}/coach/mia-lips.json`).then((r) => r.json()).then((j: Lips) => { L = j; off.width = j.box[2]; off.height = j.box[3]; o = off.getContext('2d', { willReadFrequently: true }); img.src = `${BASE}/coach/mia-mouths.webp`; }).catch(() => {});
-    const cell = (bin: number, name: string, a: number) => { const j = L!.visemes.indexOf(name); if (j < 0 || a <= 0) return; const [, , W, H] = L!.box; const n = bin * L!.visemes.length + j;
-      o!.globalAlpha = Math.min(1, a); o!.drawImage(img, (n % L!.cols) * W, Math.floor(n / L!.cols) * H, W, H, 0, 0, W, H); };
-    const draw = () => {
-      if (dead) return; raf = requestAnimationFrame(draw);
-      const t0 = performance.now(); if (t0 - lastDraw < 31) return; lastDraw = t0; // ~30 fps: plenty for lips, half the work on low-end phones
-      const vi = idle.current; const vt = talk.current; const c = cv.current; const g = c?.getContext('2d');
-      if (!vi || !vt || !c || !g || !L || !o || !img.complete || !img.naturalWidth || vi.readyState < 2) return;
-      if (!shown) { shown = true; setReady(true); }
-      const now = performance.now(); const dt = Math.min(100, now - last); last = now;
-      mix = Math.max(0, Math.min(1, mix + (speakRef.current && vt.readyState >= 2 ? 1 : -1) * dt / 300));
-      g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.drawImage(vi, 0, 0, c.width, c.height);
-      if (mix > 0) { g.globalAlpha = mix; g.drawImage(vt, 0, 0, c.width, c.height); g.globalAlpha = 1; }
-      const want = new Map((mouthRef.current?.(now) ?? []));
-      for (const k of new Set([...sm.keys(), ...want.keys()])) { const w = (sm.get(k) ?? 0) * 0.45 + (want.get(k) ?? 0) * 0.55; if (w < 0.02) sm.delete(k); else sm.set(k, w); }
-      const top = [...sm.entries()].sort((x, y) => y[1] - x[1]).slice(0, 2);
-      if (!top.length && mix === 0) return;
-      // Pose, head-turn version and lighting come from whichever body video is showing most.
-      const useTalk = mix >= 0.5; const vid = useTalk ? vt : vi; const poses = useTalk ? L.talk : L.idle;
-      const f = Math.min(poses.length - 1, Math.floor(vid.currentTime * L.fps)); const [nx, ny, ang, e] = poses[f];
-      const yaw = (useTalk ? L.yTalk : L.yIdle)[f]; const bin = L.bins.filter((b) => yaw > b).length; const gain = (useTalk ? L.gTalk : L.gIdle)[f];
-      const [X0, Y0, W, H] = L.box; o.setTransform(1, 0, 0, 1, 0, 0); o.clearRect(0, 0, W, H);
-      cell(bin, 'rest', mix); // while talking, her own footage's mouth is always covered
-      const total = Math.min(1, top.reduce((a, x) => a + x[1], 0));
-      top.forEach(([name, w], i) => cell(bin, name, i === 0 ? total : (total * w) / (top[0][1] + w)));
-      const id = o.getImageData(0, 0, W, H); const px = id.data;
-      for (let ch = 0; ch < 3; ch++) {
-        const [c0, cx, cy] = [gain[ch * 3], gain[ch * 3 + 1], gain[ch * 3 + 2]]; const ex = new Float32Array(W); for (let x = 0; x < W; x++) ex[x] = Math.exp(c0 + cx * (x / W - 0.5));
-        for (let y = 0; y < H; y++) { const ey = Math.exp(cy * (y / H - 0.5)); let p = y * W * 4 + ch; for (let x = 0; x < W; x++, p += 4) px[p] = px[p] * ex[x] * ey; }
-      }
-      // Pull the blend in from any side where hair falls beside her mouth in this frame.
-      const ed = (useTalk ? L.eTalk : L.eIdle)?.[f];
-      if (ed) { const el = Math.min(ed[0], -0.42); const er = Math.max(ed[1], 0.42);
-        for (let x = 0; x < W; x++) { const xu = x / L.u + X0; let a = Math.max(0, Math.min(1, (er + 0.03 - xu) / 0.08, (xu - el + 0.03) / 0.08)); if (a >= 1) continue; a = a * a * (3 - 2 * a);
-          for (let y = 0, p = x * 4 + 3; y < H; y++, p += W * 4) px[p] = px[p] * a; } }
-      o.putImageData(id, 0, 0);
-      const sc = c.width / 720; const k = (e / L.u) * sc;
-      g.setTransform(k * Math.cos(ang), k * Math.sin(ang), -k * Math.sin(ang), k * Math.cos(ang), nx * sc, ny * sc); g.globalAlpha = 1;
-      g.drawImage(off, X0 * L.u, Y0 * L.u);
-    };
-    raf = requestAnimationFrame(draw); return () => { dead = true; cancelAnimationFrame(raf); };
-  }, [cv]);
+    else { const h = setTimeout(() => t.pause(), 700); return () => clearTimeout(h); }
+  }, [speaking, rm]);
   return (
     <div className="absolute inset-0">
       <video ref={idle} src={`${BASE}/coach/mia-idle.mp4`} poster={`${BASE}/coach/mia-poster.jpg`} muted loop playsInline autoPlay preload="auto" className="absolute inset-0 h-full w-full object-cover" aria-hidden="true" />
-      {mouth && <video ref={talk} src={`${BASE}/coach/mia-talk.mp4`} muted loop playsInline preload="auto" className="absolute inset-0 h-full w-full object-cover opacity-0" aria-hidden="true" />}
-      {mouth && <canvas ref={cv} width={720} height={720} className={`absolute inset-0 h-full w-full object-cover ${ready ? '' : 'opacity-0'}`} aria-hidden="true" />}
+      {!rm && <video ref={talk} data-talk="" src={`${BASE}/coach/mia-talk.mp4`} muted loop playsInline preload="auto" className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${speaking ? 'opacity-100' : 'opacity-0'}`} aria-hidden="true" />}
       {listening && <span className="absolute left-3 top-3 rounded-full bg-night/70 px-3 py-1 text-xs text-mango">● listening</span>}
     </div>
   );
@@ -131,7 +83,7 @@ export default function CoachApp() {
     if (!session.current) session.current = { id: `s-${Date.now()}`, startedAt: new Date().toISOString() };
     if (recording.current) { const p = await recording.current.stop(); if (p) parts.current = [...parts.current, p]; recording.current = null; }
     recording.current = await startRecording({ kind, key: `${session.current.id}-${parts.current.length + 1}`, coachAudio: voice.current?.stream() ?? null,
-      frame: () => { return { coach: faceCanvas.current ?? faceBox.current?.querySelector('video') ?? null, cam: video.current, caption: caption.current }; } });
+      frame: () => { return { coach: faceCanvas.current ?? (speakingRef.current ? faceBox.current?.querySelector<HTMLVideoElement>('video[data-talk]') : null) ?? faceBox.current?.querySelector('video') ?? null, cam: video.current, caption: caption.current }; } });
     setFormat(kind);
   };
   const finishRecording = async () => {
@@ -146,7 +98,7 @@ export default function CoachApp() {
     if (voice.current) { voice.current.speak(text, es, () => setSpeaking(true), () => setSpeaking(false)); return; }
     if (!('speechSynthesis' in window)) return;
     speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text); u.lang = es ? 'es-US' : 'en-US'; u.rate = 1; u.pitch = 1.05;
+    const u = new SpeechSynthesisUtterance(text); u.lang = es ? 'es-US' : 'en-US'; u.rate = 0.9; u.pitch = 1;
     const vs = speechSynthesis.getVoices().filter((v) => v.lang.startsWith(es ? 'es' : 'en'));
     const v = vs.find((x) => /female|samantha|victoria|ava|allison|zira|jenny|aria|paulina|monica|google us english|google español/i.test(x.name)) ?? vs[0]; if (v) u.voice = v;
     u.onstart = () => setSpeaking(true); u.onend = () => setSpeaking(false); u.onerror = () => setSpeaking(false);
