@@ -48,6 +48,7 @@ Why: counselors and pastors who work with engaged couples are the fastest free w
 | Design look (green & pink) | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/DESIGN-SYSTEM.md |
 
 ## 📝 Done log (newest first)
+- 2026-11-17: Invite limit live (0012 applied, verified). Hub site address approved for sign-in. Front page Sign in merged to main (publishes once Firebase key is in). Mia voice 11 confirmed.
 - 2026-11-17: Hub as its own site built (marriage-mode-hub.web.app, Marriage Mode look, Sign in with Google) + front page Sign in link; Netlify out of free credits so using free Firebase. Steps y23-y25.
 - 2026-11-17: Mia video-call look (portrait frame, name tag, call timer, self-view in call) + 6 business-woman voice samples (y21); Pexels key step (y22).
 - 2026-11-17: Mia: drawn-on mouth removed (real footage only), slower gentler voice, 5 voice samples to pick (y21). Hourly hub check set up (2-way sync, catches up after usage runs out).
