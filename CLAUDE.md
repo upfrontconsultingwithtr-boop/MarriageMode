@@ -52,6 +52,9 @@ update tasks with `scripts/hub.py task <id> '<json>'` (status todo|doing|blocked
 owner "you" tasks get `steps` as dummy instructions; post reviews get `preview`). Also append
 finished items to the HUB.md Done log. Tiffany and her partner always get every product free.
 
+## Hourly hub check (Tiffany, 2026-11-17)
+A scheduled task fires into this session every hour at :15 to read the hub inbox and act. Empty inbox: stop at once.
+
 ## Standing rule: never wait (Tiffany, 2026-11-15)
 If Tiffany hasn't answered or a step is blocked on her, don't stop: put her
 step in the hub and move straight on to the next item Claude can do alone.
