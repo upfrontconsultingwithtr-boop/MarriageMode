@@ -7,7 +7,9 @@ import './globals.css';
 import { BASE } from '@/lib/base';
 import { PREFS_BOOT } from '@/lib/prefs';
 
-export const metadata: Metadata = {
+// Hub-only build (NEXT_PUBLIC_HUB_SITE=1): the founders' private hub as its own site, Upfront branding, no Marriage Mode menus.
+const HUB = process.env.NEXT_PUBLIC_HUB_SITE === '1';
+export const metadata: Metadata = HUB ? { title: 'Marriage Mode Hub · Upfront Consulting with Tiff & Reco LLC', robots: { index: false, follow: false } } : {
   title: 'Marriage Mode: close your dating chapter, privately',
   description: 'A free, private checklist to close old dating accounts, stop the emails and cancel the billing, so nothing old surprises your relationship. By Upfront Consulting with Tiff & Reco LLC.',
   icons: { icon: `${BASE}/icon.svg`, apple: `${BASE}/icon-192.png` },
@@ -22,6 +24,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <head><script dangerouslySetInnerHTML={{ __html: PREFS_BOOT }} /></head>
       <body className="min-h-screen overflow-x-hidden antialiased print:bg-white">
+        {HUB ? (
+          <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-night/75 backdrop-blur-xl"><div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3"><span className="flex items-center gap-2.5 font-display text-lg font-bold"><img src={`${BASE}/icon.svg`} alt="" width={30} height={30} /> Marriage Mode Hub</span><a href="https://upfrontconsultingwithtiffandreco.com/" className="text-sm text-ink/60 hover:text-ink">Upfront Consulting ↗</a></div></header>
+        ) : (<>
         <header className="print:hidden sticky top-0 z-50 border-b border-white/[0.06] bg-night/75 backdrop-blur-xl">
           <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3" aria-label="Main">
             <Link prefetch={false} href="/" className="flex items-center gap-2.5 whitespace-nowrap font-display text-lg font-bold tracking-tight">
@@ -49,7 +54,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
           </nav>
         </header>
+        </>)}
         <main>{children}</main>
+        {HUB ? (
+          <footer className="mt-24 border-t border-white/[0.06] py-10 text-center text-sm text-ink/60">Marriage Mode Hub · private · by <strong className="text-ink/85">Upfront Consulting with Tiff &amp; Reco LLC</strong></footer>
+        ) : (<>
         <script dangerouslySetInnerHTML={{ __html: `if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('${BASE}/sw.js',{scope:'${BASE}/'}).catch(function(){})})}` }} />
         <script data-goatcounter-settings={JSON.stringify({ allow_local: false })} data-goatcounter="https://upfront-with-tr.goatcounter.com/count" async src="https://gc.zgo.at/count.js" />
         <footer className="print:hidden relative mt-24 border-t border-white/[0.06] py-10 text-center text-sm text-ink/60">
@@ -67,6 +76,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Link prefetch={false} href="/es/" hrefLang="es" className="hover:text-teal">Español</Link>
           </p>
         </footer>
+        </>)}
       </body>
     </html>
   );

@@ -38,6 +38,12 @@ export async function push(state: AuditState): Promise<boolean> {
   return !error;
 }
 
+// Google sign-in (same Google account as the Upfront Consulting login). Needs Google enabled in Supabase Auth.
+export async function signInGoogle(redirectTo: string): Promise<string | null> {
+  const c = cloud(); if (!c) return 'not configured';
+  const { error } = await c.auth.signInWithOAuth({ provider: 'google', options: { redirectTo } });
+  return error ? error.message : null;
+}
 export async function signOut() { await cloud()?.auth.signOut(); }
 
 // Merge two audits: union of apps; a step counts as done if either copy has it done.

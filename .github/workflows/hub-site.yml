@@ -1,0 +1,39 @@
+name: Publish the Marriage Mode Hub (own private site, free, Firebase)
+# Builds only the founders' hub (Marriage Mode look, Google sign-in) and publishes it to
+# https://marriage-mode-hub.web.app . Needs the FIREBASE_SERVICE_ACCOUNT secret; skips until it is set.
+on:
+  push: { branches: [claude/nice-einstein-h76zzg] }
+  workflow_dispatch:
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: app } }
+    steps:
+      - uses: actions/checkout@v4
+      - id: ok
+        env: { S: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' }
+        run: if [ -n "$S" ]; then echo go=1 >> "$GITHUB_OUTPUT"; else echo "Secret not set yet; skipping."; fi
+      - if: steps.ok.outputs.go == '1'
+        uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: app/package-lock.json }
+      - if: steps.ok.outputs.go == '1'
+        run: npm ci && npx next build
+        env:
+          NEXT_PUBLIC_HUB_SITE: '1'
+          SITE_URL: https://marriage-mode-hub.web.app
+          NEXT_PUBLIC_SUPABASE_URL: https://wdokqitjoeellkwbtdso.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_6TLLpaZKPtfYJmA1IQDpEA_VJB4ehaz
+          NEXT_PUBLIC_FIREBASE_API_KEY: AIzaSyCl_J85xYkELVHr0KJcobbBRrFt8VRql5Q
+      - if: steps.ok.outputs.go == '1'
+        name: Keep only the hub
+        run: |
+          mkdir -p ../hub-site && cp -r out/_next out/founders out/icon.svg out/icon-192.png ../hub-site/
+          printf '<!doctype html><meta charset="utf-8"><meta name="robots" content="noindex"><title>Marriage Mode Hub</title><script>location.replace("/founders/"+location.search+location.hash)</script><a href="/founders/">Open the Marriage Mode Hub</a>\n' > ../hub-site/index.html
+          printf 'User-agent: *\nDisallow: /\n' > ../hub-site/robots.txt
+          printf '{"hosting":{"site":"marriage-mode-hub","public":"hub-site","headers":[{"source":"**","headers":[{"key":"X-Robots-Tag","value":"noindex"}]}]}}' > ../firebase.hub.json
+      - if: steps.ok.outputs.go == '1'
+        working-directory: .
+        env: { SA: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' }
+        run: |
+          echo "$SA" > "$RUNNER_TEMP/sa.json"
+          GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json" npx -y firebase-tools@13 deploy --only hosting --config firebase.hub.json --project upfront-command-center --non-interactive
