@@ -60,6 +60,12 @@ update tasks with `scripts/hub.py task <id> '<json>'` (status todo|doing|blocked
 owner "you" tasks get `steps` as dummy instructions; post reviews get `preview`). Also append
 finished items to the HUB.md Done log. Tiffany and her partner always get every product free.
 
+## Publishing Upfront sites from the cloud (2026-11-17)
+The FIREBASE_SERVICE_ACCOUNT secret (MarriageMode repo) lets Claude publish to Firebase project upfront-command-center.
+`.github/workflows/publish-one-file.yml` (inputs site, path, src) clones the LIVE version and swaps exactly one file,
+so nothing else can change; copies of patched live files live in `ops/`. Used for the Upfront front page Sign in and
+the HQ /v2/index.html hub link. `firebase-auth-setup.yml` manages Firebase Auth authorized domains.
+
 ## Hourly hub check (Tiffany, 2026-11-17)
 A scheduled task fires into this session every hour at :15 to read the hub inbox and act. Empty inbox: stop at once.
 

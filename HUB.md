@@ -48,6 +48,7 @@ Why: counselors and pastors who work with engaged couples are the fastest free w
 | Design look (green & pink) | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/DESIGN-SYSTEM.md |
 
 ## 📝 Done log (newest first)
+- 2026-11-17: Upfront HQ 'Marriage Mode hub' links now open marriage-mode-hub.web.app (only /v2/index.html changed).
 - 2026-11-17: Upfront front page Sign in link live (published only index.html by cloning the live Firebase version; other pages verified unchanged).
 - 2026-11-17: Hub Google sign-in fixed without Tiffany: Firebase Google sign-in (as Upfront HQ) + Supabase ID-token sign-in; hub domains added to Firebase Auth via the service-account workflow. Popup tested live.
 - 2026-11-17: tiffany@upfrontconsultingwithtiffandreco.com added to the founders list (hub sign-in).
