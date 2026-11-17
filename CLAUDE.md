@@ -51,7 +51,7 @@ browser, free, with no sign-up for the core audit. Any future AI feature runs
 on our side (capped, approved spend) and the product still works if it's off.
 
 ## Standing rule: the live Hub page (Tiffany, 2026-11-15, moved off Claude)
-Tiffany's hub is LIVE on the site: https://upfrontconsultingwithtr-boop.github.io/MarriageMode/founders/
+Tiffany's hub has its OWN site: https://marriage-mode-hub.web.app (Firebase, built by .github/workflows/hub-site.yml from the hub-only build; old copy still at https://upfrontconsultingwithtr-boop.github.io/MarriageMode/founders/)
 (founders-only sign-in; data in Supabase `app.hub_tasks` / `app.hub_messages`, migration 0008).
 Upfront HQ links to it. The old Claude artifact hub is retired (read-only backup).
 At the start of every session run `python3 scripts/hub.py inbox` and `python3 scripts/hub.py tasks`

@@ -78,6 +78,7 @@ export default function FounderHub() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
+      {process.env.NEXT_PUBLIC_HUB_SITE !== '1' && <a href="https://marriage-mode-hub.web.app/" className="mb-6 block rounded-2xl bg-mango/15 px-4 py-3 text-sm ring-1 ring-mango/40">Your hub now has its own private site: <b>marriage-mode-hub.web.app</b> → open it (same sign-in, same data)</a>}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div><p className="font-mono text-[11px] uppercase tracking-[0.25em] text-teal">Your hub · Marriage Mode</p><h1 className="mt-1 text-3xl font-bold">Good to see you</h1><p className="text-sm text-ink/60">Live: updates as Claude works. Claude checks your messages every hour (at :15) and replies here. If Claude is out of usage, the next check after it returns catches up on everything.</p></div>
         <button onClick={() => void signOut()} className="min-h-11 rounded-full px-4 text-sm ring-1 ring-white/15">Sign out</button>
