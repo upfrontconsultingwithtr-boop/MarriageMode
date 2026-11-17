@@ -31,6 +31,13 @@ const OFFICIAL: Record<string, string> = {
   Badoo: 'https://badoo.com/privacy',
   'Coffee Meets Bagel': 'https://www.coffeemeetsbagel.com/privacy-policy',
   Boo: 'https://boo.world/privacy-policy',
+  Match: 'https://www.match.com/dnws/legalpolicy/privacypolicy',
+  OkCupid: 'https://help.okcupid.com/hc/en-us/articles/6637896419213',
+  'Plenty of Fish': 'https://policies.pof.com/privacypolicy', // pof.com/privacy redirects here
+  JDate: 'https://about.jdate.com/legal-en/privacy-policy/',
+  SilverSingles: 'https://www.silversingles.com/privacyPolicy',
+  Hily: 'https://hily.com/your-privacy-rights/',
+  Raya: 'https://www.raya.app/privacypolicy',
 };
 
 export function letter(app: string, name: string, email: string, user: string) {
