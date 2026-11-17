@@ -72,11 +72,6 @@ export default function FounderHub() {
   const done = tasks.filter((t) => t.status === 'done').sort((a, b) => String(b.doneAt ?? '').localeCompare(String(a.doneAt ?? '')));
   const general = msgs.filter((m) => !m.taskId).slice(-60);
   const thread = (id: string) => msgs.filter((m) => m.taskId === id).slice(-4);
-  const Reply = ({ t, ph }: { t: Task; ph: string }) => { const [v, setV] = useState(''); return (
-    <form onSubmit={async (e) => { e.preventDefault(); if (await send(v, t)) setV(''); }} className="mt-2 flex gap-2">
-      <input value={v} onChange={(e) => setV(e.target.value)} placeholder={ph} aria-label={`Reply about ${t.title}`} className="min-h-11 min-w-0 flex-1 rounded-full border border-white/15 bg-night/60 px-4 text-sm" />
-      <button className="min-h-11 rounded-full px-4 text-sm ring-1 ring-white/15">Send</button>
-    </form>); };
   const Thread = ({ id }: { id: string }) => <>{thread(id).map((m) => <p key={m.id} className={`mt-1 rounded-xl px-3 py-1.5 text-xs ${m.from === 'you' ? 'bg-mango/10' : 'bg-lagoon/10'}`}><b>{m.from === 'you' ? 'You: ' : 'Claude: '}</b><Linked text={m.text} /></p>)}</>;
 
   return (
@@ -96,7 +91,7 @@ export default function FounderHub() {
             {t.preview?.image && <img src={t.preview.image} alt={t.preview.alt ?? 'Post picture'} className="w-full" />}
             <div className="p-4"><p className="font-semibold">{t.title}</p><p className="text-xs text-ink/55">{t.preview?.meta}</p><p className="mt-2 max-h-60 overflow-y-auto whitespace-pre-line text-sm"><Linked text={t.preview?.text ?? ''} /></p>
               <button onClick={() => void send('approve', t)} className="glow-mango mt-3 min-h-11 rounded-full bg-mango px-5 text-sm font-semibold text-night">Approve this post</button>
-              <Thread id={t.id} /><Reply t={t} ph="Want a change? Type it here…" /></div>
+              <Thread id={t.id} /><Reply send={send} t={t} ph="Want a change? Type it here…" /></div>
           </div>))}</div></section>}
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2 [&>*]:min-w-0">
@@ -109,10 +104,10 @@ export default function FounderHub() {
                   {t.steps && <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm">{t.steps.map((s, j) => <li key={j}><Linked text={s} /></li>)}</ol>}
                 </details>
                 <button onClick={() => void markDone(t)} className="mt-2 min-h-11 rounded-full bg-palm/15 px-4 text-sm font-semibold text-palm ring-1 ring-palm/40">I did this</button>
-                <Thread id={t.id} /><Reply t={t} ph="Type here: done, a question, or help…" />
+                <Thread id={t.id} /><Reply send={send} t={t} ph="Type here: done, a question, or help…" />
               </li>))}</ul></section>
           <section className="glass p-5"><h2 className="text-lg font-semibold">Claude’s work, in priority order</h2>
-            <ul className="mt-3 space-y-2">{claude.map((t) => <li key={t.id} className="rounded-xl bg-white/[0.03] p-3 text-sm ring-1 ring-white/[0.07]"><b>{t.title}</b> <span className="ml-1 rounded-full bg-white/10 px-2 py-0.5 text-[11px]">{PILL[t.status] ?? 'To do'}</span>{t.why && <p className="mt-1 text-ink/60"><Linked text={t.why} /></p>}<Thread id={t.id} /><Reply t={t} ph="Tell Claude anything about this…" /></li>)}</ul></section>
+            <ul className="mt-3 space-y-2">{claude.map((t) => <li key={t.id} className="rounded-xl bg-white/[0.03] p-3 text-sm ring-1 ring-white/[0.07]"><b>{t.title}</b> <span className="ml-1 rounded-full bg-white/10 px-2 py-0.5 text-[11px]">{PILL[t.status] ?? 'To do'}</span>{t.why && <p className="mt-1 text-ink/60"><Linked text={t.why} /></p>}<Thread id={t.id} /><Reply send={send} t={t} ph="Tell Claude anything about this…" /></li>)}</ul></section>
           <section className="glass p-5"><details><summary className="cursor-pointer text-lg font-semibold">History ({done.length})</summary>
             <ul className="mt-2 space-y-1 text-sm">{done.map((t) => <li key={t.id}><span className="text-ink/50">{t.doneAt ? new Date(t.doneAt).toLocaleDateString() : ''}</span> · {t.title}</li>)}</ul></details></section>
         </div>
@@ -126,4 +121,14 @@ export default function FounderHub() {
       </div>
     </div>
   );
+}
+
+// Defined outside the hub so live refreshes never reset what's being typed.
+function Reply({ t, ph, send }: { t: Task; ph: string; send: (text: string, task?: Task) => Promise<boolean> }) {
+  const [v, setV] = useState('');
+  return (
+    <form onSubmit={async (e) => { e.preventDefault(); if (await send(v, t)) setV(''); }} className="mt-2 flex gap-2">
+      <input value={v} onChange={(e) => setV(e.target.value)} placeholder={ph} aria-label={`Reply about ${t.title}`} className="min-h-11 min-w-0 flex-1 rounded-full border border-white/15 bg-night/60 px-4 text-sm" />
+      <button className="min-h-11 rounded-full px-4 text-sm ring-1 ring-white/15">Send</button>
+    </form>);
 }
