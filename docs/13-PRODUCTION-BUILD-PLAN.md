@@ -29,7 +29,7 @@ never edit production by hand. Releases tagged `v0.x` with notes in `CHANGELOG.m
 
 ## 4. Security checklist before taking payments
 
-- [ ] RLS test covers every table (CI fails otherwise)
+- [x] RLS test covers every table (CI fails otherwise): catch-all guards added 2026-11-17
 - [ ] Service role key only in Edge Function secrets
 - [ ] Stripe webhook signature verified
 - [ ] Rate limits on auth and invites

@@ -262,5 +262,14 @@ set local role anon;
 select app.push_forget('00000000-0000-0000-0000-0000000000f1');
 reset role;
 select pg_temp.check((select count(*) from app.push_subs) = 0, 'right token deletes instantly');
+-- Catch-all guards: no table can ship without row-level security, and only
+-- the reviewed public catalogs may be read without signing in.
+reset role;
+select pg_temp.check(not exists (select 1 from pg_class c join pg_namespace n on n.oid = c.relnamespace
+  where c.relkind in ('r','p') and n.nspname in ('app','ops') and not c.relrowsecurity),
+  'every app/ops table has row-level security on');
+select pg_temp.check(coalesce((select string_agg(distinct schemaname||'.'||tablename, ',' order by schemaname||'.'||tablename) from pg_policies
+  where schemaname in ('app','ops') and roles && array['anon','public']::name[] and cmd in ('SELECT','ALL')), '')
+  = 'app.counselors,app.platforms', 'only approved counselors and the app catalog are public');
 rollback;
 \echo RLS_ISOLATION_ALL_PASSED
