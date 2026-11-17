@@ -23,6 +23,7 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_6TLLpaZKPtfYJmA1IQDpEA_VJB4ehaz
           NEXT_PUBLIC_KIT_URL: https://payhip.com/b/nVh3D
           NEXT_PUBLIC_FIREBASE_API_KEY: AIzaSyCl_J85xYkELVHr0KJcobbBRrFt8VRql5Q
+          NEXT_PUBLIC_GMAIL_SEND: "1"
       - run: touch out/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with: { path: app/out }
