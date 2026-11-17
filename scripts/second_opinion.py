@@ -4,7 +4,7 @@ Usage: python3 scripts/second_opinion.py "question"   (or pipe text on stdin)
 Never send customer data: only plans, copy and code. The key is read live, never stored."""
 import json, os, subprocess, sys, urllib.error, urllib.request
 PROJ, KEY_ID = 'upfront-dashkit-test', 'ab13227a-70f4-473b-9d23-f0118ccd2f12'
-MODELS = [os.environ['GEMINI_MODEL']] if os.environ.get('GEMINI_MODEL') else ['gemini-pro-latest', 'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-flash-lite-latest']
+MODELS = [os.environ['GEMINI_MODEL']] if os.environ.get('GEMINI_MODEL') else ['gemini-pro-latest', 'gemini-flash-latest', 'gemini-3.8-flash', 'gemini-flash-lite-latest']
 
 def key():
     if os.environ.get('GEMINI_API_KEY'): return os.environ['GEMINI_API_KEY']

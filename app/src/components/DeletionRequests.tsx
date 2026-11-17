@@ -19,6 +19,8 @@ const EMAIL: Record<string, string> = {
   Boo: 'hello@boo.world',           // boo.world/privacy-policy: "You may request a copy or file of your personal information by contacting hello@boo.world"
 };
 
+// Apps whose only published full policy is their EU version: labelled so US users aren't misled.
+const EU_ONLY = new Set(['Zoosk', 'EliteSingles']);
 const OFFICIAL: Record<string, string> = {
   Bumble: 'https://bumble.com/en/privacy',
   eharmony: 'https://www.eharmony.com/about/privacy/',
@@ -165,7 +167,8 @@ export default function DeletionRequests({ apps, state, setState }: Props) {
               <button onClick={() => setOpen(open === a ? null : a)} className="min-h-9 rounded-full px-3 text-xs ring-1 ring-white/15">{open === a ? t('Hide letter', 'Ocultar carta') : t('See letter', 'Ver carta')}</button>
               <button onClick={() => copy(a)} className="min-h-9 rounded-full bg-lagoon/15 px-3 text-xs ring-1 ring-lagoon/50">{copied === a ? t('Copied ✓', 'Copiada ✓') : t('Copy letter', 'Copiar carta')}</button>
               {EMAIL[a] && <a href={`mailto:${EMAIL[a]}?subject=${encodeURIComponent('Request to delete my account and personal data')}&body=${encodeURIComponent(letter(a, name, email, user).replace(/^Subject:.*\n\n/, ''))}`} onClick={() => track('deletion-request-email')} className="inline-flex min-h-9 items-center rounded-full bg-mango px-3 text-xs font-semibold text-night">{t('Send from my email ✉', 'Enviar desde mi correo ✉')}</a>}
-              <a href={OFFICIAL[a] ?? 'https://www.google.com/search?q=' + encodeURIComponent(`${a} official privacy request delete my personal data`)} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-9 items-center rounded-full px-3 text-xs ring-1 ring-white/15">{t(`Open ${a}'s privacy page ↗`, `Abrir la página de privacidad de ${a} ↗`)}</a>
+              <a href={OFFICIAL[a] ?? 'https://www.google.com/search?q=' + encodeURIComponent(`${a} official privacy request delete my personal data`)} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-9 items-center rounded-full px-3 text-xs ring-1 ring-white/15">{t(`Open ${a}'s privacy page${EU_ONLY.has(a) ? ' (EU version)' : ''} ↗`, `Abrir la página de privacidad de ${a}${EU_ONLY.has(a) ? ' (versión UE)' : ''} ↗`)}</a>
+              {OFFICIAL[a] && <a href={`mailto:upfrontconsultingwithtr@gmail.com?subject=${encodeURIComponent(`Marriage Mode: ${a} privacy link not working`)}`} className="inline-flex min-h-9 items-center px-2 text-xs text-ink/50 underline">{t('Link not working? Tell us', '¿No funciona el enlace? Avísanos')}</a>}
               <button onClick={() => markSent(a)} aria-pressed={!!sent[a]} className={`min-h-9 rounded-full px-3 text-xs ring-1 ${sent[a] ? 'bg-palm/15 text-palm ring-palm/40' : 'ring-white/15'}`}>{sent[a] ? t('Sent ✓', 'Enviada ✓') : t('I sent it', 'La envié')}</button>
             </span>
           </div>
