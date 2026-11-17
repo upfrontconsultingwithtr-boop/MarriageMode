@@ -38,6 +38,10 @@ export async function push(state: AuditState): Promise<boolean> {
   return !error;
 }
 
+// True once Google is switched on in Supabase Auth (public settings endpoint), so the button only shows when it works.
+export async function googleEnabled(): Promise<boolean> {
+  try { const r = await fetch(`${URL}/auth/v1/settings`, { headers: { apikey: KEY } }); const j = await r.json(); return Boolean(j?.external?.google); } catch { return false; }
+}
 // Google sign-in (same Google account as the Upfront Consulting login). Needs Google enabled in Supabase Auth.
 export async function signInGoogle(redirectTo: string): Promise<string | null> {
   const c = cloud(); if (!c) return 'not configured';
