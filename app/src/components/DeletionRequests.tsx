@@ -38,6 +38,15 @@ const OFFICIAL: Record<string, string> = {
   SilverSingles: 'https://www.silversingles.com/privacyPolicy',
   Hily: 'https://hily.com/your-privacy-rights/',
   Raya: 'https://www.raya.app/privacypolicy',
+  Zoosk: 'https://www.zoosk.com/date-mix/legal-privacy-en_eu/', // Zoosk's only published full policy
+  'The League': 'https://love.theleague.com/api/v1/policy/privacy-policy?raw=true', // current (Match Group) version
+  OurTime: 'https://help.ourtime.com/hc/en-us/articles/6619212258459-How-do-I-request-a-copy-of-my-personal-data',
+  happn: 'https://www.happn.com/legal/trust-charter', // access, correction, deletion rights
+  'Facebook Dating': 'https://www.facebook.com/legal/terms/dating/datause', // Meta's Dating privacy policy
+  Seeking: 'https://www.seeking.com/faq', // "How do I delete my account?"
+  'Christian Mingle': 'https://about.christianmingle.com/en/legal-en/privacy-policy/', // linked from its App Store / Google Play listings
+  HER: 'https://weareher.com/privacy', // linked from its App Store listing
+  EliteSingles: 'https://www.elitesingles.ie/privacy', // official EliteSingles policy (closing an account triggers deletion)
 };
 
 export function letter(app: string, name: string, email: string, user: string) {
