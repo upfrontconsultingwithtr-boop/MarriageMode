@@ -69,6 +69,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Link prefetch={false} href="/worksheet/" className="hover:text-teal">Couples worksheet</Link>
             <Link prefetch={false} href="/engagement-checklist/" className="hover:text-teal">Engagement checklist</Link>
             <Link prefetch={false} href="/privacy/" className="hover:text-teal">Privacy</Link>
+            <Link prefetch={false} href="/terms/" className="hover:text-teal">Terms</Link>
             <Link prefetch={false} href="/safety/" className="hover:text-teal">Safety &amp; consent</Link>
             <Link prefetch={false} href="/coach/" className="hover:text-teal">AI coach</Link> · <Link prefetch={false} href="/counselors/" className="hover:text-teal">Real counselors</Link>
             <Link prefetch={false} href="/lessons/" className="hover:text-teal">Lessons</Link>
