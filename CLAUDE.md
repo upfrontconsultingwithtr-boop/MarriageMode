@@ -68,6 +68,7 @@ the HQ /v2/index.html hub link. `firebase-auth-setup.yml` manages Firebase Auth 
 
 ## Hourly hub check (Tiffany, 2026-11-17)
 A scheduled task fires into this session every hour at :15 to read the hub inbox and act. Empty inbox: stop at once.
+If a message has `images`, run `python3 scripts/hub.py img <path> <scratchpad file>` and Read the file to see the picture.
 
 ## Standing rule: never wait (Tiffany, 2026-11-15)
 If Tiffany hasn't answered or a step is blocked on her, don't stop: put her

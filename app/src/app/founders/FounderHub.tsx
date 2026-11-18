@@ -7,7 +7,7 @@ import FounderCounselors from './FounderCounselors';
 // Tiffany & Reco's founder hub, live on the Marriage Mode site (not hosted by Claude).
 // Founders only: data lives in app.hub_tasks / app.hub_messages behind row-level security.
 type Task = { id: string; title: string; why?: string; owner: 'you' | 'claude'; status: string; priority: number; steps?: string[]; doneAt?: string; preview?: { image?: string; alt?: string; meta?: string; text?: string } };
-type Msg = { id: string; from: string; text: string; at: string; taskId?: string; handled?: boolean };
+type Msg = { id: string; from: string; text: string; at: string; taskId?: string; handled?: boolean; images?: string[] };
 
 function Linked({ text }: { text: string }) {
   return <>{String(text).split(/(https?:\/\/[^\s)]+)/g).map((p, i) => (i % 2 ? <a key={i} href={p} target="_blank" rel="noopener noreferrer" className="break-all text-teal underline">{p}</a> : <span key={i}>{p}</span>))}</>;
@@ -17,7 +17,7 @@ const PILL: Record<string, string> = { todo: 'To do', doing: 'Working', blocked:
 export default function FounderHub() {
   const [state, setState] = useState<'loading' | 'signin' | 'denied' | 'ok'>('loading');
   const [email, setEmail] = useState(''); const [sent, setSent] = useState('');
-  const [tasks, setTasks] = useState<Task[]>([]); const [msgs, setMsgs] = useState<Msg[]>([]); const [chat, setChat] = useState(''); const [gOn, setGOn] = useState(false);
+  const [tasks, setTasks] = useState<Task[]>([]); const [msgs, setMsgs] = useState<Msg[]>([]); const [gOn, setGOn] = useState(false);
   useEffect(() => { void googleEnabled().then(setGOn); }, []);
 
   const load = useCallback(async () => {
@@ -45,9 +45,9 @@ export default function FounderHub() {
     return () => { void c.removeChannel(ch); clearInterval(i); };
   }, [state, load]);
 
-  const send = async (text: string, task?: Task) => {
-    const v = text.trim(); if (!v) return false;
-    const { error } = await cloud()!.from('hub_messages').insert({ data: { from: 'you', text: task ? `About “${task.title}”: ${v}` : v, at: new Date().toISOString(), handled: false, ...(task ? { taskId: task.id } : {}) } });
+  const send = async (text: string, task?: Task, images: string[] = []) => {
+    const v = text.trim() || (images.length ? '(picture)' : ''); if (!v) return false;
+    const { error } = await cloud()!.from('hub_messages').insert({ data: { from: 'you', text: task ? `About “${task.title}”: ${v}` : v, at: new Date().toISOString(), handled: false, ...(task ? { taskId: task.id } : {}), ...(images.length ? { images } : {}) } });
     if (!error) await load(); return !error;
   };
   const markDone = async (t: Task) => { const { id, ...data } = t; await cloud()!.from('hub_tasks').update({ data: { ...data, status: 'done', doneAt: new Date().toISOString() }, updated_at: new Date().toISOString() }).eq('id', id); await send('I did this ✓', t); };
@@ -75,7 +75,7 @@ export default function FounderHub() {
   const done = tasks.filter((t) => t.status === 'done').sort((a, b) => String(b.doneAt ?? '').localeCompare(String(a.doneAt ?? '')));
   const general = msgs.filter((m) => !m.taskId).slice(-60);
   const thread = (id: string) => msgs.filter((m) => m.taskId === id).slice(-4);
-  const Thread = ({ id }: { id: string }) => <>{thread(id).map((m) => <p key={m.id} className={`mt-1 rounded-xl px-3 py-1.5 text-xs ${m.from === 'you' ? 'bg-mango/10' : 'bg-lagoon/10'}`}><b>{m.from === 'you' ? 'You: ' : 'Claude: '}</b><Linked text={m.text} /></p>)}</>;
+  const Thread = ({ id }: { id: string }) => <>{thread(id).map((m) => <p key={m.id} className={`mt-1 rounded-xl px-3 py-1.5 text-xs ${m.from === 'you' ? 'bg-mango/10' : 'bg-lagoon/10'}`}><b>{m.from === 'you' ? 'You: ' : 'Claude: '}</b><Linked text={m.text} />{m.images && <HubImages paths={m.images} />}</p>)}</>;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
@@ -95,7 +95,7 @@ export default function FounderHub() {
             {t.preview?.image && <img src={t.preview.image} alt={t.preview.alt ?? 'Post picture'} className="w-full" />}
             <div className="p-4"><p className="font-semibold">{t.title}</p><p className="text-xs text-ink/55">{t.preview?.meta}</p><p className="mt-2 max-h-60 overflow-y-auto whitespace-pre-line text-sm"><Linked text={t.preview?.text ?? ''} /></p>
               <button onClick={() => void send('approve', t)} className="glow-mango mt-3 min-h-11 rounded-full bg-mango px-5 text-sm font-semibold text-night">Approve this post</button>
-              <Thread id={t.id} /><Reply send={send} t={t} ph="Want a change? Type it here…" /></div>
+              <Thread id={t.id} /><Composer send={(x, imgs) => send(x, t, imgs)} ph="Want a change? Type it here…" /></div>
           </div>))}</div></section>}
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2 [&>*]:min-w-0">
@@ -108,31 +108,50 @@ export default function FounderHub() {
                   {t.steps && <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm">{t.steps.map((s, j) => <li key={j}><Linked text={s} /></li>)}</ol>}
                 </details>
                 <button onClick={() => void markDone(t)} className="mt-2 min-h-11 rounded-full bg-palm/15 px-4 text-sm font-semibold text-palm ring-1 ring-palm/40">I did this</button>
-                <Thread id={t.id} /><Reply send={send} t={t} ph="Type here: done, a question, or help…" />
+                <Thread id={t.id} /><Composer send={(x, imgs) => send(x, t, imgs)} ph="Type here: done, a question, or help…" />
               </li>))}</ul></section>
           <section className="glass p-5"><h2 className="text-lg font-semibold">Claude’s work, in priority order</h2>
-            <ul className="mt-3 space-y-2">{claude.map((t) => <li key={t.id} className="rounded-xl bg-white/[0.03] p-3 text-sm ring-1 ring-white/[0.07]"><b>{t.title}</b> <span className="ml-1 rounded-full bg-white/10 px-2 py-0.5 text-[11px]">{PILL[t.status] ?? 'To do'}</span>{t.why && <p className="mt-1 text-ink/60"><Linked text={t.why} /></p>}<Thread id={t.id} /><Reply send={send} t={t} ph="Tell Claude anything about this…" /></li>)}</ul></section>
+            <ul className="mt-3 space-y-2">{claude.map((t) => <li key={t.id} className="rounded-xl bg-white/[0.03] p-3 text-sm ring-1 ring-white/[0.07]"><b>{t.title}</b> <span className="ml-1 rounded-full bg-white/10 px-2 py-0.5 text-[11px]">{PILL[t.status] ?? 'To do'}</span>{t.why && <p className="mt-1 text-ink/60"><Linked text={t.why} /></p>}<Thread id={t.id} /><Composer send={(x, imgs) => send(x, t, imgs)} ph="Tell Claude anything about this…" /></li>)}</ul></section>
           <section className="glass p-5"><details><summary className="cursor-pointer text-lg font-semibold">History ({done.length})</summary>
             <ul className="mt-2 space-y-1 text-sm">{done.map((t) => <li key={t.id}><span className="text-ink/50">{t.doneAt ? new Date(t.doneAt).toLocaleDateString() : ''}</span> · {t.title}</li>)}</ul></details></section>
         </div>
         <section className="glass flex flex-col p-5"><h2 className="text-lg font-semibold">Chat with Claude</h2>
-          <div className="mt-3 flex max-h-[640px] min-h-64 flex-col gap-2 overflow-y-auto">{general.map((m) => <p key={m.id} className={`max-w-[88%] whitespace-pre-line rounded-2xl px-3 py-2 text-sm ${m.from === 'you' ? 'self-end bg-mango/15' : 'self-start bg-lagoon/10'}`}><b className="block text-[11px] text-ink/50">{m.from === 'you' ? 'You' : 'Claude'}{m.from === 'you' && m.handled ? ' · read ✓' : ''}</b><Linked text={m.text} /></p>)}</div>
-          <form onSubmit={async (e) => { e.preventDefault(); if (await send(chat)) setChat(''); }} className="mt-3 flex gap-2">
-            <label htmlFor="fh-chat" className="sr-only">Message Claude</label>
-            <input id="fh-chat" value={chat} onChange={(e) => setChat(e.target.value)} placeholder="Ask a question or ask for something to be done…" className="min-h-11 min-w-0 flex-1 rounded-full border border-white/15 bg-night/60 px-4" />
-            <button className="glow-mango min-h-11 rounded-full bg-mango px-5 font-semibold text-night">Send</button>
-          </form></section>
+          <div className="mt-3 flex max-h-[640px] min-h-64 flex-col gap-2 overflow-y-auto">{general.map((m) => <p key={m.id} className={`max-w-[88%] whitespace-pre-line rounded-2xl px-3 py-2 text-sm ${m.from === 'you' ? 'self-end bg-mango/15' : 'self-start bg-lagoon/10'}`}><b className="block text-[11px] text-ink/50">{m.from === 'you' ? 'You' : 'Claude'}{m.from === 'you' && m.handled ? ' · read ✓' : ''}</b><Linked text={m.text} />{m.images && <HubImages paths={m.images} />}</p>)}</div>
+          <Composer send={(t, imgs) => send(t, undefined, imgs)} ph="Ask a question or ask for something to be done…" big /></section>
       </div>
     </div>
   );
 }
 
 // Defined outside the hub so live refreshes never reset what's being typed.
-function Reply({ t, ph, send }: { t: Task; ph: string; send: (text: string, task?: Task) => Promise<boolean> }) {
-  const [v, setV] = useState('');
+// Text plus optional pictures (private founders-only bucket hub-uploads).
+async function uploadPics(files: File[]): Promise<string[]> {
+  const out: string[] = [];
+  for (const f of files) {
+    const ext = (f.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+    const path = `${new Date().toISOString().slice(0, 10)}/${crypto.randomUUID()}.${ext}`;
+    const { error } = await cloud()!.storage.from('hub-uploads').upload(path, f, { contentType: f.type || 'image/jpeg' });
+    if (!error) out.push(path);
+  }
+  return out;
+}
+function Composer({ send, ph, big }: { send: (text: string, images: string[]) => Promise<boolean>; ph: string; big?: boolean }) {
+  const [v, setV] = useState(''); const [files, setFiles] = useState<File[]>([]); const [busy, setBusy] = useState(false); const [err, setErr] = useState('');
   return (
-    <form onSubmit={async (e) => { e.preventDefault(); if (await send(v, t)) setV(''); }} className="mt-2 flex gap-2">
-      <input value={v} onChange={(e) => setV(e.target.value)} placeholder={ph} aria-label={`Reply about ${t.title}`} className="min-h-11 min-w-0 flex-1 rounded-full border border-white/15 bg-night/60 px-4 text-sm" />
-      <button className="min-h-11 rounded-full px-4 text-sm ring-1 ring-white/15">Send</button>
+    <form onSubmit={async (e) => { e.preventDefault(); if (busy || (!v.trim() && !files.length)) return; setBusy(true); setErr('');
+      const imgs = files.length ? await uploadPics(files) : []; if (files.length && imgs.length < files.length) setErr('A picture didn’t upload; try again.');
+      if (await send(v, imgs)) { setV(''); setFiles([]); } setBusy(false); }} className={big ? 'mt-3' : 'mt-2'}>
+      <div className="flex gap-2">
+        <label className="grid min-h-11 min-w-11 cursor-pointer place-items-center rounded-full ring-1 ring-white/15" title="Add a picture" aria-label="Add a picture">📷<input type="file" accept="image/*" multiple className="sr-only" onChange={(e) => setFiles([...files, ...Array.from(e.target.files ?? [])].slice(0, 6))} /></label>
+        <input value={v} onChange={(e) => setV(e.target.value)} placeholder={ph} aria-label={ph} className="min-h-11 min-w-0 flex-1 rounded-full border border-white/15 bg-night/60 px-4 text-sm" />
+        <button disabled={busy} className={`min-h-11 rounded-full px-4 text-sm font-semibold ${big ? 'glow-mango bg-mango text-night' : 'ring-1 ring-white/15'}`}>{busy ? 'Sending…' : 'Send'}</button>
+      </div>
+      {files.length > 0 && <p className="mt-1 text-xs text-ink/60">📎 {files.length} picture{files.length > 1 ? 's' : ''} ready · <button type="button" className="underline" onClick={() => setFiles([])}>remove</button></p>}
+      {err && <p role="status" className="mt-1 text-xs text-coral">{err}</p>}
     </form>);
+}
+function HubImages({ paths }: { paths: string[] }) {
+  const [urls, setUrls] = useState<string[]>([]);
+  useEffect(() => { let on = true; void Promise.all(paths.map(async (p) => (await cloud()!.storage.from('hub-uploads').createSignedUrl(p, 3600)).data?.signedUrl ?? '')).then((u) => { if (on) setUrls(u.filter(Boolean)); }); return () => { on = false; }; }, [paths]);
+  return <span className="mt-1 flex flex-wrap gap-1">{urls.map((u) => <a key={u} href={u} target="_blank" rel="noopener noreferrer"><img src={u} alt="Attached picture" className="h-24 w-auto rounded-lg object-cover ring-1 ring-white/10" /></a>)}</span>;
 }

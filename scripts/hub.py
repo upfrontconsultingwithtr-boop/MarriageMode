@@ -6,6 +6,7 @@ Uses the Supabase Management API (the session's saved credential for api.supabas
   python3 scripts/hub.py reply "text" [taskId] # add a message from Claude
   python3 scripts/hub.py handled <id>          # mark Tiffany's message handled
   python3 scripts/hub.py task <id> '<json>'    # merge fields into a task (creates it if new)
+  python3 scripts/hub.py img <path> [outfile]   # download a picture Tiffany attached (data.images) to view it
 """
 import json, sys, urllib.request, datetime as dt
 REF = 'wdokqitjoeellkwbtdso'
@@ -20,3 +21,10 @@ elif cmd == 'tasks': print(json.dumps(q("select id, data->>'title' title, data->
 elif cmd == 'reply': d = {'from': 'builder', 'text': a[0], 'at': now, **({'taskId': a[1]} if len(a) > 1 else {})}; q(f"insert into app.hub_messages (data) values ({L(json.dumps(d))}::jsonb)"); print('ok')
 elif cmd == 'handled': q(f"update app.hub_messages set data = data || '{{\"handled\":true}}'::jsonb where id = {L(a[0])}"); print('ok')
 elif cmd == 'task': q(f"insert into app.hub_tasks (id, data) values ({L(a[0])}, {L(a[1])}::jsonb) on conflict (id) do update set data = app.hub_tasks.data || excluded.data, updated_at = now()"); print('ok')
+elif cmd == 'img':
+    # Service key read live via the Management API (never stored), then a private download from storage.
+    r = urllib.request.Request(f'https://api.supabase.com/v1/projects/{REF}/api-keys?reveal=true', headers={'Authorization': 'Bearer x'})
+    keys = json.loads(urllib.request.urlopen(r).read()); k = next(x['api_key'] for x in keys if x.get('name') == 'service_role' or x.get('type') == 'secret')
+    out = a[1] if len(a) > 1 else '/tmp/hub-' + a[0].replace('/', '_')
+    d = urllib.request.Request(f'https://{REF}.supabase.co/storage/v1/object/hub-uploads/{a[0]}', headers={'Authorization': f'Bearer {k}', 'apikey': k})
+    open(out, 'wb').write(urllib.request.urlopen(d).read()); print(out)
