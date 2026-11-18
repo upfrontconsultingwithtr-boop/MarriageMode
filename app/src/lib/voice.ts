@@ -5,12 +5,17 @@
 export const MIA_VOICE = 'af_heart'; export const MIA_SPEED = 0.88;
 const HT = 'https://cdn.jsdelivr.net/npm/@met4citizen/headtts@1.3.0';
 import { MouthTrack, wordShapes, wordMs } from './lipsync';
+import { speechChunks, chunkKey } from './speechChunks';
+import { BASE } from './base';
 const load = (url: string) => import(/* webpackIgnore: true */ url);
 
-export type Voice = { speak: (text: string, es: boolean, onStart: () => void, onEnd: () => void) => void; stop: () => void; neural: () => boolean; stream: () => MediaStream | null; active: () => boolean; mouth: (now: number) => [string, number][] };
+export type Voice = { speak: (text: string, es: boolean, onStart: () => void, onEnd: () => void) => void; stop: () => void; neural: () => boolean; stream: () => MediaStream | null; active: () => boolean; level: () => number | null; mouth: (now: number) => [string, number][] };
 
 export function createVoice(): Voice {
   let tts: any = null; let ctx: AudioContext | null = null; let src: AudioBufferSourceNode | null = null; let gen = 0; let tap: MediaStreamAudioDestinationNode | null = null; let an: AnalyserNode | null = null; let lastWord = 0; const buf = new Uint8Array(512); const track = new MouthTrack();
+  // Pre-recorded natural-voice clips for Mia's fixed lines (scripts/prerender-voice.mjs): instant, same on every device.
+  let rec: Set<string> | null = null;
+  void fetch(`${BASE}/coach/voice/manifest.json`).then((r) => r.json()).then((m) => { rec = new Set(m.en ?? []); }).catch(() => {});
   void (async () => {
     try {
       ctx = new AudioContext(); tap = ctx.createMediaStreamDestination(); an = ctx.createAnalyser(); an.fftSize = 512;
@@ -35,6 +40,8 @@ export function createVoice(): Voice {
 
   return {
     neural: () => !!tts,
+    // Loudness of Mia's voice right now (0..1), or null when the device voice is used (no audio access).
+    level: () => { if (!(src && an)) return null; an.getByteTimeDomainData(buf); let e = 0; for (const v of buf) e += (v - 128) * (v - 128); return Math.min(1, Math.sqrt(e / buf.length) / 40); },
     mouth: (now) => track.at(now),
     stream: () => tap?.stream ?? null,
     // Is Mia's voice actually making sound right now? (Drives the mouth: closes on pauses.)
@@ -45,6 +52,23 @@ export function createVoice(): Voice {
     stop() { gen++; track.clear(); try { speechSynthesis.cancel(); } catch { /* none */ } try { src?.stop(); } catch { /* none */ } src = null; },
     speak(text, es, onStart, onEnd) {
       this.stop(); const my = gen;
+      const parts = speechChunks(text);
+      if (!es && ctx && rec && parts.length && parts.every((p) => rec!.has(chunkKey(p)))) {
+        void (async () => {
+          try {
+            await ctx!.resume();
+            const bufs = parts.map((p) => fetch(`${BASE}/coach/voice/en-${chunkKey(p)}.mp3`).then((r) => r.arrayBuffer()).then((a) => ctx!.decodeAudioData(a)));
+            const first = await bufs[0]; if (my !== gen) return; onStart();
+            for (const [i, pb] of bufs.entries()) {
+              const b = i ? await pb : first; if (my !== gen) return;
+              await new Promise<void>((res) => { src = ctx!.createBufferSource(); src.buffer = b; src.connect(ctx!.destination); if (tap) src.connect(tap); if (an) src.connect(an); src.onended = () => res(); src.start(); });
+              if (i < bufs.length - 1) await new Promise((r) => setTimeout(r, 180)); // natural breath between sentences
+            }
+            if (my === gen) onEnd();
+          } catch { if (my === gen) device(text, es, onStart, onEnd); }
+        })();
+        return;
+      }
       if (!tts || es || !ctx) { device(text, es, onStart, onEnd); return; }
       void (async () => {
         try {

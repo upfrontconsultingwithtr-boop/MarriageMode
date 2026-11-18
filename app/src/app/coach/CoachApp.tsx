@@ -7,6 +7,7 @@ import { BASE } from '@/lib/base';
 import { track } from '@/lib/track';
 import { startMia, type Mia } from '@/lib/mia';
 import { createVoice, type Voice } from '@/lib/voice';
+import { OPENING, OPENING_REVIEW } from '@/lib/coachLines';
 import { saveSession } from '@/lib/sessions';
 import { startRecording, type Rec as Recording, type Part } from '@/lib/recorder';
 import { coachReply, guidanceFor, findTopics } from '@/lib/coachKnowledge';
@@ -24,21 +25,43 @@ type Rec = { lang: string; interimResults: boolean; continuous: boolean; onresul
 // light-corrected frame by frame. Falls back to the plain video if anything can't load.
 type Pose = [number, number, number, number];
 type Lips = { u: number; box: [number, number, number, number]; cols: number; fps: number; visemes: string[]; bins: number[]; idle: Pose[]; talk: Pose[]; yIdle: number[]; yTalk: number[]; gIdle: number[][]; gTalk: number[][]; eIdle?: number[][]; eTalk?: number[][] };
-function VideoAvatar({ speaking, listening }: { speaking: boolean; listening: boolean; mouth?: unknown; canvasRef?: unknown }) {
-  // Only the actor's own real footage: calm listening clip, and her real talking clip while Mia speaks,
-  // with a soft cross-fade. No drawn-on mouth (Tiffany 2026-11-17: the pasted mouth looked fake).
-  const idle = useRef<HTMLVideoElement>(null); const talk = useRef<HTMLVideoElement>(null);
-  const [rm, setRm] = useState(false); useEffect(() => { try { setRm(matchMedia('(prefers-reduced-motion: reduce)').matches); } catch { /* old browser */ } }, []);
+function VideoAvatar({ speaking, listening, level }: { speaking: boolean; listening: boolean; level?: () => number | null; mouth?: unknown; canvasRef?: unknown }) {
+  // Only the actor's own real footage. Listening: calm loop. Talking: when Mia's natural voice plays, each moment shows
+  // the real frame whose mouth opening matches her voice (frames steadied on the face); otherwise the talking loop.
+  const idle = useRef<HTMLVideoElement>(null); const talk = useRef<HTMLVideoElement>(null); const cv = useRef<HTMLCanvasElement>(null);
+  const [rm, setRm] = useState(false); const [synced, setSynced] = useState(false);
+  const lv = useRef(level); lv.current = level; const sp = useRef(speaking); sp.current = speaking; const syncedRef = useRef(false);
+  const setSync = (v: boolean) => { if (syncedRef.current !== v) { syncedRef.current = v; setSynced(v); } };
+  useEffect(() => { try { setRm(matchMedia('(prefers-reduced-motion: reduce)').matches); } catch { /* old browser */ } }, []);
   useEffect(() => { if (rm) idle.current?.pause(); else void idle.current?.play().catch(() => {}); }, [rm]);
   useEffect(() => {
     const t = talk.current; if (!t || rm) return;
-    if (speaking) { if (t.paused) { try { t.currentTime = 0; } catch { /* not ready */ } } void t.play().catch(() => {}); }
+    if (speaking && !synced) { if (t.paused) { try { t.currentTime = 0; } catch { /* not ready */ } } void t.play().catch(() => {}); }
     else { const h = setTimeout(() => t.pause(), 700); return () => clearTimeout(h); }
-  }, [speaking, rm]);
+  }, [speaking, rm, synced]);
+  useEffect(() => {
+    if (rm) return; let dead = false; let raf = 0; let F: number[][] = []; const imgs: HTMLImageElement[] = []; let prev = 40; let s = 0; let last = 0;
+    void fetch(`${BASE}/coach/lips2/frames.json`).then((r) => r.json()).then((j: { n: number; f: number[][] }) => {
+      F = j.f; for (let i = 0; i < j.n; i++) { const im = new Image(); im.src = `${BASE}/coach/lips2/f${String(i).padStart(3, '0')}.webp`; imgs.push(im); }
+    }).catch(() => {});
+    const tick = (now: number) => {
+      raf = requestAnimationFrame(tick); if (dead || now - last < 41) return; last = now;
+      const v = sp.current ? lv.current?.() : null; const c = cv.current;
+      if (v == null || !F.length || !c) { setSync(false); return; }
+      setSync(true);
+      s = v > s ? s + 0.7 * (v - s) : s + 0.45 * (v - s); const tgt = s * 0.09;
+      let best = prev; let bc = Infinity;
+      for (let i = 0; i < F.length; i++) { const f = F[i]; const p = F[prev]; const cost = Math.abs(f[0] - tgt) * 30 + 1.5 * Math.hypot(f[2] - p[2], f[3] - p[3]) + (i === prev + 1 ? 0 : 0.05) + (f[1] ? 0 : 10); if (cost < bc) { bc = cost; best = i; } }
+      prev = best; const im = imgs[best]; if (im?.complete) c.getContext('2d')?.drawImage(im, 0, 0, c.width, c.height);
+    };
+    raf = requestAnimationFrame(tick); return () => { dead = true; cancelAnimationFrame(raf); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rm]);
   return (
     <div className="absolute inset-0">
       <video ref={idle} src={`${BASE}/coach/mia-idle.mp4`} poster={`${BASE}/coach/mia-poster.jpg`} muted loop playsInline autoPlay preload="auto" className="absolute inset-0 h-full w-full object-cover" aria-hidden="true" />
-      {!rm && <video ref={talk} data-talk="" src={`${BASE}/coach/mia-talk.mp4`} muted loop playsInline preload="auto" className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${speaking ? 'opacity-100' : 'opacity-0'}`} aria-hidden="true" />}
+      {!rm && <video ref={talk} data-talk="" src={`${BASE}/coach/mia-talk.mp4`} muted loop playsInline preload="auto" className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${speaking && !synced ? 'opacity-100' : 'opacity-0'}`} aria-hidden="true" />}
+      {!rm && <canvas ref={cv} width={480} height={640} className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${speaking && synced ? 'opacity-100' : 'opacity-0'}`} aria-hidden="true" />}
       {listening && <span className="absolute bottom-10 left-2 rounded-full bg-night/70 px-3 py-1 text-xs text-mango">● listening</span>}
     </div>
   );
@@ -111,7 +134,7 @@ export default function CoachApp() {
     speechSynthesis.speak(u);
   };
 
-  const opening = () => reviewMode ? t('Hi, I’m Mia, your AI relationship coach. Thank you for doing your social media review: that took honesty. If your partner is with you, welcome to you both. This is a calm, no-blame conversation. To start, how are each of you feeling about what came up?', 'Hola, soy Mia, tu coach de relaciones con IA. Gracias por hacer tu revisión de redes sociales: eso requirió honestidad. Si tu pareja está contigo, bienvenidos los dos. Esta es una conversación tranquila y sin culpas. Para empezar, ¿cómo se siente cada uno con lo que salió?') : t('Hi, I’m Mia, your Marriage Mode AI relationship coach. I’m an AI, not a counselor, and our conversation stays on your device. What would you like to work on today?', 'Hola, soy Mia, tu coach de relaciones con IA de Marriage Mode. Soy una IA, no una consejera, y nuestra conversación se queda en tu dispositivo. ¿En qué te gustaría trabajar hoy?');
+  const opening = () => reviewMode ? (es ? OPENING_REVIEW.es : OPENING_REVIEW.en) : (es ? OPENING.es : OPENING.en);
 
   // Load Mia's lifelike 3D face + natural voice (free, open source). Falls back to the drawn face.
   const startFace = async () => {
@@ -226,7 +249,7 @@ export default function CoachApp() {
             {mode === 'lite' && progress > 0 && <div className="mt-2" role="status"><p className="text-[11px] text-ink/60">{t('Getting Mia’s full AI ready in the background, keep talking meanwhile', 'Preparando la IA completa de Mia, puedes seguir hablando')} · {Math.round(progress * 100)}%</p><div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-gradient-to-r from-lagoon to-mango transition-all" style={{ width: `${Math.round(progress * 100)}%` }} /></div></div>}
             <div className="relative mx-auto mt-4 aspect-[3/4] w-full max-w-[460px] overflow-hidden rounded-[1.5rem] bg-night shadow-2xl ring-1 ring-white/10">
               <div ref={stage} className={`absolute inset-0 ${face3d === 'on' ? '' : 'invisible'}`} aria-label={t('Mia, the AI coach (3D)', 'Mia, la coach de IA (3D)')} role="img" />
-              {face3d !== 'on' && face3d !== 'loading' && <div ref={faceBox} className="absolute inset-0"><VideoAvatar speaking={speaking} listening={listening} mouth={mouthOf.current} canvasRef={faceCanvas} /></div>}
+              {face3d !== 'on' && face3d !== 'loading' && <div ref={faceBox} className="absolute inset-0"><VideoAvatar speaking={speaking} listening={listening} level={() => voice.current?.level() ?? null} /></div>}
               <span className="pointer-events-none absolute bottom-2 left-2 rounded-full bg-night/70 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-ink/80">{t('AI coach · not a therapist', 'Coach de IA · no es terapeuta')}</span>
               {format !== 'text' && <span className="absolute right-3 top-3 rounded-full bg-night/70 px-3 py-1 text-xs text-coral">● {format === 'video' ? t('Recording video to this device', 'Grabando video en este dispositivo') : t('Recording audio to this device', 'Grabando audio en este dispositivo')}</span>}
               <span className="pointer-events-none absolute left-3 top-3 flex items-center gap-2 rounded-full bg-night/60 px-3 py-1 text-xs text-ink/90 backdrop-blur"><span className="size-2 rounded-full bg-palm" />Mia · {t('Relationship coach', 'Coach de pareja')} · <CallTimer /></span>
