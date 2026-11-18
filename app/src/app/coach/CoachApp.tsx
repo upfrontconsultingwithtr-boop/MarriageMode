@@ -32,7 +32,7 @@ function VideoAvatar({ speaking, listening }: { speaking: boolean; listening: bo
   useEffect(() => { if (rm) idle.current?.pause(); else void idle.current?.play().catch(() => {}); }, [rm]);
   useEffect(() => {
     const t = talk.current; if (!t || rm) return;
-    if (speaking) { if (t.paused) { try { t.currentTime = 4.48; } catch { /* not ready */ } } void t.play().catch(() => {}); }
+    if (speaking) { if (t.paused) { try { t.currentTime = 0; } catch { /* not ready */ } } void t.play().catch(() => {}); }
     else { const h = setTimeout(() => t.pause(), 700); return () => clearTimeout(h); }
   }, [speaking, rm]);
   return (
@@ -206,7 +206,7 @@ export default function CoachApp() {
             <ul className="mt-4 space-y-2 text-sm text-ink/75">
               <li>🔒 {t('Private: the AI runs on your own device. Nothing you say is sent to us or anyone.', 'Privado: la IA funciona en tu propio dispositivo. Nada de lo que dices se nos envía a nosotros ni a nadie.')}</li>
               <li>💸 {t('Free: no account, no subscription.', 'Gratis: sin cuenta ni suscripción.')}</li>
-              <li>🤖 {t('Mia is an AI coach, not a person or a licensed counselor. Her face is video of an actor.', 'Mia es una coach de IA, no una persona ni una consejera con licencia. Su rostro es video de una actriz.')}</li>
+              <li>🤖 {t('Mia is an AI coach, not a person or a licensed counselor. Her face is stock video, not a real coach.', 'Mia es una coach de IA, no una persona ni una consejera con licencia. Su rostro es video de archivo, no una coach real.')}</li>
               <li>📶 {t(`First time only: a one-time download of about ${size >= 1000 ? (size / 1000).toFixed(1) + ' GB' : size + ' MB'}. Wi-Fi recommended.`, `Solo la primera vez: una descarga única de unos ${size >= 1000 ? (size / 1000).toFixed(1) + ' GB' : size + ' MB'}. Se recomienda Wi-Fi.`)}</li>
             </ul>
             <div className="mt-6 flex flex-wrap gap-3">
