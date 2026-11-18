@@ -48,6 +48,7 @@ Why: counselors and pastors who work with engaged couples are the fastest free w
 | Design look (green & pink) | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/DESIGN-SYSTEM.md |
 
 ## 📝 Done log (newest first)
+- 2026-11-18: Hub: picture button in chat and task replies (private founders-only storage, migration 0013b); Claude reads them with hub.py img.
 - 2026-11-18: Link check: all 72 site pages OK; 30 outside links checked, 5 sit behind robot screens (fine for people), EliteSingles' page errored for our checker only (kept; 'Link not working? Tell us' covers it). No broken links found.
 - 2026-11-17: Upfront HQ 'Marriage Mode hub' links now open marriage-mode-hub.web.app (only /v2/index.html changed).
 - 2026-11-17: Upfront front page Sign in link live (published only index.html by cloning the live Firebase version; other pages verified unchanged).
