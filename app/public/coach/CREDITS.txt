@@ -15,3 +15,6 @@ Mia's video face since 2026-11-18 (mia-idle.mp4, mia-talk.mp4, mia-poster.jpg) i
 385639 (https://pixabay.com/videos/id-385639/), chosen by Tiffany, used under the Pixabay Content License (free for
 commercial use, modification allowed). The person shown is stock footage, not a real coach, and does not endorse
 Marriage Mode. Mia is an AI.
+
+Mia's voice: English lines pre-recorded with Kokoro-82M (Apache 2.0), voice af_heart. Spanish lines pre-recorded with
+Piper (MIT) voice es_MX "claude" (rhasspy/piper-voices; training data Apache-2.0). Both free for commercial use.

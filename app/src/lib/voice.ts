@@ -14,8 +14,8 @@ export type Voice = { speak: (text: string, es: boolean, onStart: () => void, on
 export function createVoice(): Voice {
   let tts: any = null; let ctx: AudioContext | null = null; let src: AudioBufferSourceNode | null = null; let gen = 0; let tap: MediaStreamAudioDestinationNode | null = null; let an: AnalyserNode | null = null; let lastWord = 0; const buf = new Uint8Array(512); const track = new MouthTrack();
   // Pre-recorded natural-voice clips for Mia's fixed lines (scripts/prerender-voice.mjs): instant, same on every device.
-  let rec: Set<string> | null = null;
-  const recReady: Promise<void> = fetch(`${BASE}/coach/voice/manifest.json`).then((r) => r.json()).then((m) => { rec = new Set(m.en ?? []); }).catch(() => {});
+  let rec: Set<string> | null = null; let recEs: Set<string> = new Set();
+  const recReady: Promise<void> = fetch(`${BASE}/coach/voice/manifest.json`).then((r) => r.json()).then((m) => { rec = new Set(m.en ?? []); recEs = new Set(m.es ?? []); }).catch(() => {});
   void (async () => {
     try {
       ctx = new AudioContext(); tap = ctx.createMediaStreamDestination(); an = ctx.createAnalyser(); an.fftSize = 512;
@@ -53,13 +53,14 @@ export function createVoice(): Voice {
     speak(text, es, onStart, onEnd) {
       this.stop(); const my = gen;
       // First line can arrive before the list of recordings: wait for it (at most 2.5s), then decide.
-      if (!rec && !es) { void Promise.race([recReady, new Promise((r) => setTimeout(r, 2500))]).then(() => { if (my === gen) { rec = rec ?? new Set(); this.speak(text, es, onStart, onEnd); } }); return; }
+      if (!rec) { void Promise.race([recReady, new Promise((r) => setTimeout(r, 2500))]).then(() => { if (my === gen) { rec = rec ?? new Set(); this.speak(text, es, onStart, onEnd); } }); return; }
       const parts = speechChunks(text);
-      if (!es && ctx && rec && parts.length && parts.every((p) => rec!.has(chunkKey(p)))) {
+      const have = es ? recEs : rec;
+      if (ctx && have && parts.length && parts.every((p) => have.has(chunkKey(p)))) {
         void (async () => {
           try {
             await ctx!.resume();
-            const bufs = parts.map((p) => fetch(`${BASE}/coach/voice/en-${chunkKey(p)}.mp3`).then((r) => r.arrayBuffer()).then((a) => ctx!.decodeAudioData(a)));
+            const bufs = parts.map((p) => fetch(`${BASE}/coach/voice/${es ? 'es' : 'en'}-${chunkKey(p)}.mp3`).then((r) => r.arrayBuffer()).then((a) => ctx!.decodeAudioData(a)));
             const first = await bufs[0]; if (my !== gen) return; onStart();
             for (const [i, pb] of bufs.entries()) {
               const b = i ? await pb : first; if (my !== gen) return;
