@@ -48,6 +48,7 @@ Why: counselors and pastors who work with engaged couples are the fastest free w
 | Design look (green & pink) | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/DESIGN-SYSTEM.md |
 
 ## 📝 Done log (newest first)
+- 2026-11-20: Mia speaks natural Spanish too: 239 fixed Spanish lines pre-recorded with the free Piper es_MX voice (tested live).
 - 2026-11-18: Mia sounds natural on every device: 235 fixed lines pre-recorded in voice 11 (free, Kokoro), and her real-footage lips follow her voice (open on sounds, closed on pauses). Tested live on iPad size.
 - 2026-11-18: Mia's new face live (Tiffany's pick, Pixabay clip A): listening + talking loops, 'shh' cut; old footage archived in archive/mia-v1; credits updated.
 - 2026-11-18: Hub: picture button in chat and task replies (private founders-only storage, migration 0013b); Claude reads them with hub.py img.
