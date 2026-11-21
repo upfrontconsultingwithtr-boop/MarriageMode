@@ -29,7 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head><script dangerouslySetInnerHTML={{ __html: PREFS_BOOT }} /></head>
       <body className="min-h-screen overflow-x-hidden antialiased print:bg-white">
         {PORTAL ? (
-          <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-night/75 backdrop-blur-xl"><div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-2.5"><a href="/portal/" className="flex min-h-11 items-center gap-2.5 font-display text-lg font-bold"><img src={`${BASE}/icon.svg`} alt="" width={30} height={30} /> Marriage Mode</a><nav className="flex items-center gap-1 text-sm"><a href="/portal/" className="inline-flex min-h-11 items-center rounded-full px-3 text-ink/75 hover:text-ink">Dashboard</a><a href="/advanced/app/" className="inline-flex min-h-11 items-center rounded-full px-3 text-ink/75 hover:text-ink">Tools</a></nav></div></header>
+          <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-night/75 backdrop-blur-xl"><div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-2.5"><a href="/login/" className="flex min-h-11 items-center gap-2.5 font-display text-lg font-bold"><img src={`${BASE}/icon.svg`} alt="" width={30} height={30} /> Marriage Mode</a><nav className="flex items-center gap-1 text-sm"><a href="/portal/" className="inline-flex min-h-11 items-center rounded-full px-3 text-ink/75 hover:text-ink">Dashboard</a><a href="/advanced/app/" className="inline-flex min-h-11 items-center rounded-full px-3 text-ink/75 hover:text-ink">Tools</a></nav></div></header>
         ) : HUB ? (
           <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-night/75 backdrop-blur-xl"><div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3"><span className="flex items-center gap-2.5 font-display text-lg font-bold"><img src={`${BASE}/icon.svg`} alt="" width={30} height={30} /> Marriage Mode Hub</span><a href="https://upfrontconsultingwithtiffandreco.com/" className="text-sm text-ink/60 hover:text-ink">Upfront Consulting ↗</a></div></header>
         ) : (<>
@@ -40,7 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </Link>
             <div className="hidden items-center gap-5 whitespace-nowrap text-sm text-ink/70 lg:flex">
               {ADV ? <Link prefetch={false} href="/advanced/" className="text-mango hover:text-ink">✦ Advanced</Link> : <Link prefetch={false} href="/#value" className="hover:text-ink">Why Marriage Mode</Link>}
-              {ADV && process.env.NEXT_PUBLIC_PORTAL_URL && <a href={`${process.env.NEXT_PUBLIC_PORTAL_URL}portal/`} className="hover:text-ink">Sign in</a>}
+              {ADV && process.env.NEXT_PUBLIC_PORTAL_URL && <a href={`${process.env.NEXT_PUBLIC_PORTAL_URL}login/`} className="hover:text-ink">Sign in</a>}
               <Link prefetch={false} href="/#how" className="hover:text-ink">How it works</Link>
               <Link prefetch={false} href="/couple/" className="hover:text-ink">Couple Mode</Link>
               <Link prefetch={false} href="/guides/" className="hover:text-ink">Guides</Link>

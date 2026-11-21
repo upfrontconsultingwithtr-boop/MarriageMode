@@ -5,11 +5,10 @@ import { LESSONS, WS_ITEMS, answer, differences, type Answer } from '@/lib/adv/l
 import { sweepLock, type Stage, type AdvState } from '@/lib/adv/store';
 import { CATEGORIES, CAT_LABEL, sortMostAccess, type Category, type Flag, type Rel } from '@/lib/adv/sweep';
 import { SOCIALS } from '@/lib/adv/platforms';
-import { DEMO_FILES, DEMO_EXES } from '@/lib/adv/demo';
 import { readInbox, readSocial, readDevice, type Kind, type SweepResult } from '@/lib/adv/io';
 import { accountFor, status } from '@/lib/adv/accounts';
 import { backupOf, enqueue, nextBatch, confirmBatch, undoItem, BATCH, PAUSE_MS } from '@/lib/adv/queue';
-import { searchesFor, DEMO_IDS, type IdType } from '@/lib/adv/solo';
+import { searchesFor, type IdType } from '@/lib/adv/solo';
 import { reply, MIA_SAFETY } from '@/lib/adv/mia';
 import { buildReport, reportText, encodeReport, decodeReport, bothView, nextRecheck, recheck, type Report } from '@/lib/adv/report';
 import { BASE } from '@/lib/base';
@@ -77,21 +76,12 @@ export function Sweep() {
     } catch { setErr(t('That file could not be read. Use the platform’s JSON or ZIP download, a .txt/.mbox inbox export, or a .vcf / SMS Backup XML device export.', 'No se pudo leer ese archivo. Usa la descarga JSON o ZIP de la plataforma, un correo .txt/.mbox o un .vcf / XML de SMS Backup.')); }
     finally { setBusy(''); }
   }
-  async function demo() {
-    setExes(DEMO_EXES.join(', '));
-    const inbox = await readInbox('demo-inbox.txt', DEMO_FILES[0].text);
-    const k = { exes: DEMO_EXES, pastMatches: inbox.matches };
-    const soc = await readSocial('demo-social.json', DEMO_FILES[1].text, undefined, k); const dev = readDevice('demo-device.json', DEMO_FILES[2].text, k);
-    set((x) => { const accounts = [...x.accounts]; for (const d of inbox.dating) if (!accounts.some((a) => a.id === d.id)) accounts.push(accountFor(d.id, t('Sweep auto-discovery (demo)', 'Detección automática (prueba)'), d.evidence));
-      return { ...x, accounts, flags: [...x.flags.filter((f) => !/demo-/.test(f.source)), ...inbox.flags, ...soc.flags, ...dev.flags], sources: [...new Set([...x.sources, ...DEMO_FILES.map((f) => f.name)])], matches: [...new Set([...x.matches, ...inbox.matches])], exes: DEMO_EXES.join(', ') }; });
-  }
   if (lock.length) return <Card tone="warn"><H>🔒 {t('The Sweep is locked', 'La Revisión está bloqueada')}</H><p>{t('Add a valid partner email and tick “I understand my results will go to my partner” to unlock it.', 'Agrega un correo válido de tu pareja y marca “Entiendo que mis resultados irán a mi pareja” para desbloquearla.')}</p></Card>;
   const counts = CATEGORIES.map((c) => [c, s.flags.filter((f) => (c === 'risque' ? f.risque : f.category === c)).length] as const);
   return (<>
     <H sub={t('Your own exports, read on this device. Nothing is uploaded. No logins, no access to anyone else’s account.', 'Tus propias exportaciones, leídas en este dispositivo. No se sube nada. Sin inicios de sesión ni acceso a cuentas de otros.')}>{t('Social Sweep', 'Revisión social')}</H>
     <div className="grid gap-4 lg:grid-cols-[1.3fr_1fr]">
       <div className="grid gap-4">
-        <Card tone="rose"><h2 className="font-semibold">{t('Try it with demo data first', 'Pruébala primero con datos de prueba')}</h2><p className="mt-1 text-sm text-ink/70">{t('Three fictional files (inbox, social, device). No real people.', 'Tres archivos ficticios (correo, redes, dispositivo). Sin personas reales.')}</p><Btn className="mt-3" onClick={demo}>{t('Run the demo Sweep', 'Hacer la Revisión de prueba')}</Btn></Card>
         <Card><label htmlFor="exes" className="font-semibold">{t('Exes and people you want the Sweep to watch for', 'Exparejas y personas que la Revisión debe buscar')}</label><p className="text-sm text-ink/60">{t('Names or usernames, separated by commas. Past dating matches are found from your inbox automatically.', 'Nombres o usuarios separados por comas. Los matches anteriores se encuentran en tu correo automáticamente.')}</p>
           <textarea id="exes" value={exes} onChange={(e) => setExes(e.target.value)} rows={2} className="mt-2 w-full rounded-2xl bg-night/60 p-3 ring-1 ring-white/15" /></Card>
         {([['inbox', t('Email inbox + receipts (finds dating accounts)', 'Correo + recibos (encuentra cuentas de citas)'), '.txt,.mbox,.eml,.html,.json,.csv,.zip'], ['social', t('Social media data download', 'Descarga de datos de redes sociales'), '.zip,.json,.html,.csv'], ['device', t('Device: contacts, call log, text log (times only)', 'Dispositivo: contactos, llamadas y mensajes (solo horas)'), '.vcf,.xml,.json']] as const).map(([k, label, accept]) => (
@@ -125,7 +115,7 @@ export function Review() {
   const platforms = [...new Set(s.flags.map((f) => f.platform))];
   const toggle = (id: string, on: boolean) => setSel((x) => { const n = new Set(x); if (on) n.add(id); else n.delete(id); return n; });
   const chosen = s.flags.filter((f) => sel.has(f.id)); const backedUp = chosen.filter((f) => s.backups.some((b) => b.flagId === f.id));
-  if (!s.flags.length) return <Card><H>{t('Nothing to review yet', 'Aún no hay nada que revisar')}</H><p className="text-ink/70">{t('Run the Sweep (or the demo) first.', 'Primero haz la Revisión (o la prueba).')}</p></Card>;
+  if (!s.flags.length) return <Card><H>{t('Nothing to review yet', 'Aún no hay nada que revisar')}</H><p className="text-ink/70">{t('Run the Sweep on your own exports first.', 'Primero haz la Revisión con tus propias exportaciones.')}</p></Card>;
   return (<>
     <H sub={t('Every flag shows why and where it came from. You decide. Nothing is removed without your own tap on the platform’s button.', 'Cada marca muestra por qué y de dónde salió. Tú decides. Nada se quita sin que toques el botón de la plataforma.')}>{t('Review and remove', 'Revisar y quitar')}</H>
     <Card tone="warn" className="mb-4"><p className="text-sm"><strong>{t('Platform limits', 'Límites de las plataformas')}:</strong> {t('most platforms do NOT allow a third-party tool to bulk-unfollow or bulk-delete, and most platforms do NOT expose who viewed a profile (story viewers are the limited exception, where the platform itself shows them). The submit-ready queue exists because of these limits.', 'la mayoría de las plataformas NO permiten que una herramienta externa deje de seguir o borre en grupo, y la mayoría NO muestra quién vio un perfil (quién ve tus historias es la excepción limitada, cuando la plataforma misma lo muestra). La cola lista-para-enviar existe por estos límites.')}</p></Card>
@@ -201,8 +191,7 @@ export function Solo() {
     <Card><div className="grid gap-3 sm:grid-cols-[auto_1fr_auto] sm:items-end">
       <label className="text-sm"><span className="text-ink/60">{t('Type', 'Tipo')}</span><select value={type} onChange={(e) => setType(e.target.value as IdType)} className="mt-1 min-h-12 w-full rounded-2xl bg-night/60 px-3 ring-1 ring-white/15">{TYPES.map(([k, en, es]) => <option key={k} value={k}>{t(en, es)}</option>)}</select></label>
       <label className="text-sm"><span className="text-ink/60">{t('Identifier', 'Identificador')}</span><input value={val} onChange={(e) => setVal(e.target.value)} placeholder={type === 'namecity' ? 'Name, City' : type === 'photo' ? 'https://… (or leave blank to upload on the site)' : ''} className="mt-1 min-h-12 w-full rounded-2xl bg-night/60 px-4 ring-1 ring-white/15" /></label>
-      <Btn disabled={!val.trim() && type !== 'photo'} onClick={() => { add(type, val.trim() || 'photo upload'); setVal(''); }}>{t('Make searches', 'Crear búsquedas')}</Btn></div>
-      <Btn kind="quiet" className="mt-2" onClick={() => DEMO_IDS.forEach((d) => add(d.type, d.value))}>{t('Add the demo identifiers (fictional)', 'Agregar identificadores de prueba (ficticios)')}</Btn></Card>
+      <Btn disabled={!val.trim() && type !== 'photo'} onClick={() => { add(type, val.trim() || 'photo upload'); setVal(''); }}>{t('Make searches', 'Crear búsquedas')}</Btn></div></Card>
     <div className="mt-4 grid gap-4">{groups.map(([k, items]) => <Card key={k}><h3 className="font-semibold">{items[0].idType}: <span className="text-mango">{items[0].value}</span></h3>
       <ul className="mt-2 divide-y divide-white/10">{items.map((q) => <SoloRow key={q.id} q={q} onRecord={record} />)}</ul></Card>)}</div>
     <p className="mt-4 text-sm text-ink/60">{t('Feeling unsafe? Free, confidential help: 1-800-799-7233 · text START to 88788.', '¿No te sientes a salvo? Ayuda gratis y confidencial: 1-800-799-7233 · envía START al 88788.')}</p>
@@ -255,7 +244,6 @@ export function Proof() {
         <p className="mt-1 text-sm text-ink/65">{t('Re-runs discovery against your closed list and flags anything that came back (re-registered app, resumed billing).', 'Vuelve a buscar en tu lista de cerradas y marca lo que regresó (app registrada de nuevo, cobro reactivado).')}</p>
         <p className="mt-2">{t('Next re-check', 'Próxima revisión')}: <strong>{nextRecheck(s)}</strong>{s.lastCheck && <span className="text-sm text-ink/60"> · {t('last', 'última')} {fmtDate(s.lastCheck, es)}</span>}</p>
         <input type="file" accept=".txt,.mbox,.eml,.html,.json,.csv" aria-label={t('New inbox export for the re-check', 'Nueva exportación de correo para la revisión')} className="mt-3 block w-full text-sm file:mr-3 file:min-h-11 file:rounded-full file:border-0 file:bg-white/10 file:px-4 file:text-ink" onChange={async (e) => { const f = e.target.files?.[0]; if (!f) return; const r = recheck(s, await f.text(), f.name); set((x) => ({ ...x, lastCheck: new Date().toISOString() })); setRc(r.reappeared.length ? r.reappeared.map((x) => `${x.name} — ${x.evidence}`).join('\n') : t('Nothing came back. Clean.', 'Nada regresó. Todo limpio.')); }} />
-        <Btn kind="quiet" className="mt-1" onClick={() => { const r = recheck(s, DEMO_FILES[0].text, 'demo-inbox.txt'); set((x) => ({ ...x, lastCheck: new Date().toISOString() })); setRc(r.reappeared.length ? r.reappeared.map((x) => `${x.name} — ${x.evidence}`).join('\n') : t('Nothing came back. Clean.', 'Nada regresó. Todo limpio.')); }}>{t('Run the re-check on the demo inbox', 'Hacer la revisión con el correo de prueba')}</Btn>
         {rc && <pre role="status" className="mt-2 whitespace-pre-wrap font-sans text-sm text-lagoon">{rc}</pre>}</Card>
     </div>
   </>);

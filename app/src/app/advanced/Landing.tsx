@@ -8,7 +8,7 @@ import Orbits from './Orbits';
 
 type T = (en: string, es: string) => string;
 // Sign-up / sign-in lives on the separate customer portal site when it is configured.
-const START = process.env.NEXT_PUBLIC_PORTAL_URL ? `${process.env.NEXT_PUBLIC_PORTAL_URL}portal/` : './app/';
+const START = process.env.NEXT_PUBLIC_PORTAL_URL ? `${process.env.NEXT_PUBLIC_PORTAL_URL}login/` : './app/';
 const I = {
   learn: 'M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5zM4 20.5A2.5 2.5 0 0 0 6.5 23H20',
   sweep: 'M11 4a7 7 0 1 0 4.95 11.95L21 21M8 11h6M11 8v6',
@@ -30,33 +30,24 @@ function useReveal() {
   return ref;
 }
 
-/** A live-looking app preview built from real UI, filled with clearly labelled demo data. */
+/** The hero device: what Marriage Mode actually checks. Real product content only: no invented people or numbers. */
 function Device({ t }: { t: T }) {
-  const [p, setP] = useState(0);
-  useEffect(() => { const id = setTimeout(() => setP(75), 400); return () => clearTimeout(id); }, []);
+  const CATS = [t('Dating accounts', 'Cuentas de citas'), t('Exes & past matches', 'Exparejas y matches'), t('Late-night messages', 'Mensajes de madrugada'), t('Risque groups & follows', 'Grupos y cuentas riesgosas'), t('Who can see your stories', 'Quién ve tus historias'), t('Billing & subscriptions', 'Cobros y suscripciones')];
+  const [i, setI] = useState(0);
+  useEffect(() => { if (matchMedia('(prefers-reduced-motion: reduce)').matches) return; const id = setInterval(() => setI((x) => (x + 1) % CATS.length), 1800); return () => clearInterval(id); }, [CATS.length]);
+  const STEPS = [t('Delete the account', 'Borrar la cuenta'), t('Cancel billing', 'Cancelar el cobro'), t('Remove the app', 'Quitar la app'), t('Unsubscribe from emails', 'Darse de baja de correos')];
   return (
     <div className="adv-device relative mx-auto w-full max-w-[380px]">
       <div className="adv-glass adv-edge rounded-[2.4rem] p-3">
         <div className="rounded-[1.9rem] bg-night/80 p-5 ring-1 ring-white/5">
-          <div className="flex items-center justify-between text-[11px] text-ink/50"><span>Marriage Mode</span><span className="rounded-full bg-lagoon/15 px-2 py-0.5 text-lagoon">{t('Demo preview', 'Vista de prueba')}</span></div>
-          <div className="mt-4 flex items-center gap-4">
-            <div className="adv-ring grid size-24 shrink-0 place-items-center" style={{ ['--p' as string]: p } as React.CSSProperties}><div className="grid size-[84px] place-items-center rounded-full bg-night"><span className="font-display text-3xl font-semibold">{p}</span></div></div>
-            <div><p className="text-xs text-ink/55">{t('Honest score', 'Puntuación honesta')}</p><p className="font-display text-lg leading-tight">{t('3 of 4 accounts', '3 de 4 cuentas')}<br />{t('verified closed', 'cerradas y verificadas')}</p></div>
-          </div>
-          <div className="mt-5 space-y-2">
-            {[[t('Liked 12 posts in 2 weeks', '12 me gusta en 2 semanas'), 'Instagram · close friend', true], [t('Risque group you joined', 'Grupo riesgoso al que te uniste'), 'Facebook · group', true], [t('Past dating match', 'Match de citas anterior'), 'Snapchat · friend', false]].map(([a, b, r], i) => (
-              <div key={i} className="flex items-center justify-between gap-2 rounded-2xl bg-white/[0.04] px-3 py-2.5 ring-1 ring-white/[0.06]">
-                <div className="min-w-0"><p className="truncate text-[13px]">{a as string}</p><p className="text-[11px] text-ink/45">{b as string}</p></div>
-                <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] ${r ? 'bg-mango/15 text-mango' : 'bg-white/10 text-ink/70'}`}>{r ? t('Risque', 'Riesgoso') : t('Ex / match', 'Ex / match')}</span>
-              </div>))}
-          </div>
-          <div className="mt-4 rounded-2xl bg-mango/10 p-3 ring-1 ring-mango/30">
-            <div className="flex items-center justify-between text-[12px]"><span className="font-semibold">{t('Batch 1 · 5 items', 'Grupo 1 · 5 elementos')}</span><span className="rounded-full bg-[#4a1630] px-2 py-0.5 text-[10px] text-white">{t('Guided', 'Guiado')}</span></div>
-            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-gradient-to-r from-mango to-lagoon transition-all duration-[1600ms]" style={{ width: `${p * 0.8}%` }} /></div>
-          </div>
+          <div className="flex items-center justify-between text-[11px] text-ink/50"><span>Marriage Mode</span><span className="rounded-full bg-palm/15 px-2 py-0.5 text-palm">{t('On your device', 'En tu dispositivo')}</span></div>
+          <p className="mt-4 text-xs uppercase tracking-wider text-ink/45">{t('The Sweep checks', 'La Revisión revisa')}</p>
+          <ul className="mt-2 space-y-1.5" aria-live="off">{CATS.map((c, k) => <li key={c} className={`flex items-center justify-between rounded-2xl px-3 py-2 text-[13px] ring-1 transition-all duration-500 ${k === i ? 'bg-mango/15 text-ink ring-mango/50' : 'bg-white/[0.03] text-ink/60 ring-white/[0.06]'}`}><span>{c}</span>{k === i && <span className="text-[10px] text-mango">{t('scanning', 'revisando')}</span>}</li>)}</ul>
+          <p className="mt-5 text-xs uppercase tracking-wider text-ink/45">{t('An account counts as closed only when all 4 are done', 'Una cuenta cuenta como cerrada solo con los 4 pasos')}</p>
+          <ol className="mt-2 grid grid-cols-2 gap-1.5 text-[12px]">{STEPS.map((x, k) => <li key={x} className="flex items-center gap-2 rounded-xl bg-white/[0.03] px-2.5 py-2 ring-1 ring-white/[0.06]"><span className="grid size-5 shrink-0 place-items-center rounded-full bg-mango/20 text-[10px] text-mango">{k + 1}</span>{x}</li>)}</ol>
         </div>
       </div>
-      <div className="adv-glass absolute -left-10 bottom-36 hidden rounded-2xl px-3 py-2 text-xs sm:block float"><span className="text-palm">●</span> {t('Read on your device', 'Leído en tu dispositivo')}</div>
+      <div className="adv-glass absolute -left-10 top-10 hidden rounded-2xl px-3 py-2 text-xs sm:block float"><span className="text-palm">●</span> {t('Read on your device', 'Leído en tu dispositivo')}</div>
       <div className="adv-glass absolute -right-6 bottom-16 hidden rounded-2xl px-3 py-2 text-xs sm:block float float-2">🔒 {t('Nothing uploaded', 'No se sube nada')}</div>
     </div>
   );
@@ -90,7 +81,7 @@ export default function Landing() {
                 <a href={START} className="btn-press group inline-flex min-h-13 items-center gap-2 rounded-full bg-mango px-8 py-3.5 text-base font-semibold text-night shadow-[0_18px_60px_-12px_rgb(232_164_169/.85)] hover:brightness-110">{t('Start free', 'Empezar gratis')} <span className="transition group-hover:translate-x-0.5">→</span></a>
                 <a href="./solo/" className="btn-press adv-glass inline-flex min-h-13 items-center rounded-full px-6 py-3.5 text-base text-ink/90 hover:text-ink">{t('Partner won’t join? Solo Search', '¿Tu pareja no participa? Búsqueda Solo')}</a>
               </div>
-              <ul className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-ink/55 lg:justify-start">{[t('No sign-up', 'Sin registro'), t('Nothing uploaded', 'No se sube nada'), t('Mutual by choice', 'Mutuo por elección')].map((x) => <li key={x} className="flex items-center gap-2"><span className="text-palm">✓</span>{x}</li>)}</ul>
+              <ul className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-ink/55 lg:justify-start">{[t('Free account', 'Cuenta gratis'), t('Nothing uploaded', 'No se sube nada'), t('Mutual by choice', 'Mutuo por elección')].map((x) => <li key={x} className="flex items-center gap-2"><span className="text-palm">✓</span>{x}</li>)}</ul>
             </div>
             <div className="rise rise-3"><Device t={t} /></div>
           </div>
@@ -115,7 +106,7 @@ export default function Landing() {
 
         {/* LIVE SIMULATOR */}
         <section aria-labelledby="try" className="py-10">
-          <h2 id="try" className="adv-reveal text-center font-display text-4xl font-semibold tracking-tight sm:text-5xl">{t('See it work before you start', 'Mírala funcionar antes de empezar')}</h2>
+          <h2 id="try" className="adv-reveal text-center font-display text-4xl font-semibold tracking-tight sm:text-5xl">{t('Try it on your own data, right here', 'Pruébala con tus propios datos, aquí mismo')}</h2>
           <div className="adv-reveal mt-10"><SweepSim t={t} es={es} /></div>
         </section>
 
@@ -158,7 +149,7 @@ export default function Landing() {
               [t('No secret checking of a partner', 'Nada de revisar a tu pareja en secreto'), t('No screen lets one partner see the other’s data without their own opt-in.', 'Ninguna pantalla permite ver los datos de la otra persona sin su consentimiento.')],
               [t('Results go to your partner only as disclosed', 'Los resultados van a tu pareja solo como se indicó'), t('You see exactly what will be sent. Nothing sends without your confirm tap.', 'Ves exactamente lo que se enviará. Nada se envía sin tu confirmación.')],
               [t('Clear data at any time', 'Borra tus datos cuando quieras'), t('Type CLEAR in Settings and everything on the device is gone.', 'Escribe CLEAR en Ajustes y todo desaparece del dispositivo.')],
-              [t('Free on purpose', 'Gratis a propósito'), t('No paywall, no checkout, no sign-up for the core cleanup.', 'Sin muro de pago, sin cobro y sin registro para la limpieza principal.')],
+              [t('Free on purpose', 'Gratis a propósito'), t('No paywall and no checkout. Your free account keeps your dashboard private.', 'Sin muro de pago ni cobro. Tu cuenta gratis mantiene tu panel privado.')],
             ].map(([h, p]) => <li key={h} className="flex gap-4"><span className="adv-glass grid size-10 shrink-0 place-items-center rounded-xl text-mango"><Icon d={I.lock} /></span><span><strong className="block text-lg">{h}</strong><span className="text-ink/65">{p}</span></span></li>)}</ul>
           </div>
         </section>

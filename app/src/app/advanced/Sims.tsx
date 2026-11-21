@@ -1,45 +1,51 @@
 'use client';
 // Two interactive simulators for the Marriage Mode Advanced landing page.
-// 1) Sweep simulator: runs the REAL sweep engine on the fictional demo files, live, in the visitor's browser.
+// 1) Live Sweep: runs the REAL sweep engine on the visitor's OWN file, in their browser. Nothing uploaded or saved.
 // 2) Feed simulator: shows how an attention algorithm learns from what you pause on (Learn lesson 4).
 import { useEffect, useRef, useState } from 'react';
-import { sweepInbox, sweepSocial, sweepDevice, parseDemoSocial, parseDevice, CAT_LABEL, type Flag } from '@/lib/adv/sweep';
-import { DEMO_INBOX, DEMO_SOCIAL, DEMO_DEVICE, DEMO_EXES } from '@/lib/adv/demo';
+import { CAT_LABEL } from '@/lib/adv/sweep';
+import { readInbox, readSocial } from '@/lib/adv/io';
 
 type T = (en: string, es: string) => string;
 
-function demoFlags(): Flag[] {
-  const inbox = sweepInbox({ file: 'demo-inbox.txt', text: DEMO_INBOX }); const k = { exes: DEMO_EXES, pastMatches: inbox.matches };
-  return [...inbox.flags, ...parseDemoSocial(DEMO_SOCIAL, 'demo-social.json').flatMap((d) => sweepSocial(d, k)), ...sweepDevice(parseDevice(DEMO_DEVICE, 'demo-device.json'), k)];
-}
-
 export function SweepSim({ t, es }: { t: T; es: boolean }) {
-  const [shown, setShown] = useState<Flag[]>([]); const [running, setRunning] = useState(false); const [file, setFile] = useState(''); const timer = useRef<ReturnType<typeof setTimeout>[]>([]);
-  useEffect(() => () => timer.current.forEach(clearTimeout), []);
-  const run = () => {
-    timer.current.forEach(clearTimeout); timer.current = []; setShown([]); setRunning(true);
-    const all = demoFlags(); const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches; const step = reduce ? 0 : 420;
-    all.forEach((f, i) => timer.current.push(setTimeout(() => { setShown((x) => [...x, f]); setFile(f.source.replace(/.*\((.*)\)/, '$1')); if (i === all.length - 1) setRunning(false); }, i * step)));
+  const [shown, setShown] = useState<{ who: string; why: string; evidence: string; risque: boolean; cat: string }[]>([]); const [busy, setBusy] = useState(''); const [file, setFile] = useState(''); const [err, setErr] = useState('');
+  const run = async (f: File) => {
+    setErr(''); setShown([]); setFile(f.name); setBusy(t('Reading on your device…', 'Leyendo en tu dispositivo…'));
+    try {
+      const text = /\.zip$/i.test(f.name) ? null : await f.text();
+      const social = text !== null && /^\s*[[{]/.test(text) && !/^From /m.test(text);
+      if (social || /\.zip$/i.test(f.name)) {
+        const r = await readSocial(f.name, text, f, { exes: [], pastMatches: [] }, setBusy).catch(() => null);
+        const d = await readInbox(f.name, text, f, setBusy).catch(() => null);
+        setShown([...(d?.dating ?? []).map((x) => ({ who: x.name, why: t('Dating app found in your file', 'App de citas encontrada en tu archivo'), evidence: x.evidence, risque: true, cat: CAT_LABEL.dating[es ? 1 : 0] })),
+          ...(r?.flags ?? []).map((x) => ({ who: x.who, why: es ? x.whyEs : x.why, evidence: x.evidence, risque: x.risque, cat: CAT_LABEL[x.category][es ? 1 : 0] }))]);
+      } else {
+        const d = await readInbox(f.name, text, f, setBusy);
+        setShown([...d.dating.map((x) => ({ who: x.name, why: t('Dating app found in your email or receipts', 'App de citas encontrada en tu correo o recibos'), evidence: x.evidence, risque: true, cat: CAT_LABEL.dating[es ? 1 : 0] })),
+          ...d.matches.map((m) => ({ who: m, why: t('A past dating match is named in your email', 'Un match de citas anterior aparece en tu correo'), evidence: f.name, risque: true, cat: CAT_LABEL.risque[es ? 1 : 0] }))]);
+      }
+    } catch { setErr(t('That file could not be read. Try a .txt / .mbox email export or a social media .zip / .json download.', 'No se pudo leer el archivo. Prueba un correo .txt / .mbox o una descarga .zip / .json de redes.')); }
+    finally { setBusy(''); }
   };
   const risk = shown.filter((f) => f.risque).length;
   return (
     <div className="adv-glass adv-edge rounded-[2rem] p-5 sm:p-7">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div><p className="text-sm text-mango">{t('Live simulator', 'Simulador en vivo')}</p><h3 className="font-display text-2xl font-semibold">{t('Run a real Sweep on fictional data', 'Haz una Revisión real con datos ficticios')}</h3></div>
-        <button onClick={run} disabled={running} className="btn-press min-h-12 rounded-full bg-mango px-6 font-semibold text-night disabled:opacity-60">{running ? t('Sweeping…', 'Revisando…') : shown.length ? t('Run again', 'Repetir') : t('Run the Sweep', 'Hacer la Revisión')}</button>
-      </div>
-      <div className="mt-5 grid gap-4 md:grid-cols-[220px_1fr]">
-        <div className="space-y-3 text-sm">
-          {['demo-inbox.txt', 'demo-social.json', 'demo-device.json'].map((f) => <div key={f} className={`flex items-center gap-2 rounded-xl px-3 py-2 ring-1 transition ${file === f && running ? 'bg-mango/10 ring-mango/50' : 'ring-white/10'}`}><span aria-hidden="true">{f.includes('inbox') ? '✉️' : f.includes('social') ? '📱' : '☎️'}</span>{f}</div>)}
-          <div className="rounded-xl bg-white/[0.04] p-3"><p className="text-ink/60">{t('Flags', 'Marcas')}: <strong className="text-ink">{shown.length}</strong></p><p className="text-ink/60">{t('Risque', 'Riesgoso')}: <strong className="text-mango">{risk}</strong></p><p className="mt-1 text-xs text-ink/45">{t('Runs in your browser. Nothing uploaded.', 'Corre en tu navegador. No se sube nada.')}</p></div>
-        </div>
-        <ul aria-live="polite" className="max-h-[360px] min-h-[220px] space-y-2 overflow-y-auto pr-1">
-          {!shown.length && <li className="grid h-[220px] place-items-center rounded-2xl text-ink/45 ring-1 ring-dashed ring-white/10">{t('Press “Run the Sweep” to watch it work.', 'Toca “Hacer la Revisión” para verla trabajar.')}</li>}
-          {shown.map((f) => <li key={f.id} className="rise rounded-2xl bg-white/[0.04] p-3 ring-1 ring-white/[0.07]">
-            <div className="flex flex-wrap items-center gap-2 text-sm"><strong>{f.who}</strong><span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px]">{CAT_LABEL[f.category][es ? 1 : 0]}</span>{f.risque && <span className="rounded-full bg-mango/15 px-2 py-0.5 text-[11px] text-mango">{CAT_LABEL.risque[es ? 1 : 0]}</span>}</div>
-            <p className="mt-1 text-sm text-ink/75">{es ? f.whyEs : f.why}</p><p className="mt-0.5 truncate text-[11px] text-ink/40">{f.evidence}</p></li>)}
-        </ul>
-      </div>
+      <p className="text-sm text-mango">{t('Live, private, on your device', 'En vivo, privado, en tu dispositivo')}</p>
+      <h3 className="font-display text-2xl font-semibold">{t('Drop in your own email or social media download', 'Suelta tu propia descarga de correo o redes')}</h3>
+      <p className="mt-1 text-sm text-ink/60">{t('The real Sweep reads it in your browser and shows what it finds. Nothing is uploaded or saved; close the page and it’s gone.', 'La Revisión real lo lee en tu navegador y muestra lo que encuentra. No se sube ni se guarda nada; cierra la página y desaparece.')}</p>
+      <label className="mt-5 flex min-h-24 cursor-pointer flex-col items-center justify-center gap-1 rounded-2xl border border-dashed border-mango/40 bg-mango/[0.04] p-5 text-center hover:bg-mango/[0.08]">
+        <span className="font-semibold">{t('Choose a file', 'Elegir un archivo')}</span><span className="text-xs text-ink/55">.mbox · .txt · .eml · .json · .zip ({t('Google Takeout, Instagram, Facebook, TikTok…', 'Google Takeout, Instagram, Facebook, TikTok…')})</span>
+        <input type="file" accept=".mbox,.txt,.eml,.html,.json,.csv,.zip" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) void run(f); e.target.value = ''; }} />
+      </label>
+      {busy && <p role="status" className="mt-3 text-sm text-lagoon">{busy}</p>}{err && <p role="alert" className="mt-3 text-sm text-coral">{err}</p>}
+      {file && !busy && !err && <div className="mt-4">
+        <p className="text-sm text-ink/70">{file}: <strong className="text-ink">{shown.length}</strong> {t('found', 'encontrados')} · <strong className="text-mango">{risk}</strong> {t('risque', 'riesgosos')}</p>
+        {shown.length ? <ul aria-live="polite" className="mt-3 max-h-[360px] space-y-2 overflow-y-auto pr-1">{shown.map((f, k) => <li key={k} className="rise rounded-2xl bg-white/[0.04] p-3 ring-1 ring-white/[0.07]">
+          <div className="flex flex-wrap items-center gap-2 text-sm"><strong>{f.who}</strong><span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px]">{f.cat}</span>{f.risque && <span className="rounded-full bg-mango/15 px-2 py-0.5 text-[11px] text-mango">{CAT_LABEL.risque[es ? 1 : 0]}</span>}</div>
+          <p className="mt-1 text-sm text-ink/75">{f.why}</p><p className="mt-0.5 truncate text-[11px] text-ink/40">{f.evidence}</p></li>)}</ul>
+          : <p className="mt-3 text-sm text-palm">✓ {t('Nothing flagged in this file.', 'Nada marcado en este archivo.')}</p>}
+      </div>}
     </div>
   );
 }

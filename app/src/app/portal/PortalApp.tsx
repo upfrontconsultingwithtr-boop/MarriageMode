@@ -16,7 +16,7 @@ const ghost = `${btn} ring-1 ring-white/20 hover:bg-white/5`;
 const input = 'min-h-12 w-full rounded-2xl bg-night/60 px-4 ring-1 ring-white/15 focus:ring-mango';
 const TOOLS = '../advanced/app/';
 
-export default function PortalApp() {
+export default function PortalApp({ page = 'dashboard' }: { page?: 'login' | 'dashboard' }) {
   const [es, setEs] = useState(false); const t: T = (en, sp) => (es ? sp : en);
   const [uid, setUid] = useState<string | null>(null); const [email, setEmail] = useState(''); const [level, setLevel] = useState<P.Level | 0>(0); const [ready, setReady] = useState(false); const [recovery, setRecovery] = useState(false);
   useEffect(() => {
@@ -38,9 +38,16 @@ export default function PortalApp() {
           {uid && <button onClick={() => void signOut()} className={ghost}>{t('Sign out', 'Salir')}</button>}
         </div>
       </div>
-      {!ready ? <div className="min-h-[50vh]" /> : recovery ? <NewPassword t={t} done={() => setRecovery(false)} /> : !uid ? <SignIn t={t} /> : <Home t={t} es={es} uid={uid} level={level as P.Level} />}
+      {!ready ? <div className="min-h-[50vh]" /> : recovery ? <NewPassword t={t} done={() => { setRecovery(false); location.replace('../portal/'); }} />
+        : page === 'login' ? (uid ? <Redirect to="../portal/" /> : <SignIn t={t} />)
+        : !uid ? <Redirect to="../login/" /> : <Home t={t} es={es} uid={uid} level={level as P.Level} />}
     </div>
   );
+}
+
+function Redirect({ to }: { to: string }) {
+  useEffect(() => { location.replace(to); }, [to]);
+  return <div className="min-h-[50vh]" />;
 }
 
 function SignIn({ t }: { t: T }) {

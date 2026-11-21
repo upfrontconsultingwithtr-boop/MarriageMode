@@ -30,11 +30,11 @@ jobs:
         run: |
           npx next build
           rm -rf ../portal-site && mkdir -p ../portal-site/advanced ../portal-site/coach
-          cp -r out/_next out/portal out/icon.svg out/icon-192.png ../portal-site/
+          cp -r out/_next out/portal out/login out/icon.svg out/icon-192.png ../portal-site/
           cp -r out/advanced/app out/advanced/solo ../portal-site/advanced/
           cp out/coach/mia-poster.jpg out/coach/mia-idle.mp4 ../portal-site/coach/
           cp out/404.html ../portal-site/ || true
-          printf '<!doctype html><meta charset="utf-8"><meta name="robots" content="noindex"><title>Marriage Mode</title><script>location.replace("/portal/"+location.search+location.hash)</script><a href="/portal/">Sign in to Marriage Mode</a>\n' > ../portal-site/index.html
+          printf '<!doctype html><meta charset="utf-8"><meta name="robots" content="noindex"><title>Marriage Mode</title><script>location.replace("/login/"+location.search+location.hash)</script><a href="/login/">Log in to Marriage Mode</a>\n' > ../portal-site/index.html
           printf 'User-agent: *\nDisallow: /\n' > ../portal-site/robots.txt
         env: { NEXT_PUBLIC_PORTAL_SITE: '1', SITE_URL: 'https://marriage-mode-portal.web.app' }
       - name: Deploy portal preview

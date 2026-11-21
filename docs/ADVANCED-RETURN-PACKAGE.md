@@ -15,6 +15,11 @@ The full existing site is included and unchanged; the live GitHub Pages site was
 - Tests: `app/src/lib/advanced.test.ts` (acceptance tests 1-10)
 - Preview publishing: `.github/workflows/advanced-preview.yml`
 
+## No made-up data on the site (Tiffany, 2026-11-21)
+All demo buttons and the fictional demo screen were removed from the site. The fictional test files live only in the automated tests (`app/src/lib/adv/demo.ts`), and the browser test now uploads them through the real file buttons like a customer would. The front page's live Sweep runs on the visitor's own file, in their browser, saving nothing.
+
+Customer login has its own page on the portal site: `/login/` (the portal's front door); `/portal/` is the dashboard and sends signed-out visitors to `/login/`.
+
 ## 3. Acceptance checks (all run in a real browser on the built site, plus unit tests)
 | # | Result | What was actually tested |
 |---|---|---|
