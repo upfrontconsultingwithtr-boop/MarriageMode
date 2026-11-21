@@ -56,3 +56,16 @@ export async function updates(): Promise<Update[]> { const { data } = await db()
 export async function postUpdate(uid: string, customer: string, title: string, body: string, urgent: boolean) { const { error } = await db()!.schema('app').from('portal_updates').insert({ customer_id: customer, author_id: uid, title, body, urgent }); return error?.message ?? null; }
 export async function setLevel(target: string, level: Level) { const { error } = await db()!.schema('app').rpc('portal_set_level', { target, new_level: level }); return error?.message ?? null; }
 export async function assign(staff: string, customer: string, on: boolean) { const { error } = await db()!.schema('app').rpc('portal_assign', { staff, customer, on_off: on }); return error?.message ?? null; }
+
+/** Partner pairing on file (migration 0015): only the signed-in person's own row is readable. */
+export async function partnerInfo(): Promise<{ partner_emails: string[]; auto_share: boolean } | null> {
+  const c = db(); if (!c) return null; const { data: s } = await c.auth.getSession(); if (!s.session) return null;
+  const { data } = await c.schema('app').from('portal_partner_map').select('partner_emails, auto_share').maybeSingle(); return (data as any) ?? null;
+}
+/** The partner's shared dashboard (visible to the pair by database rule). */
+export async function partnerDashboard(emails: string[]): Promise<{ member: Member; results: Results; updated_at: string } | null> {
+  const { data: m } = await db()!.schema('app').from('portal_members').select('*').in('email', emails.map((e) => e.toLowerCase())).limit(1);
+  const member = (m ?? [])[0] as Member | undefined; if (!member) return null;
+  const { data: d } = await db()!.schema('app').from('portal_dashboards').select('*').eq('customer_id', member.user_id).maybeSingle();
+  return d ? { member, results: (d as any).results, updated_at: (d as any).updated_at } : { member, results: null as any, updated_at: '' };
+}

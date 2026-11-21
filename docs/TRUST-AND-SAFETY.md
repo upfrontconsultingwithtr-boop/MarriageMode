@@ -73,6 +73,14 @@ dashboard reaches the team only if they tap "Share my results", and it holds num
 (never exports, reviewed names or messages); "Stop sharing and remove" deletes it at once. Mia's AI
 runs on the customer's own device (free); chats never leave it. Crisis numbers sit above the chat.
 
+## Partner on file (Tiffany, 2026-11-21, migration 0015)
+
+When the company already has a customer's partner email (today only the two founders), the intake
+fills it in and the customer only ticks the acknowledgement. Paired partners can see each other's
+shared dashboard (numbers and to-dos only). The founder pair has auto-share on, consistent with the
+intake disclaimer "your results will go to your partner", and the dashboard says so plainly. Each
+person can read only their own pairing row.
+
 ## Coercion safeguards
 
 - Couple invites can be accepted only on the invitee's own signed-in device.

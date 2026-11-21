@@ -108,7 +108,16 @@ function Home({ t, es, uid, level }: { t: T; es: boolean; uid: string; level: P.
 // ---------- Customer dashboard: results, important items, updates, AI help ----------
 function Dashboard({ t, es, uid }: { t: T; es: boolean; uid: string }) {
   const [s, setS] = useState<AdvState | null>(null); const [ups, setUps] = useState<P.Update[]>([]); const [shared, setShared] = useState<string | null>(null);
-  useEffect(() => { setS(load()); void P.updates().then((u) => setUps(u.filter((x) => x.customer_id === uid))); void P.dashboards().then((d) => setShared(d.find((x) => x.customer_id === uid)?.updated_at ?? null)); }, [uid]);
+  const [pair, setPair] = useState<{ partner_emails: string[]; auto_share: boolean } | null>(null); const [pd, setPd] = useState<Awaited<ReturnType<typeof P.partnerDashboard>>>(null);
+  useEffect(() => {
+    const st = load(); setS(st); void P.updates().then((u) => setUps(u.filter((x) => x.customer_id === uid)));
+    void (async () => {
+      const info = await P.partnerInfo(); setPair(info);
+      if (info?.auto_share && st.intake) { if (await P.syncMine(uid, st)) setShared(new Date().toISOString()); }
+      else { const d = await P.dashboards(); setShared(d.find((x) => x.customer_id === uid)?.updated_at ?? null); }
+      if (info) setPd(await P.partnerDashboard(info.partner_emails));
+    })();
+  }, [uid]);
   const sum = useMemo(() => (s ? P.summarize(s) : null), [s]);
   if (!s || !sum) return <div className="min-h-[40vh]" />;
   const r = sum.results; const started = !!s.intake;
@@ -132,8 +141,17 @@ function Dashboard({ t, es, uid }: { t: T; es: boolean; uid: string }) {
           <h2 id="upd" className="font-display text-2xl font-semibold">{t('Updates', 'Avisos')}</h2>
           {ups.length ? <ul className="mt-3 space-y-3">{ups.map((u) => <li key={u.id} className={`rounded-2xl p-4 ring-1 ${u.urgent ? 'bg-coral/10 ring-coral/40' : 'bg-white/[0.04] ring-white/[0.06]'}`}><p className="text-xs text-ink/50">{new Date(u.created_at).toLocaleString(es ? 'es-US' : 'en-US')}{u.urgent ? ` · ${t('Important', 'Importante')}` : ''}</p><p className="mt-1 font-semibold">{u.title}</p>{u.body && <p className="mt-1 whitespace-pre-wrap text-sm text-ink/75">{u.body}</p>}</li>)}</ul> : <p className="mt-3 text-ink/65">{t('No updates from your team yet.', 'Aún no hay avisos de tu equipo.')}</p>}
         </section>
+        {pair && <section className={`${card} adv-edge`} aria-labelledby="pr">
+          <h2 id="pr" className="font-display text-2xl font-semibold">{t('My partner’s results', 'Resultados de mi pareja')}</h2>
+          {!pd ? <p className="mt-2 text-ink/65">{t('Your partner hasn’t signed in yet. Their results show here as soon as they do.', 'Tu pareja aún no inicia sesión. Sus resultados aparecen aquí en cuanto lo haga.')}</p>
+            : !pd.results ? <p className="mt-2 text-ink/65">{(pd.member.display_name || pd.member.email)} {t('has signed in but hasn’t started the intake yet.', 'ya inició sesión pero aún no empieza el registro.')}</p>
+            : <><p className="mt-1 text-sm text-ink/55">{pd.member.display_name || pd.member.email} · {t('updated', 'actualizado')} {new Date(pd.updated_at).toLocaleString(es ? 'es-US' : 'en-US')}</p>
+              <dl className="mt-3 grid grid-cols-3 gap-3 text-sm">{[[t('Score', 'Puntos'), pd.results.score], [t('Closed', 'Cerradas'), `${pd.results.closed.length}/${pd.results.total}`], [t('Removals', 'Quitados'), pd.results.queueDone]].map(([k, v]) => <div key={k as string} className="rounded-2xl bg-white/[0.04] p-3"><dt className="text-ink/55">{k}</dt><dd className="mt-0.5 font-display text-xl">{v}</dd></div>)}</dl>
+              {pd.results.closed.length > 0 && <p className="mt-3 text-sm text-ink/65">{t('Verified closed', 'Cerradas y verificadas')}: {pd.results.closed.map((c) => `${c.name} (${c.at})`).join(' · ')}</p>}</>}
+        </section>}
         <section className={card} aria-labelledby="share">
           <h2 id="share" className="font-display text-xl font-semibold">{t('Share with my Marriage Mode team', 'Compartir con mi equipo de Marriage Mode')}</h2>
+          {pair?.auto_share && <p className="mt-1 rounded-2xl bg-lagoon/10 p-3 text-sm text-lagoon ring-1 ring-lagoon/30">{t('Founder account: your results are shared with your partner automatically each time you open this dashboard, as the disclaimer says.', 'Cuenta de fundador: tus resultados se comparten con tu pareja automáticamente cada vez que abres este panel, como dice el aviso.')}</p>}
           <p className="mt-1 text-sm text-ink/65">{t('Off unless you turn it on. Sends only the numbers and to-dos above (never your exports, names you reviewed, or messages) so your coach can help. Your Company Admin and any coach assigned to you can see it.', 'Apagado salvo que lo actives. Envía solo los números y pendientes de arriba (nunca tus exportaciones, nombres ni mensajes) para que tu coach te ayude. Tu Administrador y el coach asignado pueden verlo.')}</p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <button className={primary} onClick={async () => { if (await P.syncMine(uid, s)) setShared(new Date().toISOString()); }}>{shared ? t('Update what my team sees', 'Actualizar lo que ve mi equipo') : t('Share my results', 'Compartir mis resultados')}</button>

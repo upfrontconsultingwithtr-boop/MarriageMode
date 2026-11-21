@@ -50,6 +50,8 @@ export default function AdvApp({ only }: { only?: 'solo' }) {
 function IntakeFlow() {
   const { set, t, es } = useAdv();
   const [step, setStep] = useState(0); const [d, setD] = useState<Partial<Intake>>({ lang: es ? 'es' : 'en' }); const [touched, setTouched] = useState(false);
+  const [onFile, setOnFile] = useState(false);
+  useEffect(() => { void import('@/lib/portal').then((P) => P.partnerInfo()).then((info) => { if (info?.partner_emails[0]) { setD((x) => ({ ...x, partnerEmail: info.partner_emails[0] })); setOnFile(true); } }).catch(() => {}); }, []);
   const lock = sweepLock(d); const emailBad = touched && !!d.partnerEmail && !validEmail(d.partnerEmail);
   const stages: [Stage, string, string][] = [['dating', 'Dating seriously', 'En una relación seria'], ['engaged', 'Engaged', 'Comprometidos'], ['newlywed', 'Newly married', 'Recién casados'], ['married', 'Married', 'Casados'], ['rebuilding', 'Rebuilding trust', 'Reconstruyendo la confianza']];
   const supports: [Support, string, string, string, string][] = [['human', 'Human', 'Humano', 'A real counselor walks with you.', 'Un consejero real te acompaña.'], ['ai', 'AI', 'IA', 'Mia, our AI coach, guides you any time.', 'Mia, nuestra coach de IA, te guía cuando quieras.'], ['hybrid', 'Hybrid', 'Híbrido', 'Mia day to day, a real person when it matters.', 'Mia en el día a día, una persona real cuando importa.']];
@@ -65,9 +67,10 @@ function IntakeFlow() {
           <p className="mt-2 font-display text-xl leading-snug text-ink/80">“Si usas este producto, tus resultados irán a tu pareja.”</p>
         </div>
         <Card>
+          {onFile ? <p className="rounded-2xl bg-palm/10 p-3 text-sm ring-1 ring-palm/30">✓ {t('We already have your partner’s email on file. Nothing to type.', 'Ya tenemos el correo de tu pareja. No tienes que escribir nada.')}</p> : <>
           <label htmlFor="pe" className="block font-medium">{t('Your partner’s email (required)', 'Correo de tu pareja (obligatorio)')}</label>
           <input id="pe" type="email" inputMode="email" autoComplete="off" value={d.partnerEmail ?? ''} onChange={(e) => setD({ ...d, partnerEmail: e.target.value })} onBlur={() => setTouched(true)} aria-invalid={emailBad} aria-describedby="pe-err" className="mt-2 min-h-12 w-full rounded-2xl bg-night/60 px-4 ring-1 ring-white/15 focus:ring-mango" placeholder="partner@example.com" />
-          <p id="pe-err" className="mt-1 min-h-5 text-sm text-coral">{emailBad ? t('That email doesn’t look right. Check it and try again.', 'Ese correo no parece correcto. Revísalo e inténtalo otra vez.') : ''}</p>
+          <p id="pe-err" className="mt-1 min-h-5 text-sm text-coral">{emailBad ? t('That email doesn’t look right. Check it and try again.', 'Ese correo no parece correcto. Revísalo e inténtalo otra vez.') : ''}</p></>}
           <Check id="ack" checked={!!d.ack} onChange={(v) => setD({ ...d, ack: v })}>{t('I understand my results will go to my partner.', 'Entiendo que mis resultados irán a mi pareja.')}</Check>
           <p className="mt-2 text-sm text-ink/60">{t('Nothing is ever sent without you seeing exactly what will be sent and tapping confirm. You choose each section to share.', 'Nunca se envía nada sin que veas exactamente qué se enviará y toques confirmar. Tú eliges cada sección que compartes.')}</p>
           {lock.length > 0 && <p className="mt-3 text-sm text-ink/70" role="status">🔒 {t('The Sweep stays locked until', 'La Revisión sigue bloqueada hasta que')}: {lock.map((w) => ({ 'email-missing': t('partner email is entered', 'escribas el correo de tu pareja'), 'email-invalid': t('partner email is valid', 'el correo sea válido'), 'ack-missing': t('you tick the box', 'marques la casilla') }[w])).join(' · ')}</p>}

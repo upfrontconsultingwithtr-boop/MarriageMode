@@ -298,6 +298,16 @@ select pg_temp.check((select count(*) from app.portal_dashboards) = 2, 'portal: 
 do $$ begin perform app.portal_set_level('00000000-0000-0000-0000-00000000000a', 1::smallint); raise exception 'RLS FAIL: last admin removed';
 exception when others then if sqlerrm not like 'at least one Company Admin%' then raise; end if; end $$;
 select pg_temp.check(true, 'portal: last Company Admin cannot be removed');
+-- Partner pairing (0015): own map row only; partners see each other's shared dashboard, nobody else's.
+reset role;
+insert into app.portal_partner_map (email, partner_emails) values ('b@test', array['d@test']), ('d@test', array['b@test']);
+update app.portal_members set level = 1 where user_id = '00000000-0000-0000-0000-00000000000c';
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000b');
+select pg_temp.check((select count(*) from app.portal_partner_map) = 1, 'partners: reads only own pairing row');
+select pg_temp.check((select count(*) from app.portal_dashboards) = 2, 'partners: sees own + partner dashboard');
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000c');
+select pg_temp.check((select count(*) from app.portal_dashboards) = 0, 'partners: outsider sees neither');
+select pg_temp.check((select count(*) from app.portal_partner_map) = 0, 'partners: outsider reads no pairing rows');
 -- Catch-all guards: no table can ship without row-level security, and only
 -- the reviewed public catalogs may be read without signing in.
 reset role;
