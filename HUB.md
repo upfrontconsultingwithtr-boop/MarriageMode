@@ -48,6 +48,7 @@ Why: counselors and pastors who work with engaged couples are the fastest free w
 | Design look (green & pink) | https://github.com/upfrontconsultingwithtr-boop/MarriageMode/blob/claude/nice-einstein-h76zzg/docs/DESIGN-SYSTEM.md |
 
 ## 📝 Done log (newest first)
+- 2026-11-21: Customer sign-in portal (private preview, own site): Results, Important items, Updates, Mia for times of need (on-device AI, crisis first); levels Company Admin Access / Manager / Coach / Customer with coach assignments; last admin can't be removed (migration 0014 live, RLS tested). Password minimum raised to 10. Fixed the free-database keep-alive workflow, which had never run.
 - 2026-11-21: Marriage Mode Advanced built from the Muse handoff (Jobs 1-10) as a PRIVATE preview: intake + partner disclaimer, honest scoring, Learn + worksheet, on-device Sweep, risque rules, access levels, backup-first queue, free Solo Search (public only + reverse photo), contextual Mia EN/ES, verified proof + mutual report. Premium landing with live Sweep + feed simulators. All 10 acceptance tests pass. Return package: docs/ADVANCED-RETURN-PACKAGE.md. Live site untouched.
 - 2026-11-20: Mia speaks natural Spanish too: 239 fixed Spanish lines pre-recorded with the free Piper es_MX voice (tested live).
 - 2026-11-18: Mia sounds natural on every device: 235 fixed lines pre-recorded in voice 11 (free, Kokoro), and her real-footage lips follow her voice (open on sounds, closed on pauses). Tested live on iPad size.
