@@ -187,7 +187,7 @@ function Queue() {
 export function Solo() {
   const { s, set, t } = useAdv(); const [type, setType] = useState<IdType>('username'); const [val, setVal] = useState('');
   const TYPES: [IdType, string, string][] = [['email', 'Email', 'Correo'], ['username', 'Username', 'Usuario'], ['phone', 'Phone number', 'Teléfono'], ['namecity', 'Name + city', 'Nombre + ciudad'], ['photo', 'Photo (reverse look-up)', 'Foto (búsqueda inversa)'], ['other', 'Other identifier', 'Otro identificador']];
-  const add = (ty: IdType, v: string) => { const list = searchesFor(ty, v); set((x) => ({ ...x, solo: [...x.solo, ...list.filter((q) => !x.solo.some((y) => y.url === q.url)).map((q, i) => ({ id: `s-${Date.now()}-${i}`, idType: ty, value: v, site: q.site, url: q.url }))] })); };
+  const add = (ty: IdType, v: string) => { const list = searchesFor(ty, v); set((x) => ({ ...x, solo: [...x.solo, ...list.filter((q) => !x.solo.some((y) => y.url === q.url)).map((q, i) => ({ id: `s-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}-${i}`, idType: ty, value: v, site: q.site, url: q.url }))] })); };
   const record = (id: string, result: 'found' | 'none', note?: string, link?: string) => set((x) => {
     const item = x.solo.find((y) => y.id === id)!; const solo = x.solo.map((y) => (y.id === id ? { ...y, result, note, link, at: new Date().toISOString() } : y));
     if (result !== 'found') return { ...x, solo };
