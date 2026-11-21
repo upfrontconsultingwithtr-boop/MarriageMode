@@ -8,4 +8,5 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - run: curl -fsS https://wdokqitjoeellkwbtdso.supabase.co/auth/v1/health -H "apikey: sb_publishable_6TLLpaZKPtfYJmA1IQDpEA_VJB4ehaz" > /dev/null && echo awake
+      - run: |
+          curl -fsS https://wdokqitjoeellkwbtdso.supabase.co/auth/v1/health -H "apikey: sb_publishable_6TLLpaZKPtfYJmA1IQDpEA_VJB4ehaz" > /dev/null && echo awake
