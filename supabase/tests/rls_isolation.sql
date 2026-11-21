@@ -268,6 +268,36 @@ do $$ begin for i in 1..10 loop perform app.create_couple_invite(); end loop;
   begin perform app.create_couple_invite(); raise exception 'RLS FAIL: 11th invite allowed';
   exception when others then if sqlerrm not like 'too many invites%' then raise; end if; end; end $$;
 select pg_temp.check(true, 'invites capped at 10 per day');
+-- Marriage Mode portal (0014): levels, assignments, Company Admin guard.
+reset role;
+insert into auth.users (id, email) values ('00000000-0000-0000-0000-0000000000d1','d@test');
+insert into app.portal_members (user_id, email, level) values
+  ('00000000-0000-0000-0000-00000000000a','a@test',4), ('00000000-0000-0000-0000-00000000000b','b@test',1),
+  ('00000000-0000-0000-0000-00000000000c','c@test',2), ('00000000-0000-0000-0000-0000000000d1','d@test',1);
+insert into app.portal_assignments values ('00000000-0000-0000-0000-00000000000c','00000000-0000-0000-0000-00000000000b');
+insert into app.portal_dashboards (customer_id, results) values ('00000000-0000-0000-0000-00000000000b','{"score":50}'), ('00000000-0000-0000-0000-0000000000d1','{"score":10}');
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000b');
+select pg_temp.check((select count(*) from app.portal_dashboards) = 1, 'portal: customer sees only own dashboard');
+select pg_temp.check((select count(*) from app.portal_members) = 1, 'portal: customer sees only own member row');
+do $$ begin update app.portal_members set level = 4 where user_id = '00000000-0000-0000-0000-00000000000b'; raise exception 'RLS FAIL: customer raised own level';
+exception when insufficient_privilege then null; end $$;
+select pg_temp.check((select level from app.portal_members where user_id = '00000000-0000-0000-0000-00000000000b') = 1, 'portal: customer cannot raise own level');
+do $$ begin perform app.portal_set_level('00000000-0000-0000-0000-00000000000b', 4::smallint); raise exception 'RLS FAIL: customer used set_level';
+exception when others then if sqlerrm not like 'Company Admin Access required%' then raise; end if; end $$;
+do $$ begin insert into app.portal_dashboards (customer_id) values ('00000000-0000-0000-0000-0000000000d1'); raise exception 'RLS FAIL: wrote another dashboard';
+exception when insufficient_privilege then null; end $$;
+select pg_temp.check(true, 'portal: customer cannot write another dashboard');
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000c');
+select pg_temp.check((select count(*) from app.portal_dashboards) = 1, 'portal: coach sees only assigned customer');
+insert into app.portal_updates (customer_id, author_id, title) values ('00000000-0000-0000-0000-00000000000b','00000000-0000-0000-0000-00000000000c','Check-in');
+do $$ begin insert into app.portal_updates (customer_id, author_id, title) values ('00000000-0000-0000-0000-0000000000d1','00000000-0000-0000-0000-00000000000c','x'); raise exception 'RLS FAIL: coach posted to unassigned customer';
+exception when insufficient_privilege then null; end $$;
+select pg_temp.check(true, 'portal: coach posts only to assigned customers');
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
+select pg_temp.check((select count(*) from app.portal_dashboards) = 2, 'portal: Company Admin sees all dashboards');
+do $$ begin perform app.portal_set_level('00000000-0000-0000-0000-00000000000a', 1::smallint); raise exception 'RLS FAIL: last admin removed';
+exception when others then if sqlerrm not like 'at least one Company Admin%' then raise; end if; end $$;
+select pg_temp.check(true, 'portal: last Company Admin cannot be removed');
 -- Catch-all guards: no table can ship without row-level security, and only
 -- the reviewed public catalogs may be read without signing in.
 reset role;

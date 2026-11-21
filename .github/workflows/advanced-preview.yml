@@ -1,11 +1,16 @@
 name: Marriage Mode Advanced - private preview (not live)
-# Builds the full Marriage Mode site plus the new Advanced section (NEXT_PUBLIC_ADVANCED_SITE=1) and
-# publishes it to a Firebase Hosting PREVIEW CHANNEL (free, temporary, noindex). The live site is untouched.
+# 1) Customer PORTAL (sign-in dashboard + tools) on its own Firebase site, preview channel.
+# 2) Customer WEBSITE (full site + Advanced marketing pages) on a separate preview channel, linking to the portal.
+# Free, temporary, noindex. The live GitHub Pages site is untouched.
 on:
   push:
     branches: [claude/exciting-fermi-8uxuci]
     paths: ['app/**', '.github/workflows/advanced-preview.yml']
   workflow_dispatch:
+env:
+  NEXT_PUBLIC_SUPABASE_URL: https://wdokqitjoeellkwbtdso.supabase.co
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_6TLLpaZKPtfYJmA1IQDpEA_VJB4ehaz
+  NEXT_PUBLIC_FIREBASE_API_KEY: AIzaSyCl_J85xYkELVHr0KJcobbBRrFt8VRql5Q
 jobs:
   preview:
     runs-on: ubuntu-latest
@@ -16,24 +21,44 @@ jobs:
         with: { node-version: 22, cache: npm, cache-dependency-path: app/package-lock.json }
       - run: npm ci
       - run: npm test
-      - run: npx next build
-        env:
-          NEXT_PUBLIC_ADVANCED_SITE: '1'
-          SITE_URL: https://marriage-mode-preview.web.app
-          NEXT_PUBLIC_SUPABASE_URL: https://wdokqitjoeellkwbtdso.supabase.co
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_6TLLpaZKPtfYJmA1IQDpEA_VJB4ehaz
-          NEXT_PUBLIC_FIREBASE_API_KEY: AIzaSyCl_J85xYkELVHr0KJcobbBRrFt8VRql5Q
-      - name: Mark the preview noindex
-        run: |
-          printf 'User-agent: *\nDisallow: /\n' > out/robots.txt
-          printf '{"hosting":{"site":"marriage-mode-preview","public":"app/out","cleanUrls":false,"headers":[{"source":"**","headers":[{"key":"X-Robots-Tag","value":"noindex"}]}]}}' > ../firebase.preview.json
-      - name: Deploy to a preview channel
-        id: d
+      - name: Firebase login
         working-directory: .
         env: { SA: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' }
+        run: echo "$SA" > "$RUNNER_TEMP/sa.json" && echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/sa.json" >> "$GITHUB_ENV"
+      # ---- 1) portal ----
+      - run: npx next build && rm -rf ../portal-site && mkdir -p ../portal-site/advanced ../portal-site/coach && cp -r out/_next out/portal out/icon.svg out/icon-192.png ../portal-site/ && cp -r out/advanced/app out/advanced/solo ../portal-site/advanced/ && cp out/coach/mia-poster.jpg out/coach/mia-idle.mp4 ../portal-site/coach/ && cp out/404.html ../portal-site/ 2>/dev/null; printf '<!doctype html><meta charset="utf-8"><meta name="robots" content="noindex"><title>Marriage Mode</title><script>location.replace("/portal/"+location.search+location.hash)</script><a href="/portal/">Sign in to Marriage Mode</a>\n' > ../portal-site/index.html; printf 'User-agent: *\nDisallow: /\n' > ../portal-site/robots.txt
+        env: { NEXT_PUBLIC_PORTAL_SITE: '1', SITE_URL: 'https://marriage-mode-portal.web.app' }
+      - name: Deploy portal preview
+        id: portal
+        working-directory: .
         run: |
-          echo "$SA" > "$RUNNER_TEMP/sa.json"; export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
-          npx -y firebase-tools@13 hosting:sites:create marriage-mode-preview --project upfront-command-center --non-interactive || echo "site exists"
+          printf '{"hosting":{"site":"marriage-mode-portal","public":"portal-site","headers":[{"source":"**","headers":[{"key":"X-Robots-Tag","value":"noindex"},{"key":"X-Frame-Options","value":"DENY"},{"key":"Referrer-Policy","value":"no-referrer"}]}]}}' > firebase.portal.json
+          npx -y firebase-tools@13 hosting:sites:create marriage-mode-portal --project upfront-command-center --non-interactive || echo "site exists"
+          npx -y firebase-tools@13 hosting:channel:deploy advanced --expires 30d --config firebase.portal.json --project upfront-command-center --non-interactive --json > portal.json
+          URL=$(node -e "const j=require('./portal.json');const v=Object.values(j.result||{})[0]||{};console.log(v.url||'')")
+          echo "url=$URL/" >> "$GITHUB_OUTPUT"; echo "Portal: $URL/portal/" | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Allow Google sign-in on the portal address
+        working-directory: .
+        env: { HOST: '${{ steps.portal.outputs.url }}' }
+        run: |
+          pip install -q google-auth requests
+          python - <<'PY'
+          import os, json, requests, google.oauth2.service_account as s, google.auth.transport.requests as t
+          c = s.Credentials.from_service_account_file(os.environ['GOOGLE_APPLICATION_CREDENTIALS'], scopes=['https://www.googleapis.com/auth/cloud-platform']); c.refresh(t.Request())
+          h = {'Authorization': 'Bearer ' + c.token}; base = 'https://identitytoolkit.googleapis.com/admin/v2/projects/upfront-command-center'
+          doms = requests.get(base + '/config', headers=h).json().get('authorizedDomains', [])
+          host = os.environ['HOST'].split('//')[-1].strip('/')
+          for d in [host, 'marriage-mode-portal.web.app']:
+              if d and d not in doms: doms.append(d)
+          r = requests.patch(base + '/config?updateMask=authorizedDomains', headers=h, json={'authorizedDomains': doms}); print('domains', r.status_code)
+          PY
+      # ---- 2) customer website preview ----
+      - run: rm -rf .next out && npx next build && printf 'User-agent: *\nDisallow: /\n' > out/robots.txt
+        env: { NEXT_PUBLIC_ADVANCED_SITE: '1', NEXT_PUBLIC_PORTAL_URL: '${{ steps.portal.outputs.url }}', SITE_URL: 'https://marriage-mode-preview.web.app' }
+      - name: Deploy website preview
+        working-directory: .
+        run: |
+          printf '{"hosting":{"site":"marriage-mode-preview","public":"app/out","headers":[{"source":"**","headers":[{"key":"X-Robots-Tag","value":"noindex"}]}]}}' > firebase.preview.json
           npx -y firebase-tools@13 hosting:channel:deploy advanced --expires 30d --config firebase.preview.json --project upfront-command-center --non-interactive --json > deploy.json
-          URL=$(node -e "const j=require('./deploy.json');const r=j.result||{};const v=Object.values(r)[0]||{};console.log(v.url||'')")
-          echo "Preview: ${URL}advanced/" | tee -a "$GITHUB_STEP_SUMMARY"
+          URL=$(node -e "const j=require('./deploy.json');const v=Object.values(j.result||{})[0]||{};console.log(v.url||'')")
+          echo "Website: $URL/advanced/" | tee -a "$GITHUB_STEP_SUMMARY"

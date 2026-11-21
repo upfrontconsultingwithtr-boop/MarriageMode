@@ -62,6 +62,17 @@ Recorded at Tiffany's written direction (build handoff, 2026-11-21, plus chat).
 - **Device sweep reads metadata only.** Calls and texts are read as who and when; message content
   is never read or stored.
 
+## Customer portal (preview, 2026-11-21)
+
+Marriage Mode customers sign in on a separate portal site (never the customer website): email +
+password (10+ characters), email link, or Google. Security levels: 4 Company Admin Access (all;
+the database refuses to remove the last one), 3 Manager, 2 Coach / Support (assigned customers
+only), 1 Customer (own dashboard only); enforced by row-level security (migration 0014, tested in
+`supabase/tests/rls_isolation.sql`). Cleanup tools and exports stay on the device. A customer's
+dashboard reaches the team only if they tap "Share my results", and it holds numbers and to-dos only
+(never exports, reviewed names or messages); "Stop sharing and remove" deletes it at once. Mia's AI
+runs on the customer's own device (free); chats never leave it. Crisis numbers sit above the chat.
+
 ## Coercion safeguards
 
 - Couple invites can be accepted only on the invitee's own signed-in device.

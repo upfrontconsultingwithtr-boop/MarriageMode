@@ -11,6 +11,8 @@ import { PREFS_BOOT } from '@/lib/prefs';
 const HUB = process.env.NEXT_PUBLIC_HUB_SITE === '1';
 // Advanced preview build (NEXT_PUBLIC_ADVANCED_SITE=1): the full site plus the new Marriage Mode Advanced section.
 const ADV = process.env.NEXT_PUBLIC_ADVANCED_SITE === '1';
+// Customer portal build (NEXT_PUBLIC_PORTAL_SITE=1): sign-in dashboard on its own site, never on the customer website.
+const PORTAL = process.env.NEXT_PUBLIC_PORTAL_SITE === '1';
 export const metadata: Metadata = HUB ? { title: 'Marriage Mode Hub · Upfront Consulting with Tiff & Reco LLC', robots: { index: false, follow: false } } : {
   title: 'Marriage Mode: close your dating chapter, privately',
   description: 'A free, private checklist to close old dating accounts, stop the emails and cancel the billing, so nothing old surprises your relationship. By Upfront Consulting with Tiff & Reco LLC.',
@@ -26,7 +28,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <head><script dangerouslySetInnerHTML={{ __html: PREFS_BOOT }} /></head>
       <body className="min-h-screen overflow-x-hidden antialiased print:bg-white">
-        {HUB ? (
+        {PORTAL ? (
+          <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-night/75 backdrop-blur-xl"><div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-2.5"><a href="/portal/" className="flex min-h-11 items-center gap-2.5 font-display text-lg font-bold"><img src={`${BASE}/icon.svg`} alt="" width={30} height={30} /> Marriage Mode</a><nav className="flex items-center gap-1 text-sm"><a href="/portal/" className="inline-flex min-h-11 items-center rounded-full px-3 text-ink/75 hover:text-ink">Dashboard</a><a href="/advanced/app/" className="inline-flex min-h-11 items-center rounded-full px-3 text-ink/75 hover:text-ink">Tools</a></nav></div></header>
+        ) : HUB ? (
           <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-night/75 backdrop-blur-xl"><div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3"><span className="flex items-center gap-2.5 font-display text-lg font-bold"><img src={`${BASE}/icon.svg`} alt="" width={30} height={30} /> Marriage Mode Hub</span><a href="https://upfrontconsultingwithtiffandreco.com/" className="text-sm text-ink/60 hover:text-ink">Upfront Consulting ↗</a></div></header>
         ) : (<>
         <header className="print:hidden sticky top-0 z-50 border-b border-white/[0.06] bg-night/75 backdrop-blur-xl">
@@ -36,6 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </Link>
             <div className="hidden items-center gap-5 whitespace-nowrap text-sm text-ink/70 lg:flex">
               {ADV ? <Link prefetch={false} href="/advanced/" className="text-mango hover:text-ink">✦ Advanced</Link> : <Link prefetch={false} href="/#value" className="hover:text-ink">Why Marriage Mode</Link>}
+              {ADV && process.env.NEXT_PUBLIC_PORTAL_URL && <a href={`${process.env.NEXT_PUBLIC_PORTAL_URL}portal/`} className="hover:text-ink">Sign in</a>}
               <Link prefetch={false} href="/#how" className="hover:text-ink">How it works</Link>
               <Link prefetch={false} href="/couple/" className="hover:text-ink">Couple Mode</Link>
               <Link prefetch={false} href="/guides/" className="hover:text-ink">Guides</Link>
@@ -58,7 +63,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </header>
         </>)}
         <main>{children}</main>
-        {HUB ? (
+        {PORTAL ? (
+          <footer className="mt-24 border-t border-white/[0.06] px-4 py-10 text-center text-sm text-ink/60"><p>Marriage Mode by <strong className="text-ink/85">Upfront Consulting with Tiff &amp; Reco LLC</strong></p><p className="mt-3 flex justify-center gap-5"><a href="https://upfrontconsultingwithtr-boop.github.io/MarriageMode/privacy/" className="inline-flex min-h-11 items-center hover:text-teal">Privacy</a><a href="https://upfrontconsultingwithtr-boop.github.io/MarriageMode/terms/" className="inline-flex min-h-11 items-center hover:text-teal">Terms</a><a href="mailto:upfrontconsultingwithtr@gmail.com" className="inline-flex min-h-11 items-center hover:text-teal">Support</a></p></footer>
+        ) : HUB ? (
           <footer className="mt-24 border-t border-white/[0.06] py-10 text-center text-sm text-ink/60">Marriage Mode Hub · private · by <strong className="text-ink/85">Upfront Consulting with Tiff &amp; Reco LLC</strong></footer>
         ) : (<>
         <script dangerouslySetInnerHTML={{ __html: `if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('${BASE}/sw.js',{scope:'${BASE}/'}).catch(function(){})})}` }} />

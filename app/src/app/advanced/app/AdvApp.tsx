@@ -23,7 +23,7 @@ export default function AdvApp({ only }: { only?: 'solo' }) {
   if (!ready) return <div className="min-h-[60vh]" />;
   return (
     <AdvCtx.Provider value={ctx}>
-      <div className="relative isolate mx-auto max-w-5xl px-4 pb-28 pt-4">
+      <div className="relative isolate mx-auto max-w-5xl overflow-x-clip px-4 pb-28 pt-4">
         <div className="adv-aurora !h-[420px] opacity-50" aria-hidden="true"><span /><span /><span /></div>
         <div className="mb-4 flex items-center justify-between gap-3">
           <Pill tone="gold">{ctx.t('Free · private · on your device', 'Gratis · privado · en tu dispositivo')}</Pill>

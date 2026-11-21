@@ -7,6 +7,8 @@ import { SweepSim, FeedSim } from './Sims';
 import Orbits from './Orbits';
 
 type T = (en: string, es: string) => string;
+// Sign-up / sign-in lives on the separate customer portal site when it is configured.
+const START = process.env.NEXT_PUBLIC_PORTAL_URL ? `${process.env.NEXT_PUBLIC_PORTAL_URL}portal/` : './app/';
 const I = {
   learn: 'M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5zM4 20.5A2.5 2.5 0 0 0 6.5 23H20',
   sweep: 'M11 4a7 7 0 1 0 4.95 11.95L21 21M8 11h6M11 8v6',
@@ -85,7 +87,7 @@ export default function Landing() {
               </h1>
               <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-ink/70 lg:mx-0">{t('Marriage Mode closes old dating accounts, cleans up your own social media, and gives you both proof it is done. Privately, on your own device.', 'Marriage Mode cierra cuentas de citas viejas, limpia tus propias redes y les da a los dos la prueba de que está hecho. En privado, en tu propio dispositivo.')}</p>
               <div className="mt-9 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
-                <a href="./app/" className="btn-press group inline-flex min-h-13 items-center gap-2 rounded-full bg-mango px-8 py-3.5 text-base font-semibold text-night shadow-[0_18px_60px_-12px_rgb(232_164_169/.85)] hover:brightness-110">{t('Start free', 'Empezar gratis')} <span className="transition group-hover:translate-x-0.5">→</span></a>
+                <a href={START} className="btn-press group inline-flex min-h-13 items-center gap-2 rounded-full bg-mango px-8 py-3.5 text-base font-semibold text-night shadow-[0_18px_60px_-12px_rgb(232_164_169/.85)] hover:brightness-110">{t('Start free', 'Empezar gratis')} <span className="transition group-hover:translate-x-0.5">→</span></a>
                 <a href="./solo/" className="btn-press adv-glass inline-flex min-h-13 items-center rounded-full px-6 py-3.5 text-base text-ink/90 hover:text-ink">{t('Partner won’t join? Solo Search', '¿Tu pareja no participa? Búsqueda Solo')}</a>
               </div>
               <ul className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-ink/55 lg:justify-start">{[t('No sign-up', 'Sin registro'), t('Nothing uploaded', 'No se sube nada'), t('Mutual by choice', 'Mutuo por elección')].map((x) => <li key={x} className="flex items-center gap-2"><span className="text-palm">✓</span>{x}</li>)}</ul>
@@ -165,7 +167,7 @@ export default function Landing() {
         <section className="py-20 text-center">
           <h2 className="adv-reveal font-display text-4xl font-semibold tracking-tight sm:text-6xl">{t('Start your clean slate', 'Empieza tu página en blanco')} <span className="adv-gradient-text">{t('today.', 'hoy.')}</span></h2>
           <p className="adv-reveal mx-auto mt-4 max-w-lg text-ink/65">{t('One minute to start. Free, private and in your language.', 'Un minuto para empezar. Gratis, privado y en tu idioma.')}</p>
-          <a href="./app/" className="adv-reveal btn-press mt-8 inline-flex min-h-13 items-center gap-2 rounded-full bg-mango px-9 py-4 text-lg font-semibold text-night shadow-[0_18px_60px_-12px_rgb(232_164_169/.85)] hover:brightness-110">{t('Start free', 'Empezar gratis')} →</a>
+          <a href={START} className="adv-reveal btn-press mt-8 inline-flex min-h-13 items-center gap-2 rounded-full bg-mango px-9 py-4 text-lg font-semibold text-night shadow-[0_18px_60px_-12px_rgb(232_164_169/.85)] hover:brightness-110">{t('Start free', 'Empezar gratis')} →</a>
         </section>
       </div>
     </div>
