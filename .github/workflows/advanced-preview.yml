@@ -26,7 +26,16 @@ jobs:
         env: { SA: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' }
         run: echo "$SA" > "$RUNNER_TEMP/sa.json" && echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/sa.json" >> "$GITHUB_ENV"
       # ---- 1) portal ----
-      - run: npx next build && rm -rf ../portal-site && mkdir -p ../portal-site/advanced ../portal-site/coach && cp -r out/_next out/portal out/icon.svg out/icon-192.png ../portal-site/ && cp -r out/advanced/app out/advanced/solo ../portal-site/advanced/ && cp out/coach/mia-poster.jpg out/coach/mia-idle.mp4 ../portal-site/coach/ && cp out/404.html ../portal-site/ 2>/dev/null; printf '<!doctype html><meta charset="utf-8"><meta name="robots" content="noindex"><title>Marriage Mode</title><script>location.replace("/portal/"+location.search+location.hash)</script><a href="/portal/">Sign in to Marriage Mode</a>\n' > ../portal-site/index.html; printf 'User-agent: *\nDisallow: /\n' > ../portal-site/robots.txt
+      - name: Build the portal (its own site)
+        run: |
+          npx next build
+          rm -rf ../portal-site && mkdir -p ../portal-site/advanced ../portal-site/coach
+          cp -r out/_next out/portal out/icon.svg out/icon-192.png ../portal-site/
+          cp -r out/advanced/app out/advanced/solo ../portal-site/advanced/
+          cp out/coach/mia-poster.jpg out/coach/mia-idle.mp4 ../portal-site/coach/
+          cp out/404.html ../portal-site/ || true
+          printf '<!doctype html><meta charset="utf-8"><meta name="robots" content="noindex"><title>Marriage Mode</title><script>location.replace("/portal/"+location.search+location.hash)</script><a href="/portal/">Sign in to Marriage Mode</a>\n' > ../portal-site/index.html
+          printf 'User-agent: *\nDisallow: /\n' > ../portal-site/robots.txt
         env: { NEXT_PUBLIC_PORTAL_SITE: '1', SITE_URL: 'https://marriage-mode-portal.web.app' }
       - name: Deploy portal preview
         id: portal
@@ -53,7 +62,11 @@ jobs:
           r = requests.patch(base + '/config?updateMask=authorizedDomains', headers=h, json={'authorizedDomains': doms}); print('domains', r.status_code)
           PY
       # ---- 2) customer website preview ----
-      - run: rm -rf .next out && npx next build && printf 'User-agent: *\nDisallow: /\n' > out/robots.txt
+      - name: Build the customer website preview
+        run: |
+          rm -rf .next out
+          npx next build
+          printf 'User-agent: *\nDisallow: /\n' > out/robots.txt
         env: { NEXT_PUBLIC_ADVANCED_SITE: '1', NEXT_PUBLIC_PORTAL_URL: '${{ steps.portal.outputs.url }}', SITE_URL: 'https://marriage-mode-preview.web.app' }
       - name: Deploy website preview
         working-directory: .
