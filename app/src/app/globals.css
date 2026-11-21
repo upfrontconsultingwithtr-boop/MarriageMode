@@ -167,3 +167,25 @@ main > section:nth-child(n+3) { content-visibility: auto; contain-intrinsic-size
 [data-motion="reduce"] .coach-blink, [data-motion="reduce"] .coach-talk, [data-motion="reduce"] .coach-think, [data-motion="reduce"] .coach-listen { animation: none; }
 
 /* Mia: gentle breathing and head sway so the video feels alive between clips */
+
+/* ---------- Marriage Mode Advanced: premium layer (aurora, glass device, bento, reveals) ---------- */
+.adv-aurora { position: absolute; inset: -20% -10% auto; height: 120%; z-index: -1; pointer-events: none; filter: blur(80px) saturate(140%); opacity: .9; }
+.adv-aurora span { position: absolute; border-radius: 9999px; mix-blend-mode: screen; animation: adv-drift 22s ease-in-out infinite alternate; }
+.adv-aurora span:nth-child(1) { width: 46vw; height: 46vw; left: 8%; top: 4%; background: radial-gradient(circle, rgb(232 164 169 / .55), transparent 65%); }
+.adv-aurora span:nth-child(2) { width: 38vw; height: 38vw; right: 4%; top: 0; background: radial-gradient(circle, rgb(217 183 126 / .40), transparent 65%); animation-duration: 28s; animation-delay: -6s; }
+.adv-aurora span:nth-child(3) { width: 34vw; height: 34vw; left: 38%; top: 30%; background: radial-gradient(circle, rgb(181 139 176 / .40), transparent 65%); animation-duration: 34s; animation-delay: -12s; }
+@keyframes adv-drift { 0% { transform: translate3d(0,0,0) scale(1); } 50% { transform: translate3d(6vw,4vh,0) scale(1.12); } 100% { transform: translate3d(-4vw,-3vh,0) scale(.95); } }
+.adv-glass { background: linear-gradient(160deg, rgb(255 255 255 / .09), rgb(255 255 255 / .02) 45%, rgb(255 255 255 / .04)); border: 1px solid rgb(255 255 255 / .12); box-shadow: inset 0 1px 0 rgb(255 255 255 / .12), 0 40px 120px -40px rgb(232 164 169 / .45), 0 20px 60px -30px rgb(0 0 0 / .8); backdrop-filter: blur(22px) saturate(140%); }
+.adv-device { transform: perspective(1600px) rotateY(-16deg) rotateX(8deg) rotateZ(1.5deg); transition: transform 1s cubic-bezier(.2,.8,.2,1); transform-style: preserve-3d; }
+.adv-device:hover { transform: perspective(1600px) rotateY(-6deg) rotateX(3deg); }
+.adv-ring { --p: 0; background: conic-gradient(var(--color-mango) calc(var(--p) * 1%), rgb(255 255 255 / .08) 0); border-radius: 9999px; transition: --p 1.6s cubic-bezier(.2,.8,.2,1); }
+@property --p { syntax: '<number>'; inherits: false; initial-value: 0; }
+.adv-gradient-text { background: linear-gradient(100deg, #FBE3E5 0%, var(--color-mango) 35%, var(--color-lagoon) 70%, #FBF3E6 100%); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 9s linear infinite; }
+.adv-edge { position: relative; }
+.adv-edge::before { content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 1px; background: linear-gradient(140deg, rgb(232 164 169 / .7), rgb(255 255 255 / .06) 40%, rgb(217 183 126 / .5)); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
+.adv-reveal { opacity: 0; transform: translateY(24px) scale(.985); transition: opacity .9s cubic-bezier(.2,.8,.2,1), transform .9s cubic-bezier(.2,.8,.2,1); }
+.adv-reveal.in { opacity: 1; transform: none; }
+.adv-spot { background: radial-gradient(600px circle at var(--mx, 50%) var(--my, 50%), rgb(232 164 169 / .10), transparent 40%); }
+@media (prefers-reduced-motion: reduce) { .adv-aurora span, .adv-gradient-text { animation: none; } .adv-reveal { opacity: 1; transform: none; transition: none; } .adv-device, .adv-device:hover { transform: none; } }
+[data-motion="reduce"] .adv-aurora span, [data-motion="reduce"] .adv-gradient-text { animation: none; }
+[data-motion="reduce"] .adv-reveal { opacity: 1; transform: none; transition: none; }

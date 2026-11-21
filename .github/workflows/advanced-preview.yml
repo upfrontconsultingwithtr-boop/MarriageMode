@@ -1,0 +1,39 @@
+name: Marriage Mode Advanced - private preview (not live)
+# Builds the full Marriage Mode site plus the new Advanced section (NEXT_PUBLIC_ADVANCED_SITE=1) and
+# publishes it to a Firebase Hosting PREVIEW CHANNEL (free, temporary, noindex). The live site is untouched.
+on:
+  push:
+    branches: [claude/exciting-fermi-8uxuci]
+    paths: ['app/**', '.github/workflows/advanced-preview.yml']
+  workflow_dispatch:
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: app } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: app/package-lock.json }
+      - run: npm ci
+      - run: npm test
+      - run: npx next build
+        env:
+          NEXT_PUBLIC_ADVANCED_SITE: '1'
+          SITE_URL: https://marriage-mode-preview.web.app
+          NEXT_PUBLIC_SUPABASE_URL: https://wdokqitjoeellkwbtdso.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_6TLLpaZKPtfYJmA1IQDpEA_VJB4ehaz
+          NEXT_PUBLIC_FIREBASE_API_KEY: AIzaSyCl_J85xYkELVHr0KJcobbBRrFt8VRql5Q
+      - name: Mark the preview noindex
+        run: |
+          printf 'User-agent: *\nDisallow: /\n' > out/robots.txt
+          printf '{"hosting":{"site":"marriage-mode-preview","public":"app/out","cleanUrls":false,"headers":[{"source":"**","headers":[{"key":"X-Robots-Tag","value":"noindex"}]}]}}' > ../firebase.preview.json
+      - name: Deploy to a preview channel
+        id: d
+        working-directory: .
+        env: { SA: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' }
+        run: |
+          echo "$SA" > "$RUNNER_TEMP/sa.json"; export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
+          npx -y firebase-tools@13 hosting:sites:create marriage-mode-preview --project upfront-command-center --non-interactive || echo "site exists"
+          npx -y firebase-tools@13 hosting:channel:deploy advanced --expires 30d --config firebase.preview.json --project upfront-command-center --non-interactive --json > deploy.json
+          URL=$(node -e "const j=require('./deploy.json');const r=j.result||{};const v=Object.values(r)[0]||{};console.log(v.url||'')")
+          echo "Preview: ${URL}advanced/" | tee -a "$GITHUB_STEP_SUMMARY"

@@ -47,6 +47,21 @@ buttons are added only for privacy addresses confirmed on the company's own
 site. A "done for you" authorized-agent service waits on legal review
 (DECISIONS-NEEDED #12).
 
+## Founder decision 2026-11-21: Marriage Mode Advanced (preview)
+
+Recorded at Tiffany's written direction (build handoff, 2026-11-21, plus chat).
+- **Partner disclaimer and required partner email.** The Sweep stays locked until a valid partner
+  email is entered and the user ticks "I understand my results will go to my partner." Nothing is
+  sent until the user sees the exact content and taps confirm; sharing is per-section and off by default.
+- **Free Solo Search (exception to rule 1).** For someone whose partner will not join, Solo Search
+  builds public searches (search engines, public social, dating and forum pages, username checkers,
+  reverse photo look-up) from identifiers the user enters, including a partner's. Public only, opened
+  in the user's own browser, nothing sent to us. It never uses breached or leaked data, never opens
+  private accounts, never bypasses a login, and never links people-search / home-address data
+  brokers (safety: someone may have moved away to be safe). Hotline shown on the tab.
+- **Device sweep reads metadata only.** Calls and texts are read as who and when; message content
+  is never read or stored.
+
 ## Coercion safeguards
 
 - Couple invites can be accepted only on the invitee's own signed-in device.

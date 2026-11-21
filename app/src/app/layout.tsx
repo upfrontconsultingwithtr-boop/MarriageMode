@@ -9,6 +9,8 @@ import { PREFS_BOOT } from '@/lib/prefs';
 
 // Hub-only build (NEXT_PUBLIC_HUB_SITE=1): the founders' private hub as its own site, Upfront branding, no Marriage Mode menus.
 const HUB = process.env.NEXT_PUBLIC_HUB_SITE === '1';
+// Advanced preview build (NEXT_PUBLIC_ADVANCED_SITE=1): the full site plus the new Marriage Mode Advanced section.
+const ADV = process.env.NEXT_PUBLIC_ADVANCED_SITE === '1';
 export const metadata: Metadata = HUB ? { title: 'Marriage Mode Hub · Upfront Consulting with Tiff & Reco LLC', robots: { index: false, follow: false } } : {
   title: 'Marriage Mode: close your dating chapter, privately',
   description: 'A free, private checklist to close old dating accounts, stop the emails and cancel the billing, so nothing old surprises your relationship. By Upfront Consulting with Tiff & Reco LLC.',
@@ -33,7 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <img src={`${BASE}/icon.svg`} alt="" width={30} height={30} /> Marriage Mode
             </Link>
             <div className="hidden items-center gap-5 whitespace-nowrap text-sm text-ink/70 lg:flex">
-              <Link prefetch={false} href="/#value" className="hover:text-ink">Why Marriage Mode</Link>
+              {ADV ? <Link prefetch={false} href="/advanced/" className="text-mango hover:text-ink">✦ Advanced</Link> : <Link prefetch={false} href="/#value" className="hover:text-ink">Why Marriage Mode</Link>}
               <Link prefetch={false} href="/#how" className="hover:text-ink">How it works</Link>
               <Link prefetch={false} href="/couple/" className="hover:text-ink">Couple Mode</Link>
               <Link prefetch={false} href="/guides/" className="hover:text-ink">Guides</Link>
@@ -46,7 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <details className="relative lg:hidden">
                 <summary className="grid size-10 cursor-pointer list-none place-items-center rounded-full ring-1 ring-white/15 [&::-webkit-details-marker]:hidden" aria-label="Menu">☰</summary>
                 <div className="glass absolute right-0 top-12 flex w-56 flex-col p-2 text-sm shadow-2xl">
-                  {[['/#value', 'Why Marriage Mode'], ['/#how', 'How it works'], ['/couple/', 'Couple Mode'], ['/guides/', 'Delete-account guides'], ['/#pricing', 'Pricing'], ['/audit/', 'My dashboard'], ['/worksheet/', 'Couples worksheet'], ['/coach/', 'AI coach (free beta)'], ['/counselors/', 'Talk to a real counselor'], ['/lessons/', 'Couple lessons'], ['/partners/', 'For counselors & pros'], ['/es/', 'Español']].map(([h, l]) => (
+                  {[...(ADV ? [['/advanced/', 'Marriage Mode Advanced'], ['/advanced/solo/', 'Free Solo Search']] : []), ['/#value', 'Why Marriage Mode'], ['/#how', 'How it works'], ['/couple/', 'Couple Mode'], ['/guides/', 'Delete-account guides'], ['/#pricing', 'Pricing'], ['/audit/', 'My dashboard'], ['/worksheet/', 'Couples worksheet'], ['/coach/', 'AI coach (free beta)'], ['/counselors/', 'Talk to a real counselor'], ['/lessons/', 'Couple lessons'], ['/partners/', 'For counselors & pros'], ['/es/', 'Español']].map(([h, l]) => (
                     <Link prefetch={false} key={h} href={h} className="rounded-xl px-3 py-3 hover:bg-white/5">{l}</Link>
                   ))}
                 </div>
