@@ -26,6 +26,6 @@ jobs:
           echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
           sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client-17
           PG_DUMP=/usr/lib/postgresql/17/bin/pg_dump scripts/backup.sh
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: steps.ok.outputs.go == '1'
         with: { name: db-backup, path: backup/, retention-days: 30 }
