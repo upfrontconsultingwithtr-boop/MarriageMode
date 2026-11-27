@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: app } }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - id: ok
         env: { S: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' }
         run: if [ -n "$S" ]; then echo go=1 >> "$GITHUB_OUTPUT"; else echo "Secret not set yet; skipping."; fi
