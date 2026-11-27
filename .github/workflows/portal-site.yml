@@ -1,0 +1,40 @@
+name: Publish the Marriage Mode customer portal (live, free, Firebase)
+# Customer sign-in portal on its own site: https://marriage-mode-portal.web.app (Tiffany approved 2026-11-27).
+on:
+  push:
+    branches: [claude/nice-einstein-h76zzg]
+    paths: ['app/**', '.github/workflows/portal-site.yml']
+  workflow_dispatch:
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: app } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: app/package-lock.json }
+      - run: npm ci
+      - run: npm test
+      - name: Build the portal
+        env:
+          NEXT_PUBLIC_PORTAL_SITE: '1'
+          SITE_URL: https://marriage-mode-portal.web.app
+          NEXT_PUBLIC_SUPABASE_URL: https://wdokqitjoeellkwbtdso.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_6TLLpaZKPtfYJmA1IQDpEA_VJB4ehaz
+          NEXT_PUBLIC_FIREBASE_API_KEY: AIzaSyCl_J85xYkELVHr0KJcobbBRrFt8VRql5Q
+        run: |
+          npx next build
+          rm -rf ../portal-site && mkdir -p ../portal-site/advanced ../portal-site/coach
+          cp -r out/_next out/portal out/login out/icon.svg out/icon-192.png ../portal-site/
+          cp -r out/advanced/app out/advanced/solo ../portal-site/advanced/
+          cp out/coach/mia-poster.jpg out/coach/mia-idle.mp4 ../portal-site/coach/
+          cp out/404.html ../portal-site/ || true
+          printf '<!doctype html><meta charset="utf-8"><meta name="robots" content="noindex"><title>Marriage Mode</title><script>location.replace("/login/"+location.search+location.hash)</script><a href="/login/">Log in to Marriage Mode</a>\n' > ../portal-site/index.html
+          printf 'User-agent: *\nDisallow: /\n' > ../portal-site/robots.txt
+      - name: Deploy the live portal
+        working-directory: .
+        env: { SA: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' }
+        run: |
+          echo "$SA" > "$RUNNER_TEMP/sa.json"
+          printf '{"hosting":{"site":"marriage-mode-portal","public":"portal-site","headers":[{"source":"**","headers":[{"key":"X-Robots-Tag","value":"noindex"},{"key":"X-Frame-Options","value":"DENY"},{"key":"Referrer-Policy","value":"no-referrer"}]}]}}' > firebase.portal.json
+          GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json" npx -y firebase-tools@13 deploy --only hosting --config firebase.portal.json --project upfront-command-center --non-interactive

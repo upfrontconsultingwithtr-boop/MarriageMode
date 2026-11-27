@@ -1,4 +1,4 @@
-# Marriage Mode Advanced: return package (preview only, nothing live)
+# Marriage Mode Advanced: return package (LIVE since 2026-11-27, Tiffany approved in the hub)
 
 Built 2026-11-21 from "Marriage Mode: Claude Build Instructions" (Muse handoff) plus Tiffany's chat direction.
 Marriage Mode by Upfront Consulting with Tiff & Reco LLC.
