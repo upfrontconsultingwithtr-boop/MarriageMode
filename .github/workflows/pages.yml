@@ -28,7 +28,7 @@ jobs:
           NEXT_PUBLIC_ADVANCED_SITE: "1"
           NEXT_PUBLIC_PORTAL_URL: https://marriage-mode-portal.web.app/
       - run: touch out/.nojekyll
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with: { path: app/out }
   deploy:
     needs: build
