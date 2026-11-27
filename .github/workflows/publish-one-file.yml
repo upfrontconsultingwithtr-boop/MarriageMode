@@ -11,7 +11,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: pip install -q google-auth requests
       - env: { SA: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}', SITE: '${{ inputs.site }}', FPATH: '${{ inputs.path }}', SRC: '${{ inputs.src }}' }
         shell: python
